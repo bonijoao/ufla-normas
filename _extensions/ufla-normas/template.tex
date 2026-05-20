@@ -1,0 +1,713 @@
+%% Pandoc LaTeX template — UFLA Normas 6ª edição (2025)
+%% Adapted from templufla.cls v6.10.0 (CC-BY 4.0)
+%% Original: https://github.com/joaopaulo7/Template-Trabalhos-Academicos-UFLA
+%%
+%% Pandoc template syntax: $variable$, $if(var)$...$endif$, $for(var)$...$endfor$
+%%======================================================================
+
+%----------------------------------------------------------------------
+% Document class
+%----------------------------------------------------------------------
+\documentclass[12pt, a4paper, $if(frente-verso)$twoside$else$oneside$endif$]{book}
+
+%----------------------------------------------------------------------
+% Encoding, fonts, language
+%----------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{pslatex}       % Times New Roman (text), Helvetica (sans), Courier (mono)
+\usepackage{mathptmx}      % Times in math mode
+
+%----------------------------------------------------------------------
+% Utility packages (order matters)
+%----------------------------------------------------------------------
+\usepackage{ifthen}
+\usepackage{calc}
+\usepackage{lastpage}
+\usepackage{graphicx}
+\graphicspath{{./}{imgs/}{_extensions/ufla-normas/}}
+\usepackage{alphalph}      % appendix labels above Z (AA, AB, …)
+\usepackage{xcolor}
+\usepackage{setspace}      % \setstretch, \singlespacing, etc.
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{multicol}
+\usepackage{subfigure}
+
+%----------------------------------------------------------------------
+% Math
+%----------------------------------------------------------------------
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{latexsym}
+
+%----------------------------------------------------------------------
+% Widow and orphan control
+%----------------------------------------------------------------------
+\widowpenalty=10000
+\clubpenalty=10000
+
+%----------------------------------------------------------------------
+% No-hyphenation helper (used in title fields that must not break)
+%----------------------------------------------------------------------
+\newlanguage\nohyphen
+\newcommand\nh[1]{{\language\nohyphen #1}}
+
+%----------------------------------------------------------------------
+% Margins  (sec 3.2.2: top=3cm, left=3cm, bottom=2cm, right=2cm, header=2cm)
+%----------------------------------------------------------------------
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  top=3.0cm,
+  left=3.0cm,
+  bottom=2.0cm,
+  right=2.0cm,
+  headheight=2.5cm,
+  headsep=0.5cm,
+  footskip=7pt
+}
+
+%----------------------------------------------------------------------
+% Line spacing: 1.5 throughout (sec 3.2.3)
+%----------------------------------------------------------------------
+\setstretch{1.5}
+
+%----------------------------------------------------------------------
+% Paragraph: 1.25cm indent, no space between paragraphs, justified (sec 3.2.3)
+%----------------------------------------------------------------------
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+
+% Indent the first paragraph after section headings (sec 3.2.3)
+\makeatletter\let\@afterindentfalse\@afterindenttrue\makeatother
+
+%----------------------------------------------------------------------
+% Font size redefinitions (sec 3.2.1: 11pt for specific elements)
+%----------------------------------------------------------------------
+\renewcommand{\Large}{\fontsize{14pt}{16pt}\selectfont}
+\renewcommand{\LARGE}{\fontsize{16pt}{18pt}\selectfont}
+\renewcommand{\small}{\fontsize{11pt}{13pt}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{11pt}{13pt}\selectfont}
+
+%----------------------------------------------------------------------
+% Tab helper (used in ficha catalográfica)
+%----------------------------------------------------------------------
+\newcommand{\tab}{\hspace*{0.6cm}}
+
+%----------------------------------------------------------------------
+% Headers and footers (sec 3.2.7: page number top-right, no rules)
+%----------------------------------------------------------------------
+\usepackage{fancyhdr}
+\fancypagestyle{plain}{\fancyhf{}}
+\fancypagestyle{ufla}{
+  \fancyhf{}
+  \fancyhead[R]{\small\thepage}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+%----------------------------------------------------------------------
+% Section / chapter formatting (sec 3.2.4)
+% Primary   = \chapter  → UPPERCASE + bold + new page
+% Secondary = \section  → bold (no uppercase)
+% Tertiary  = \subsection → bold
+% Quaternary = \subsubsection → bold
+% Quinary    = \subsubsubsection (custom) → bold
+%----------------------------------------------------------------------
+\usepackage[noindentafter]{titlesec}
+\setcounter{secnumdepth}{6}
+\setcounter{tocdepth}{6}
+
+% Dynamic indentation for TOC alignment (from templufla.cls)
+\newlength{\widthsechold}
+\newlength{\widthsec}
+\setlength{\widthsec}{0pt}
+\newlength{\auxwidthsec}
+\setlength{\auxwidthsec}{1.5em}
+
+\newcommand{\testasecao}{%
+  \ifthenelse{\value{chapter}>0}{\addtolength{\auxwidthsec}{\widthof{\arabic{chapter}}}}{}%
+  \ifthenelse{\value{section}>0}{\addtolength{\auxwidthsec}{\widthof{.\arabic{section}}}}{}%
+  \ifthenelse{\value{subsection}>0}{\addtolength{\auxwidthsec}{\widthof{.\arabic{subsection}}}}{}%
+  \ifthenelse{\value{subsubsection}>0}{\addtolength{\auxwidthsec}{\widthof{.\arabic{subsubsection}}}}{}%
+  \setlength{\auxwidthsec}{\maxof{\auxwidthsec}{\widthsec}}%
+  \global\widthsec=\auxwidthsec%
+}
+
+% Primary section (\chapter): UPPERCASE + bold, new page, 1.5 spacing to text
+\titleformat{\chapter}[hang]
+  {\normalsize\bfseries}
+  {\normalsize\thechapter}
+  {1ex}
+  {\MakeUppercase}
+  [\testasecao]
+\assignpagestyle{\chapter}{ufla}
+\titlespacing{\chapter}{0pt}{-2em}{\baselineskip}
+\renewcommand{\chaptername}{Seção}
+
+% Secondary section: bold
+\titlespacing*{\section}{0pt}{\baselineskip}{\baselineskip}
+\titleformat{\section}{\normalfont\normalsize\bfseries}{\thesection}{1ex}{}[\testasecao]
+
+% Tertiary
+\titlespacing*{\subsection}{0pt}{\baselineskip}{\baselineskip}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{1ex}{}[\testasecao]
+
+% Quaternary
+\titlespacing*{\subsubsection}{0pt}{\baselineskip}{\baselineskip}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1ex}{}[\testasecao]
+
+% Quinary (custom level)
+% \titleclass not supported
+\newcommand{\subsubsubsection}[1]{\vspace{\baselineskip}\noindent{\normalsize\bfseries #1}\par\vspace{\baselineskip}}
+\def\toclevel@subsubsubsection{4}
+
+%----------------------------------------------------------------------
+% Caption formatting (sec 3.2.9 and 3.2.10)
+% Format: "Figura 1 – Título" (en-dash separator)
+% Title: size 12, single space; legend/source: size 11, single space
+%----------------------------------------------------------------------
+\usepackage[labelsep=endash]{caption}
+\DeclareCaptionListFormat{ufla}{#1#2~\textendash~}
+\captionsetup{listformat=ufla, format=hang}
+
+% Source command (obrigatório em ilustrações e tabelas)
+\newcommand{\fontename}{Fonte}
+\newcommand{\fonte}[1]{\par\small\fontename: #1\par}
+
+%----------------------------------------------------------------------
+% Long quotation environment (sec 4.1b: >3 lines → 4cm indent, size 11, single space, no quotes)
+%----------------------------------------------------------------------
+\renewenvironment{quote}%
+  {\list{}{\rightmargin=0cm \leftmargin=4cm}\linespread{1}\small\item\relax}%
+  {\endlist}
+
+%----------------------------------------------------------------------
+% Footnotes (sec 3.2.3: size 11, single space, no indent)
+%----------------------------------------------------------------------
+\usepackage[hang]{footmisc}
+\setlength\footnotemargin{10pt}
+\let\footnotesize\small
+
+%----------------------------------------------------------------------
+% Alíneas and subalíneas (sec 3.2.4.2)
+%----------------------------------------------------------------------
+\makeatletter
+\def\enumalphalphcnt#1{\expandafter\@enumalphalphcnt\csname c@#1\endcsname}
+\def\@enumalphalphcnt#1{\alphalph{#1})}
+\AddEnumerateCounter{\enumalphalphcnt}{\@enumalphalphcnt)}{}\makeatother
+
+\newlist{alineas}{enumerate}{2}
+\setlist[alineas]{label={\enumalphalphcnt*}, labelindent=\parindent,%
+  align=left, leftmargin=!, labelsep=-1ex, noitemsep, nosep}
+\setlist[alineas,2]{label=\textbf{--}, left=0ex, align=right, labelsep=1ex}
+
+%----------------------------------------------------------------------
+% Float lists (figures, tables, quadros, etc.)
+%----------------------------------------------------------------------
+\floatstyle{plaintop}
+
+\makeatletter
+\renewcommand*{\listof}[2]{%
+  \@ifundefined{ext@#1}{}{%
+    \@namedef{l@#1}{\@dottedtocline{1}{3em}{2.6em}}%
+    \begin{center}\textbf{\MakeUppercase{#2}}\end{center}
+    \begingroup\setlength{\parskip}{0pt}%
+      \@starttoc{\@nameuse{ext@#1}}%
+    \endgroup}%
+  \clearpage%
+}
+\makeatother
+
+\renewcommand{\listoffigures}{%
+  {\renewcommand{\numberline}{Figura~}\listof{figure}{Lista de Figuras}}}
+
+\renewcommand{\listoftables}{%
+  {\renewcommand{\numberline}{Tabela~}\listof{table}{Lista de Tabelas}}}
+
+% Quadro (table with all borders)
+\newcommand{\quadroname}{Quadro}
+\newfloat{quadro}{htb!}{loq}[chapter]
+\floatname{quadro}{\quadroname}
+\newcommand{\listofquadros}{%
+  {\renewcommand{\numberline}{\quadroname~}\listof{quadro}{Lista de Quadros}}}
+
+%----------------------------------------------------------------------
+% Table of contents (sec 3.2.5: title UPPERCASE + bold + centered)
+% \makeatletter needed here because @starttoc is called after \makeatother above
+%----------------------------------------------------------------------
+\makeatletter
+\renewcommand{\tableofcontents}{
+  \newpage
+  \begin{center}\textbf{\MakeUppercase{\contentsname}}\end{center}
+  \normalfont\normalsize\@starttoc{toc}
+  \clearpage
+}
+\makeatother
+
+%----------------------------------------------------------------------
+% References section helper
+%----------------------------------------------------------------------
+\newcommand\referencias{%
+  \phantomsection%
+  \addcontentsline{toc}{chapter}{\numberline{} REFERÊNCIAS}%
+  \renewcommand{\bibname}{%
+    \centering\vspace{1.8ex}%
+    \bfseries REFERÊNCIAS\par
+    \vspace{-1.8ex}}%
+}
+
+%----------------------------------------------------------------------
+% Appendices and annexes (alphanumeric labels: A, B, …, Z, AA, AB, …)
+%----------------------------------------------------------------------
+\newcounter{apendice}[chapter]
+\renewcommand\theapendice{\AlphAlph{\value{apendice}}}
+\newcommand\apendice[1]{%
+  \refstepcounter{apendice}%
+  {\noindent\bfseries APÊNDICE~\theapendice\ -- \MakeUppercase{#1}\vspace{\baselineskip}}%
+}
+
+\newcounter{anexo}
+\renewcommand\theanexo{\AlphAlph{\value{anexo}}}
+\newcommand\anexo[1]{%
+  \refstepcounter{anexo}%
+  {\noindent\bfseries ANEXO~\theanexo\ -- \MakeUppercase{#1}\vspace{\baselineskip}}%
+}
+
+%----------------------------------------------------------------------
+% Auxiliary column helper for tables
+%----------------------------------------------------------------------
+\newcommand{\linhadir}[1]{\multicolumn{1}{c|}{#1}}
+
+%----------------------------------------------------------------------
+% Citations: abntex2cite (author-date, bold title, et al. in italic after 1st author with >3)
+% Must be loaded BEFORE hyperref.
+% ABNThyperref=false: store plain year text in b@key++YEAR instead of
+% \hyper@@link{...}{year}, which avoids a \@citeyear/\@ mismatch in pass 3.
+%----------------------------------------------------------------------
+\usepackage[alf, abnt-etal-list=3, abnt-emphasize=bf]{abntex2cite}
+\setboolean{ABNThyperref}{false}
+
+% Natbib-compatible aliases so Pandoc-generated \citep{} and \citet{} work
+\makeatletter
+\providecommand{\citep}[2][]{%
+  \def\@citearg{#1}%
+  \ifx\@citearg\@empty\cite{#2}\else\cite[#1]{#2}\fi%
+}
+\providecommand{\citet}[2][]{%
+  \def\@citearg{#1}%
+  \ifx\@citearg\@empty\citeonline{#2}\else\citeonline[#1]{#2}\fi%
+}
+\makeatother
+
+%----------------------------------------------------------------------
+% Hyperref (always last before document)
+%----------------------------------------------------------------------
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={$title$},
+  pdfauthor={$author$},
+  pdfsubject={$if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$ — UFLA},
+  pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$}
+}
+
+% Override hyperref's \bibcite to store plain text in b@labels.
+% Reason: \@input{aux} inside \document runs BEFORE \AtBeginDocument hooks, so
+% we must redefine \bibcite here in the preamble (not via \AtBeginDocument).
+% Without this, hyperref's \bibcite stores \hyper@@link in b@key++YEAR, which
+% causes abntex2cite's {\yearstyle\@citeyear\@} to fail with
+% "Use of \@ doesn't match its definition" in the third pdflatex pass.
+\makeatletter
+\def\bibcite#1#2{\@newl@bel{b}{#1}{#2}}
+\makeatother
+
+% Patch \@lbibitem so abntex2cite's \abntnextkey is set even when hyperref
+% overwrites \@lbibitem (hyperref is loaded after abntex2cite, so its
+% definition wins; we add \gdef\abntnextkey{#2} to restore the tracking).
+\makeatletter
+\let\abnt@orig@lbibitem\@lbibitem
+\def\@lbibitem[#1]#2{\gdef\abntnextkey{#2}\abnt@orig@lbibitem[{#1}]{#2}}
+\makeatother
+
+%----------------------------------------------------------------------
+% Babel adaptations
+%----------------------------------------------------------------------
+\addto\captionsbrazil{
+  \renewcommand{\chaptername}{Seção}
+}
+\addto\extrasbrazil{
+  \renewcommand{\chapterautorefname}{Seção}
+}
+
+% (TOC width persistence removed — widthsec is reset each run)
+
+%%======================================================================
+%% PRE-TEXTUAL ELEMENT COMMANDS
+%%======================================================================
+
+%----------------------------------------------------------------------
+% CAPA (sec 3.1.1.1)
+% Not counted, not numbered. Elements distributed uniformly.
+% Logo 7×2.85cm | Author 14pt bold | Title 16pt bold | City-year 14pt bold
+%----------------------------------------------------------------------
+\newcommand{\imprimeCapa}{%
+  \begin{center}
+    \renewcommand{\baselinestretch}{1}\normalsize
+    \includegraphics[width=7cm]{logoUFLA}
+
+    \vfill
+
+    {\Large\textbf{\MakeUppercase{$author$}}}
+
+    \vfill
+
+    {\LARGE\textbf{\MakeUppercase{$title$}}%
+    $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
+
+    \vfill
+
+    {\Large\textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par}
+    {\Large\textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}}
+    \renewcommand{\baselinestretch}{1.5}\normalsize
+  \end{center}%
+}
+
+%----------------------------------------------------------------------
+% FOLHA DE ROSTO (sec 3.1.2.1.1)
+% Counted, not numbered. Single space (except title which is 1.5).
+% Author (top, centered, bold uppercase) | Title | Nota descritiva | Orientador | City/Year
+%----------------------------------------------------------------------
+\newcommand{\imprimeFolhaRosto}{%
+  \newpage
+  \begin{center}
+    \textbf{\MakeUppercase{$author$}}
+
+    \vspace{\stretch{1}}
+
+    \textbf{\MakeUppercase{$title$}%
+    $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
+
+    \vspace{\stretch{.10}}
+
+    \renewcommand{\baselinestretch}{1}\normalsize
+    {
+      \hfill
+      \begin{minipage}{8cm}
+        $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
+        apresentado à
+        $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
+        como parte das exigências do
+        $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
+        $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
+        para a obtenção do título de
+        $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+      \end{minipage}
+    }
+
+    \vspace{\stretch{1}}
+
+    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
+    $if(coorientador)$\vspace{\stretch{.25}}{\textbf{$coorientador$}\par Coorientador}$endif$
+
+    \vspace{\stretch{.86}}
+
+    \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
+    \textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}
+    \renewcommand{\baselinestretch}{1.5}\normalsize
+  \end{center}%
+}
+
+%----------------------------------------------------------------------
+% FICHA CATALOGRÁFICA (sec 3.1.2.1.2)
+% NOT counted in page total. Box 12.5×7.5cm, bottom half of page.
+% Generated by UFLA library system; user provides content as text block.
+%----------------------------------------------------------------------
+\newcommand{\imprimeFichaCat}{%
+  $if(ficha-catalografica)$
+  \renewcommand{\baselinestretch}{1}\normalsize
+  \vspace*{\stretch{1}}
+  \begin{center}
+    \bfseries\noindent
+    Ficha catalográfica elaborada pela Coordenadoria de Processos
+    Técnicos da Biblioteca Universitária da UFLA, com dados
+    informados pelo(a) próprio(a) autor(a).
+  \end{center}
+  \setlength{\fboxrule}{1.0pt}
+  \noindent\hspace{1.75cm}%
+  \fbox{\parbox[c][7.5cm][t]{12.5cm}{%
+    \vspace{0.3cm}%
+    \hspace{1.5cm}\parbox[c][7.4cm][t]{10.8cm}{%
+      \renewcommand{\baselinestretch}{1}\normalsize
+      $if(fc-autor-sobrenome)$$fc-autor-sobrenome$$else$Sobrenome, Nome do Autor$endif$ \\
+      \tab\tab
+      $if(subtitle)$$title$\ : $subtitle$$else$$title$$endif$ /
+      $if(fc-autores)$$fc-autores$$else$$author$$endif$.
+      -- $if(cidade)$$cidade$$else$Lavras$endif$ : UFLA,
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$.\\
+      \tab \pageref{LastPage} p. :
+      $if(fc-ilust)$$fc-ilust$$else$il.$endif$
+      \vfil
+      $if(fc-tipo)$\tab $fc-tipo$--Universidade Federal de Lavras,
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$. \\$endif$
+      $if(orientador)$\tab Orientador: $orientador$. \\$endif$
+      $if(coorientador)$\tab Coorientador: $coorientador$. \\$endif$
+      \tab Bibliografia.
+      \vfil
+      $if(fc-catalogacao)$\tab $fc-catalogacao$$endif$
+      \vfil
+      $if(fc-classificacao)$\tab\hfill CDD $fc-classificacao$$endif$
+    }\hfill
+  }}\hfill
+  \vspace*{0.5cm}
+  $endif$
+}
+
+%----------------------------------------------------------------------
+% FOLHA DE APROVAÇÃO (sec 3.1.2.1.4)
+% Counted, not numbered. Single space. Banca members left-aligned.
+%----------------------------------------------------------------------
+\newcommand{\imprimeFolhaAprovacao}{%
+  \newpage
+  \renewcommand{\baselinestretch}{1}\normalsize
+  \begin{center}
+    \textbf{\MakeUppercase{$author$}}
+
+    \vspace{\stretch{0.6}}
+
+    \textbf{\MakeUppercase{$title$}%
+    $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
+
+    \vspace{\baselineskip}
+  \end{center}
+
+  \hfill
+  \begin{minipage}{8cm}
+    $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
+    apresentado à
+    $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
+    como parte das exigências do
+    $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
+    $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
+    para a obtenção do título de
+    $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+  \end{minipage}
+
+  \vspace{\stretch{.5}}
+
+  $if(defesa)$\noindent APROVADA em $defesa$.$endif$
+
+  \begin{itemize}[align=left, left=0cm, leftmargin=!, labelwidth=5cm, labelsep=2ex, noitemsep, nosep]
+    $if(banca-um-nome)$\item[$banca-um-nome$] $if(banca-um-inst)$$banca-um-inst$$endif$$endif$
+    $if(banca-dois-nome)$\item[$banca-dois-nome$] $if(banca-dois-inst)$$banca-dois-inst$$endif$$endif$
+    $if(banca-tres-nome)$\item[$banca-tres-nome$] $if(banca-tres-inst)$$banca-tres-inst$$endif$$endif$
+    $if(banca-quatro-nome)$\item[$banca-quatro-nome$] $if(banca-quatro-inst)$$banca-quatro-inst$$endif$$endif$
+  \end{itemize}
+
+  \vspace{\stretch{.6}}
+
+  \begin{center}
+    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
+    $if(coorientador)$\vspace{\stretch{.5}}{\textbf{$coorientador$}\par Coorientador}$endif$
+    \vspace*{\stretch{.6}}
+    \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
+    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}
+  \end{center}
+
+  \renewcommand{\baselinestretch}{1.5}\normalsize
+  \clearpage
+}
+
+%%======================================================================
+%% DOCUMENT BEGIN
+%%======================================================================
+\begin{document}
+
+%----------------------------------------------------------------------
+% TOC spacing setup (reads saved width from previous run)
+%----------------------------------------------------------------------
+\newlength{\identation}
+\setlength{\identation}{0cm}
+\AtBeginDocument{%
+  \def\l@chapter{\bfseries\@dottedtocline{0}{\identation}{\widthsechold}}
+  \def\l@section{\@dottedtocline{1}{\identation}{\widthsechold}}
+  \def\l@subsection{\@dottedtocline{2}{\identation}{\widthsechold}}
+  \def\l@subsubsection{\@dottedtocline{3}{\identation}{\widthsechold}}
+  \def\l@subsubsubsection{\@dottedtocline{4}{\identation}{\widthsechold}}
+}
+
+%----------------------------------------------------------------------
+% CAPA — not counted, not numbered (page counter starts at 0)
+%----------------------------------------------------------------------
+\pagestyle{empty}
+\setcounter{page}{0}
+\imprimeCapa
+\clearpage
+
+%----------------------------------------------------------------------
+% FOLHA DE ROSTO — counted (page 1), not numbered
+%----------------------------------------------------------------------
+\imprimeFolhaRosto
+\clearpage
+
+%----------------------------------------------------------------------
+% FICHA CATALOGRÁFICA — NOT counted (counter saved/restored around it)
+% sec 3.2.7: "a ficha catalográfica não pode ser incluída na contagem"
+%----------------------------------------------------------------------
+$if(ficha-catalografica)$
+\newcounter{savedpage}
+\setcounter{savedpage}{\value{page}}
+\setcounter{page}{-1}
+\imprimeFichaCat
+\clearpage
+\setcounter{page}{\value{savedpage}}
+$endif$
+
+%----------------------------------------------------------------------
+% ERRATA (optional, sec 3.1.2.1.3) — counted, not numbered
+%----------------------------------------------------------------------
+$if(errata)$
+\newpage
+\begin{center}\textbf{ERRATA}\end{center}
+$errata$
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% FOLHA DE APROVAÇÃO (sec 3.1.2.1.4) — counted, not numbered
+% Generated only when defesa date is provided
+%----------------------------------------------------------------------
+$if(defesa)$\imprimeFolhaAprovacao$endif$
+
+%----------------------------------------------------------------------
+% DEDICATÓRIA (optional, sec 3.1.2.1.5) — counted, not numbered
+% No title. Right-aligned italic text in bottom half of page.
+%----------------------------------------------------------------------
+$if(dedicatoria)$
+\newpage
+\null\vfill
+\begin{flushright}{\itshape $dedicatoria$}\end{flushright}
+\vspace*{1cm}
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% AGRADECIMENTOS (optional, sec 3.1.2.1.6) — counted, not numbered
+% Has title: AGRADECIMENTOS (centered, uppercase, bold)
+%----------------------------------------------------------------------
+$if(agradecimentos)$
+\newpage
+\begin{center}\textbf{AGRADECIMENTOS}\end{center}
+$agradecimentos$
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% EPÍGRAFE (optional, sec 3.1.2.1.7) — counted, not numbered
+% No title. Italic, right-aligned, bottom half of page.
+%----------------------------------------------------------------------
+$if(epigrafe)$
+\newpage
+\null\vfill
+\begin{flushright}
+  {\itshape $epigrafe$}\par
+  $if(epigrafe-autor)$\medskip $epigrafe-autor$$endif$
+\end{flushright}
+\vspace*{1cm}
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% RESUMO (mandatory, sec 3.1.2.1.8) — counted, not numbered
+% Single paragraph, 1.5 spacing, keywords below separated by semicolons
+%----------------------------------------------------------------------
+\newpage
+\begin{center}\textbf{RESUMO}\end{center}
+
+\noindent $abstract$\par
+
+\vspace{\baselineskip}
+{\sloppy\noindent Palavras-chave: $for(keywords)$$keywords$$sep$; $endfor$.\par}
+
+\clearpage
+
+%----------------------------------------------------------------------
+% ABSTRACT (mandatory, sec 3.1.2.1.9) — counted, not numbered
+%----------------------------------------------------------------------
+$if(abstract-en)$
+\newpage
+\begin{center}\textbf{ABSTRACT}\end{center}
+
+\noindent $abstract-en$\par
+
+\vspace{\baselineskip}
+{\sloppy\noindent Keywords: $for(keywords-en)$$keywords-en$$sep$; $endfor$.\par}
+
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% INDICADORES DE IMPACTO (mandatory for stricto sensu, sec 3.1.2.1.10)
+% Resolução PRPG nº 012/2024. Two pages: PT then EN.
+%----------------------------------------------------------------------
+$if(indicadores-impacto-texto)$
+\newpage
+\begin{center}\textbf{INDICADORES DE IMPACTO}\end{center}
+\noindent $indicadores-impacto-texto$\par
+\clearpage
+$endif$
+
+$if(impact-indicators-texto)$
+\newpage
+\begin{center}\textbf{IMPACT INDICATORS}\end{center}
+\noindent $impact-indicators-texto$\par
+\clearpage
+$endif$
+
+%----------------------------------------------------------------------
+% OPTIONAL LISTS (sec 3.1.2.1.11-13) — counted, not numbered
+%----------------------------------------------------------------------
+$if(lof)$\listoffigures$endif$
+$if(lot)$\listoftables$endif$
+
+%----------------------------------------------------------------------
+% SUMÁRIO (mandatory, sec 3.1.2.1.14) — counted, not numbered
+%----------------------------------------------------------------------
+\tableofcontents
+
+%----------------------------------------------------------------------
+% BEGIN PAGE NUMBERING (sec 3.2.7)
+% Arabic numerals, top-right corner, from first textual element onward
+%----------------------------------------------------------------------
+\pagestyle{ufla}
+
+%%======================================================================
+%% TEXTUAL ELEMENTS (body from Pandoc)
+%%======================================================================
+$body$
+
+%%======================================================================
+%% POST-TEXTUAL ELEMENTS
+%%======================================================================
+
+%----------------------------------------------------------------------
+% REFERÊNCIAS (mandatory) — no section number, UPPERCASE centered title
+%----------------------------------------------------------------------
+$if(bibliography)$
+\referencias
+\bibliographystyle{$if(biblio-style)$$biblio-style$$else$abntex2-alf$endif$}
+\citeoption{abnt-etal-text=it}
+\citeoption{abnt-etal-cite=3}
+\citeoption{abnt-missing-year=sd}
+\citeoption{abnt-nbr10520=1988}
+\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
+$endif$
+
+\end{document}

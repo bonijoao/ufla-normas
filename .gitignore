@@ -1,0 +1,24 @@
+# Quarto cache
+.quarto/
+/_site/
+
+# Output gerado
+template.pdf
+
+# Arquivos temporários LaTeX
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.log
+*.blg
+*.bbl
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.prev
+texput.*
+
+# Quarto render artifacts
+*_files/

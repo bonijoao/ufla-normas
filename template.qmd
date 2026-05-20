@@ -1,0 +1,251 @@
+---
+# ============================================================
+# UFLA Normas 6ª edição — Template de exemplo
+# Documentação de todos os campos disponíveis
+# ============================================================
+
+# Título e subtítulo (o subtítulo, se houver, aparece sem negrito após dois-pontos)
+title: "TÍTULO COMPLETO DO TRABALHO EM LETRAS MAIÚSCULAS"
+subtitle: "subtítulo em letras minúsculas se houver"   # opcional — remova se não houver
+
+# Autoria
+author: "Nome Completo do Autor"
+
+# Ano de depósito (entrega) — use "ano" para exibir apenas o ano nas capas.
+# O campo "date" pode ser mantido para metadados do PDF, mas o Quarto
+# normaliza datas, por isso usamos "ano" para controle direto.
+ano: "2025"
+date: "2025"
+
+# ============================================================
+# RESUMO e PALAVRAS-CHAVE (obrigatórios)
+# Texto corrido, parágrafo único, 150-500 palavras
+# ============================================================
+abstract: |
+  O resumo deve ser redigido em um único parágrafo, em espaçamento 1,5,
+  sem enumeração de tópicos, utilizando o verbo na terceira pessoa.
+  Deve conter entre 150 e 500 palavras para trabalhos acadêmicos.
+  As palavras-chave são listadas abaixo separadas por ponto e vírgula.
+
+keywords: [normalização bibliográfica, trabalho de conclusão de curso, ABNT, UFLA]
+
+# ============================================================
+# ABSTRACT e KEYWORDS (obrigatórios)
+# ============================================================
+abstract-en: |
+  The abstract must be written in a single paragraph, using the verb in
+  the third person. It must contain between 150 and 500 words for
+  academic papers.
+
+keywords-en: [bibliographic standardization, course completion paper, ABNT, UFLA]
+
+# ============================================================
+# NATUREZA DO TRABALHO (metadados para capa, folha de rosto e aprovação)
+# ============================================================
+tipo-trabalho: "Dissertação"
+# Opções comuns: "Trabalho de conclusão de curso", "Monografia",
+#               "Dissertação", "Tese", "Relatório de estágio supervisionado"
+
+titulo-pretendido: "Mestre"
+# Opções: "Bacharel", "Licenciado", "Especialista", "Mestre", "Doutor"
+
+curso: "Agronomia/Fitotecnia"
+# Curso (graduação) ou Programa de Pós-Graduação (pós-grad)
+
+area-concentracao: "Produção Vegetal"
+# Opcional — remova se não houver área de concentração
+
+instituicao: "Universidade Federal de Lavras"
+
+cidade: "Lavras-MG"
+
+# ============================================================
+# ORIENTAÇÃO
+# ============================================================
+orientador: "Prof. Dr. Nome do Orientador"
+coorientador: "Profa. Dra. Nome da Coorientadora"   # opcional — remova se não houver
+
+# ============================================================
+# BANCA DE DEFESA (necessário para gerar folha de aprovação)
+# Remova todos os campos abaixo se ainda não defendeu
+# ============================================================
+defesa: "18 de março de 2025"
+banca-um-nome: "Prof. Dr. Membro Um"
+banca-um-inst: "UFLA"
+banca-dois-nome: "Profa. Dra. Membro Dois"
+banca-dois-inst: "UFMG"
+banca-tres-nome: "Dr. Membro Três"
+banca-tres-inst: "EPAMIG"
+# banca-quatro-nome: ""   # até quatro membros
+
+# ============================================================
+# FICHA CATALOGRÁFICA
+# Obrigatória para pós-graduação stricto sensu.
+# Gerada pelo sistema da Biblioteca: https://bibliotecauniversitaria.ufla.br/
+# Defina ficha-catalografica: true e preencha os campos abaixo após obter a ficha.
+# ============================================================
+ficha-catalografica: true
+fc-autor-sobrenome: "Sobrenome, Nome do Autor"
+fc-autores: "Nome Completo do Autor"
+fc-tipo: "Dissertação (mestrado)"
+fc-catalogacao: "1. Normalização. 2. ABNT. 3. Trabalho acadêmico. I. Universidade Federal de Lavras. II. Título."
+fc-classificacao: "808.066"
+fc-ilust: "il."
+
+# ============================================================
+# ELEMENTOS PRÉ-TEXTUAIS OPCIONAIS
+# ============================================================
+
+# Dedicatória (sem título, texto itálico alinhado à direita no rodapé)
+dedicatoria: |
+  À minha família, pelo apoio incondicional
+  em todos os momentos desta jornada.
+
+# Agradecimentos (com título "AGRADECIMENTOS" centralizado)
+agradecimentos: |
+  Agradeço à Universidade Federal de Lavras (UFLA) pelo suporte institucional.
+  Ao meu orientador, pela dedicação e sabedoria compartilhada.
+  À Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES),
+  pelo financiamento desta pesquisa.
+
+# Epígrafe (sem título, itálico, alinhado à direita no rodapé)
+epigrafe: |
+  "A ciência organiza o que, de outro modo, seria
+  apenas um amontoado de fatos dispersos."
+epigrafe-autor: "Carl Sagan (1995)."
+
+# ============================================================
+# INDICADORES DE IMPACTO (obrigatório para pós-grad stricto sensu)
+# Resolução PRPG nº 012/2024 — texto em PT e EN, parágrafo único
+# ============================================================
+indicadores-impacto-texto: |
+  Este trabalho apresenta impactos sociais, tecnológicos e ambientais
+  relacionados à produção vegetal sustentável na região de Lavras-MG.
+  Os resultados beneficiam diretamente agricultores familiares e estão
+  alinhados com os Objetivos de Desenvolvimento Sustentável (ODS) 2, 12 e 15
+  da Organização das Nações Unidas (ONU), contribuindo para a segurança
+  alimentar e a conservação dos recursos naturais.
+
+impact-indicators-texto: |
+  This work presents social, technological, and environmental impacts
+  related to sustainable plant production in the Lavras-MG region.
+  The results directly benefit family farmers and are aligned with
+  Sustainable Development Goals (SDGs) 2, 12, and 15 of the United
+  Nations (UN), contributing to food security and the conservation
+  of natural resources.
+
+# ============================================================
+# LISTAS (descomente as que desejar incluir)
+# ============================================================
+lof: true    # Lista de Figuras
+lot: true    # Lista de Tabelas
+
+# ============================================================
+# BIBLIOGRAFIA
+# ============================================================
+bibliography: referencias.bib
+
+# ============================================================
+# FORMATO
+# ============================================================
+format:
+  ufla-normas-pdf: default
+---
+
+# INTRODUÇÃO
+
+Este documento demonstra o uso da extensão **ufla-normas** para Quarto,
+que implementa as normas técnicas da Universidade Federal de Lavras
+(UFLA) conforme o Manual de Normalização e Estrutura de Trabalhos
+Acadêmicos, 6ª edição [@Brasil2025].
+
+A extensão produz automaticamente todos os elementos pré-textuais
+obrigatórios (capa, folha de rosto, ficha catalográfica, folha de
+aprovação, resumo, abstract, indicadores de impacto e sumário) a
+partir dos metadados definidos no cabeçalho YAML deste arquivo.
+
+## Citações — sistema autor-data (único aceito na UFLA)
+
+A UFLA adota exclusivamente o sistema **autor-data** para citações,
+conforme a NBR 10520. Nunca use o sistema numérico.
+
+### Citação curta (até 3 linhas)
+
+Citações de até três linhas são inseridas no corpo do texto entre
+**aspas duplas**, em fonte 12pt:
+
+Como afirma @FrancaVasconcellos2021 [p. 33], "dissertações e teses
+constituem o produto de pesquisas desenvolvidas em cursos no nível de
+pós-graduação (mestrado e doutorado)."
+
+Ou na forma parentética: a normalização busca padronizar a produção
+científica, facilitando a comunicação e a indexação de documentos
+[@FrancaVasconcellos2021].
+
+### Citação longa (> 3 linhas)
+
+Citações com mais de três linhas recebem recuo de **4 cm** da margem
+esquerda, fonte **11pt**, espaçamento simples e **sem aspas**:
+
+> A periodicidade é fator determinante do número de fascículos que
+> compõem um volume. Havendo um número muito grande de fascículos
+> publicados em um curto espaço de tempo, pode-se publicar mais de
+> um volume por ano. Todos os fascículos deverão ter o mesmo formato.
+> Caso haja necessidade de mudá-lo, isso deve acontecer somente no
+> início de um volume [@FrancaVasconcellos2021, p. 67].
+
+### Citação com quatro ou mais autores
+
+Com quatro ou mais autores, usa-se o primeiro seguido de *et al.*
+em itálico [@SilvaEtAl2023, p. 130].
+
+# REFERENCIAL TEÓRICO
+
+## Ilustrações
+
+A norma determina que o **título** da ilustração vá acima dela e a
+**fonte** abaixo, ambos em tamanho 11pt, espaçamento simples
+[@Brasil2025].
+
+![Logomarca da UFLA utilizada neste template.](imgs/logoUFLA.pdf){#fig-logo width=50%}
+
+Fonte: UFLA (2025).
+
+## Tabelas
+
+Tabelas contêm dados numéricos, sem bordas laterais, com linhas
+horizontais apenas no topo, no cabeçalho e no rodapé [@FrancaVasconcellos2021].
+
+| Área do Conhecimento | Aquisição (un.) | Valor (R\$) |
+|:---------------------|----------------:|------------:|
+| Agrárias             |             800 |  450.013,01 |
+| Biológicas           |             915 |  530.802,76 |
+| Saúde                |           1.300 | 1.217.015,08 |
+| **Total**            |           **6.966** | **4.482.369,00** |
+
+: Aquisição de acervo bibliográfico — UFLA — 2022-2024. {#tbl-acervo}
+
+Fonte: Elaboração própria.
+
+# METODOLOGIA
+
+Esta seção apresenta os materiais e métodos utilizados na pesquisa.
+A metodologia detalha o delineamento experimental, as variáveis
+analisadas e os procedimentos estatísticos aplicados.
+
+## Delineamento experimental
+
+O experimento foi conduzido seguindo o delineamento inteiramente
+casualizado (DIC), com cinco tratamentos e quatro repetições, conforme
+@GomesUFLA2020.
+
+# RESULTADOS E DISCUSSÃO
+
+Os resultados obtidos demonstram a eficácia dos tratamentos propostos.
+A análise estatística foi realizada pelo software R [@Brasil2025].
+
+# CONSIDERAÇÕES FINAIS
+
+Este trabalho demonstrou o funcionamento da extensão **ufla-normas**
+para produção de documentos acadêmicos conformes às normas da UFLA
+6ª edição [@Brasil2025].

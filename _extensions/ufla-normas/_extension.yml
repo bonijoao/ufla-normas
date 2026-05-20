@@ -1,0 +1,54 @@
+title: UFLA Normas 6ª edição
+author: UFLA Template Community
+version: 1.0.0
+quarto-required: ">=1.4.0"
+contributes:
+  formats:
+    pdf:
+      template: template.tex
+      cite-method: natbib
+      biblio-style: abntex2-alf
+      pdf-engine: pdflatex
+      keep-tex: false
+      date-format: "YYYY"
+      toc: false
+      number-sections: false
+      # Default UFLA metadata (users override these at document level)
+      tipo-trabalho: "Dissertação"
+      titulo-pretendido: "Mestre"
+      curso: ""
+      area-concentracao: ""
+      orientador: ""
+      coorientador: ""
+      cidade: "Lavras-MG"
+      ano: ""
+      instituicao: "Universidade Federal de Lavras"
+      frente-verso: false
+      ficha-catalografica: false
+      indicadores-impacto: true
+      # Banca members (optional)
+      banca-um-nome: ""
+      banca-um-inst: ""
+      banca-dois-nome: ""
+      banca-dois-inst: ""
+      banca-tres-nome: ""
+      banca-tres-inst: ""
+      banca-quatro-nome: ""
+      banca-quatro-inst: ""
+      defesa: ""
+      # Optional pre-textual elements
+      dedicatoria: ""
+      agradecimentos: ""
+      epigrafe: ""
+      epigrafe-autor: ""
+      abstract-en: ""
+      keywords-en: ""
+      indicadores-impacto-texto: ""
+      impact-indicators-texto: ""
+      # Ficha catalografica fields (used only when ficha-catalografica: true)
+      fc-autor-sobrenome: ""
+      fc-autores: ""
+      fc-tipo: ""
+      fc-catalogacao: ""
+      fc-classificacao: ""
+      fc-ilust: "il."
