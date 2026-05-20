@@ -13,6 +13,8 @@ Manual de Normalização e Estrutura de Trabalhos Acadêmicos, **6ª edição (2
 
 ## Instalação
 
+No terminal:
+
 ```bash
 quarto add bonijoao/ufla-normas
 ```
