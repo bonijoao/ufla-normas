@@ -142,8 +142,11 @@ lot: true    # Lista de Tabelas
 
 # ============================================================
 # BIBLIOGRAFIA
+# Inclua sempre o .bib da extensão (norma UFLA) + seu próprio arquivo.
 # ============================================================
-bibliography: referencias.bib
+bibliography:
+  - _extensions/bonijoao/ufla-normas/referencias.bib
+  - referencias.bib
 
 # ============================================================
 # FORMATO
