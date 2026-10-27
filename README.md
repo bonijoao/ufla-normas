@@ -4,6 +4,29 @@ Extensão Quarto para produção de trabalhos acadêmicos (TCC, monografia,
 dissertação, tese) conforme as normas da **Universidade Federal de Lavras (UFLA)**,
 Manual de Normalização e Estrutura de Trabalhos Acadêmicos, **6ª edição (2025)**.
 
+## In English
+
+`ufla-normas` is a Quarto PDF format for theses, dissertations and
+undergraduate monographs at the Universidade Federal de Lavras (UFLA, Brazil).
+It follows the university's *Manual de Normalização e Estrutura de Trabalhos
+Acadêmicos*, 6th edition (2025): margins, Times 12 pt, 1.5 line spacing, section
+styling, page numbering and ABNT author-date citations.
+
+From the YAML front matter it builds the cover, title page, cataloguing record
+(*ficha catalográfica*), approval page, abstracts in Portuguese and English and
+the impact indicators page that UFLA requires since 2024.
+
+Install it with:
+
+```bash
+quarto add bonijoao/ufla-normas
+```
+
+Then set `format: ufla-normas-pdf` in your document. You need Quarto 1.4 or
+later and a LaTeX distribution with pdflatex. The rest of this README, including
+the full list of YAML fields, is in Portuguese, since the format is meant for
+UFLA students. `template.qmd` is a complete working example.
+
 ## Requisitos
 
 - [Quarto](https://quarto.org) ≥ 1.4
