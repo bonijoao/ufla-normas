@@ -298,10 +298,7 @@ UNIVERSIDADE FEDERAL DE LAVRAS. Biblioteca Universitária. Manual de normalizaç
 
 ## Licença
 
-Licença Creative Commons 
-
-Exceto quando indicado de outra forma, a licença deste item é descrita como [Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/)
-
-<img src="imgs/by.png" width="100">
-
-
+O código da extensão é distribuído sob a licença MIT; veja [LICENSE](LICENSE).
+Os arquivos do abnTeX2 incluídos na extensão (`abntex2cite.sty` e
+`abntex2-alf.bst`) seguem a LaTeX Project Public License, e o logo da UFLA
+pertence à universidade.

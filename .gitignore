@@ -22,3 +22,6 @@ texput.*
 
 # Quarto render artifacts
 *_files/
+
+# Sessão R
+.Rhistory
