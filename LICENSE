@@ -19,13 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Third-party files bundled in _extensions/ufla-normas/ are not covered by the
-MIT license above:
-
-- abntex2cite.sty and abntex2-alf.bst: copyright the abnTeX2 group
-  (https://www.abntex.net.br/), distributed under the LaTeX Project Public
-  License 1.3 or later.
-- logoUFLA.pdf: logo of the Universidade Federal de Lavras, which owns it.
