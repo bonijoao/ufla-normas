@@ -12,9 +12,10 @@ It follows the university's *Manual de Normalização e Estrutura de Trabalhos
 Acadêmicos*, 6th edition (2025): margins, Times 12 pt, 1.5 line spacing, section
 styling, page numbering and ABNT author-date citations.
 
-From the YAML front matter it builds the cover, title page, cataloguing record
-(*ficha catalográfica*), approval page, abstracts in Portuguese and English and
-the impact indicators page that UFLA requires since 2024.
+From the YAML front matter it builds the cover, title page and abstracts in
+Portuguese and English, and optionally the cataloguing record (*ficha
+catalográfica*), the approval page and the impact indicators page required for
+graduate work by PRPG Resolution 012/2024.
 
 Install it with:
 
