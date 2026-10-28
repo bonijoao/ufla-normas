@@ -18,17 +18,26 @@ contributes:
       filters:
         - filtros/referencias.lua
         - filtros/citacoes.lua
+        - filtros/tipo.lua
       keep-tex: false
       date-format: "YYYY"
       toc: false
       number-sections: false
-      # Default UFLA metadata (users override these at document level)
-      tipo-trabalho: "Dissertação"
-      titulo-pretendido: "Mestre"
+      # Default UFLA metadata (users override these at document level).
+      # tipo.lua fills the nota descritiva from `tipo` (empty = dissertacao);
+      # tipo-trabalho/titulo-pretendido/genero override the preset
+      tipo: ""
+      tipo-trabalho: ""
+      genero: ""
+      titulo-pretendido: ""
       curso: ""
       area-concentracao: ""
       orientador: ""
+      orientadora: ""
+      orientador-genero: ""
       coorientador: ""
+      coorientadora: ""
+      coorientador-genero: ""
       cidade: "Lavras-MG"
       ano: ""
       instituicao: "Universidade Federal de Lavras"

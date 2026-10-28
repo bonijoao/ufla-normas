@@ -360,7 +360,7 @@ $endif$
 \hypersetup{
   pdftitle={$title$},
   pdfauthor={$author$},
-  pdfsubject={$if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$ — UFLA},
+  pdfsubject={$ufla-tipo-nome$ — UFLA},
   pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$}
 }
 \urlstyle{same}  % URLs in the text font, as in the manual's references
@@ -429,21 +429,14 @@ $endif$
     {
       \hfill
       \begin{minipage}{8cm}
-        $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
-        apresentado à
-        $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
-        como parte das exigências do
-        $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
-        $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
-        para a obtenção do título de
-        $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+        $ufla-nota-descritiva$
       \end{minipage}
     }
 
     \vspace{\stretch{1}}
 
-    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
-    $if(coorientador)$\vspace{\stretch{.25}}{\textbf{$coorientador$}\par Coorientador}$endif$
+    $if(orientador)${\textbf{$orientador$}\par $ufla-orientador-rotulo$}$endif$
+    $if(coorientador)$\par\vspace{\stretch{.25}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
 
     \vspace{\stretch{.86}}
 
@@ -485,8 +478,8 @@ $endif$
       \vfil
       $if(fc-tipo)$\tab $fc-tipo$--Universidade Federal de Lavras,
       $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$. \\$endif$
-      $if(orientador)$\tab Orientador: $orientador$. \\$endif$
-      $if(coorientador)$\tab Coorientador: $coorientador$. \\$endif$
+      $if(orientador)$\tab $ufla-orientador-rotulo$: $orientador$. \\$endif$
+      $if(coorientador)$\tab $ufla-coorientador-rotulo$: $coorientador$. \\$endif$
       \tab Bibliografia.
       \vfil
       $if(fc-catalogacao)$\tab $fc-catalogacao$$endif$
@@ -518,14 +511,7 @@ $endif$
 
   \hfill
   \begin{minipage}{8cm}
-    $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
-    apresentado à
-    $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
-    como parte das exigências do
-    $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
-    $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
-    para a obtenção do título de
-    $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+    $ufla-nota-descritiva$
   \end{minipage}
 
   \vspace{\stretch{.5}}
@@ -542,8 +528,8 @@ $endif$
   \vspace{\stretch{.6}}
 
   \begin{center}
-    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
-    $if(coorientador)$\vspace{\stretch{.5}}{\textbf{$coorientador$}\par Coorientador}$endif$
+    $if(orientador)${\textbf{$orientador$}\par $ufla-orientador-rotulo$}$endif$
+    $if(coorientador)$\par\vspace{\stretch{.5}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
     \vspace*{\stretch{.6}}
     \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
     \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}
