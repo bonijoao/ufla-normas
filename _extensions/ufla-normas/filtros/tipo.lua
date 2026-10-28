@@ -28,16 +28,10 @@ local function carrega(nome)
   return assert(load(conteudo, "@" .. nome))()
 end
 
+local util = carrega("util.lua")
 local TIPOS = carrega("tipos.lua")
 
 local stringify = pandoc.utils.stringify
-
--- Ordem usada para reconhecer um `tipo-trabalho` da v1 sem `tipo`.
-local ORDEM = {
-  "dissertacao", "tese", "tcc", "monografia", "relatorio-estagio",
-}
-
-local STRICTO = { ["dissertacao"] = true, ["dissertacao-profissional"] = true, ["tese"] = true }
 
 local MARCA_CURSO = "\\textcolor{red}{[preencha: curso]}"
 
@@ -78,25 +72,6 @@ local function junta(...)
   return r
 end
 
--- Resolve o preset: `tipo` explícito, senão `tipo-trabalho` conhecido,
--- senão dissertação. Tipo desconhecido é erro em validar.lua; aqui só
--- caímos na dissertação para não quebrar.
-local function preset(meta)
-  local chave = texto(meta["tipo"]):lower()
-  if chave ~= "" then
-    if TIPOS[chave] then return chave, true end
-    return "dissertacao", true
-  end
-  if not vazio(meta["tipo-trabalho"]) then
-    local nome = pandoc.text.lower(texto(meta["tipo-trabalho"]))
-    for _, k in ipairs(ORDEM) do
-      if pandoc.text.lower(TIPOS[k].nome) == nome then return k, true end
-    end
-    return "dissertacao", false
-  end
-  return "dissertacao", true
-end
-
 local function rotulos(meta)
   local orientador = "Orientador"
   if not vazio(meta["orientadora"]) then
@@ -117,7 +92,7 @@ local function rotulos(meta)
 end
 
 function Meta(meta)
-  local chave, conhecido = preset(meta)
+  local chave, conhecido = util.preset(meta, TIPOS)
   local p = TIPOS[chave]
 
   local nome = frase(p.nome)
@@ -155,7 +130,7 @@ function Meta(meta)
   meta["ufla-nota-descritiva"] = pandoc.MetaInlines(nota)
   meta["ufla-tipo-nome"] = pandoc.MetaInlines(nome)
   meta["ufla-tipo"] = chave
-  meta["ufla-stricto"] = STRICTO[chave] == true
+  meta["ufla-stricto"] = p.stricto == true
   local banca = false
   for _, n in ipairs({ "um", "dois", "tres", "quatro" }) do
     banca = banca or not vazio(meta["banca-" .. n .. "-nome"])

@@ -92,18 +92,8 @@ local function conhecido(campo)
   return false
 end
 
--- Ordem dos tipos na mensagem de erro (a do Quadro 3.1 do manual).
-local ORDEM_TIPOS = {
-  "tcc", "monografia", "monografia-licenciatura", "especializacao",
-  "dissertacao", "dissertacao-profissional", "tese", "relatorio-estagio",
-}
-for k in pairs(TIPOS) do
-  local listado = false
-  for _, o in ipairs(ORDEM_TIPOS) do listado = listado or o == k end
-  if not listado then ORDEM_TIPOS[#ORDEM_TIPOS + 1] = k end
-end
-
-local STRICTO = { ["dissertacao"] = true, ["dissertacao-profissional"] = true, ["tese"] = true }
+-- Tipos na ordem do Quadro 3.1 do manual (para as mensagens).
+local ORDEM_TIPOS = util.chaves_tipos(TIPOS)
 
 -- Auxiliares -----------------------------------------------------------------
 
@@ -183,9 +173,9 @@ end
 local function confere_tipo(meta, erros)
   local valor = texto(meta.tipo)
   if valor == "" or TIPOS[valor:lower()] then return end
-  local msg = string.format('tipo: "%s" não existe', valor)
+  local msg = string.format('tipo: "%s" não existe.', valor)
   local sugestao = util.sugerir(valor:lower(), ORDEM_TIPOS)
-  if sugestao then msg = msg .. string.format(' — você quis dizer "%s"?', sugestao) end
+  if sugestao then msg = msg .. string.format(' Você quis dizer "%s"?', sugestao) end
   erros[#erros + 1] = msg .. " Use um destes: " .. table.concat(ORDEM_TIPOS, ", ") .. "."
 end
 
@@ -228,20 +218,6 @@ local function confere_generos(meta)
   end
 end
 
--- Mesmo critério de tipo.lua: `tipo`, senão `tipo-trabalho` com o nome de
--- um tipo conhecido, senão dissertação. Devolve a chave e se o
--- `tipo-trabalho` foi reconhecido.
-local function tipo_efetivo(meta)
-  local chave = texto(meta.tipo):lower()
-  if chave ~= "" then return TIPOS[chave] and chave or "dissertacao", true end
-  if vazio(meta["tipo-trabalho"]) then return "dissertacao", true end
-  local nome = pandoc.text.lower(texto(meta["tipo-trabalho"]))
-  for _, k in ipairs(ORDEM_TIPOS) do
-    if pandoc.text.lower(TIPOS[k].nome) == nome then return k, true end
-  end
-  return "dissertacao", false
-end
-
 local function confere_tipo_trabalho(meta, reconhecido)
   if reconhecido then return end
   local p = TIPOS["dissertacao"]
@@ -277,7 +253,7 @@ local function confere_banca(meta)
 end
 
 local function confere_versao_final(meta, chave)
-  if not STRICTO[chave] then return end
+  if not TIPOS[chave].stricto then return end
   if vazio(meta.defesa) or not verdadeiro(meta["ficha-catalografica"])
       or vazio(meta["indicadores-impacto-texto"]) then
     util.aviso("Lembrete para a versão final: dissertações e teses precisam de "
@@ -320,7 +296,7 @@ function Pandoc(doc)
   confere_campos(meta)
   confere_basicos(meta)
   confere_generos(meta)
-  local chave, reconhecido = tipo_efetivo(meta)
+  local chave, reconhecido = util.preset(meta, TIPOS)
   confere_tipo_trabalho(meta, reconhecido)
   confere_resumos(meta)
   confere_banca(meta)

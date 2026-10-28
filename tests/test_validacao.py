@@ -2,6 +2,8 @@
 avisos em português e o marcador [preencha: campo] no PDF."""
 import re
 
+import pytest
+
 PREFIXO = "[ufla-normas]"
 
 BIB = """@book{silva2020,
@@ -61,9 +63,15 @@ def test_bib_lista_com_um_faltando(render):
 def test_tipo_invalido(render):
     r = render("val_tipo_invalido", yaml="tipo: dissertação\n")
     assert not r.ok
-    assert 'tipo: "dissertação" não existe' in r.log
+    assert 'tipo: "dissertação" não existe. Você quis dizer "dissertacao"? Use um destes:' in r.log
     assert "dissertacao" in r.log
-    assert 'você quis dizer "dissertacao"' in r.log
+
+
+def test_tipo_invalido_sem_sugestao(render):
+    r = render("val_tipo_sem_sugestao", yaml="tipo: zzzz\n")
+    assert not r.ok
+    assert 'tipo: "zzzz" não existe. Use um destes: tcc, monografia,' in r.log
+    assert "quis dizer" not in r.log
 
 
 def test_tipo_vazio_e_ausente(render):
@@ -146,6 +154,25 @@ def test_sem_lembrete_para_tcc(render):
     r = render("val_lembrete_tcc", yaml="tipo: tcc\n")
     assert r.ok, r.log
     assert LEMBRETE not in r.log
+
+
+# O lembrete segue o mesmo preset de tipo.lua (util.preset + stricto em
+# tipos.lua), inclusive pelo tipo-trabalho da v1.
+CASOS_STRICTO = [
+    ("tese", "tipo: tese\n", True),
+    ("profissional", "tipo: dissertacao-profissional\n", True),
+    ("v1_tese", 'tipo: ""\ntipo-trabalho: "Tese"\n', True),
+    ("v1_monografia", 'tipo: ""\ntipo-trabalho: "Monografia"\n', False),
+    ("especializacao", "tipo: especializacao\n", False),
+]
+
+
+@pytest.mark.parametrize("nome, yaml, lembra", CASOS_STRICTO,
+                         ids=[c[0] for c in CASOS_STRICTO])
+def test_lembrete_segue_o_preset(render, nome, yaml, lembra):
+    r = render(f"val_stricto_{nome}", yaml=yaml)
+    assert r.ok, r.log
+    assert (LEMBRETE in r.log) == lembra
 
 
 # Citações sem bibliography --------------------------------------------------

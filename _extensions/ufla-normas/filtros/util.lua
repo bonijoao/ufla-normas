@@ -71,6 +71,54 @@ function M.sugerir(nome, opcoes)
   return nil
 end
 
+-- Tipos de trabalho ---------------------------------------------------------
+
+-- Espaços só ASCII: no Windows, o %s do Lua casa o byte 0xA0, que é o fim
+-- do "à" em UTF-8 (C3 A0).
+local function texto(v)
+  if v == nil then return "" end
+  return (pandoc.utils.stringify(v):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
+end
+
+--- Chaves de `tipos` (tabela de tipos.lua) na ordem do Quadro 3.1.
+function M.chaves_tipos(tipos)
+  local r = {}
+  for k in pairs(tipos) do r[#r + 1] = k end
+  table.sort(r, function(a, b)
+    local oa, ob = tipos[a].ordem or math.huge, tipos[b].ordem or math.huge
+    if oa ~= ob then return oa < ob end
+    return a < b
+  end)
+  return r
+end
+
+-- Ordem usada para reconhecer um `tipo-trabalho` da v1 sem `tipo`.
+local ORDEM_V1 = {
+  "dissertacao", "tese", "tcc", "monografia", "relatorio-estagio",
+}
+
+--- Resolve o preset de `tipos` para os metadados: `tipo` explícito, senão
+--- `tipo-trabalho` com o nome de um tipo da v1, senão dissertação. Devolve
+--- a chave e se o preset foi reconhecido (false para `tipo-trabalho` em
+--- texto livre). Tipo desconhecido é erro em validar.lua; aqui só cai na
+--- dissertação para não quebrar. Usado por tipo.lua e validar.lua.
+function M.preset(meta, tipos)
+  local chave = texto(meta["tipo"]):lower()
+  if chave ~= "" then
+    if tipos[chave] then return chave, true end
+    return "dissertacao", true
+  end
+  local tipo_trabalho = texto(meta["tipo-trabalho"])
+  if tipo_trabalho ~= "" then
+    local nome = pandoc.text.lower(tipo_trabalho)
+    for _, k in ipairs(ORDEM_V1) do
+      if pandoc.text.lower(tipos[k].nome) == nome then return k, true end
+    end
+    return "dissertacao", false
+  end
+  return "dissertacao", true
+end
+
 -- Referências cruzadas ----------------------------------------------------
 
 -- Prefixos de referência cruzada do Quarto: @fig-x, @tbl-x, ... não são
