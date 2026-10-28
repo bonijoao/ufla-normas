@@ -122,6 +122,7 @@ local GENERO_PADRAO = {
 local GENERO = {
   pt = { mestrado = "Dissertação (Mestrado)", doutorado = "Tese (Doutorado)" },
   en = { mestrado = "Master's thesis", doutorado = "Doctoral thesis" },
+  es = { mestrado = "Tesis de maestría", doutorado = "Tesis doctoral" },
 }
 
 local function capitaliza(s)
@@ -132,7 +133,7 @@ end
 local function genero_tese(genero, idioma)
   local chave = pandoc.text.lower(genero):gsub("’", "'")
   local grau = GENERO_PADRAO[chave]
-  if grau then return GENERO[idioma == "en" and "en" or "pt"][grau] end
+  if grau then return (GENERO[idioma] or GENERO.pt)[grau] end
   return capitaliza(genero)
 end
 
@@ -148,7 +149,7 @@ end
 local TITULOS_REFS = {
   ["referências"] = true, ["referencias"] = true, ["referências bibliográficas"] = true,
   ["referencias bibliograficas"] = true, ["references"] = true,
-  ["bibliografia"] = true, ["bibliography"] = true,
+  ["bibliografia"] = true, ["bibliography"] = true, ["bibliografía"] = true,
 }
 
 local function eh_div_refs(b)
@@ -216,7 +217,7 @@ function Pandoc(doc)
   local ok, refs = pcall(pandoc.utils.references, doc)
   if not ok or refs == nil then return doc end
 
-  local idioma = pandoc.utils.stringify(doc.meta.lang or "pt"):sub(1, 2):lower()
+  local idioma = util.idioma(doc.meta)
 
   local ids, chaves = {}, {}
   for _, item in ipairs(refs) do
@@ -226,6 +227,9 @@ function Pandoc(doc)
     if item.publisher ~= nil then item.publisher = limpa_editora(item.publisher) end
     if item.type == "thesis" and item.genre ~= nil then
       item.genre = genero_tese(pandoc.utils.stringify(item.genre), idioma)
+    elseif item.type == "thesis" and idioma ~= "pt" then
+      -- sem `type`: o ufla-abnt.csl escreveria "Trabalho acadêmico"
+      item.genre = util.ROTULOS[idioma].trabalho_academico
     end
     ids[item.id] = true
     chaves[#chaves + 1] = item.id

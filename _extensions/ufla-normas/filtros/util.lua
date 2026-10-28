@@ -119,6 +119,59 @@ function M.preset(meta, tipos)
   return "dissertacao", true
 end
 
+-- Idioma do texto ------------------------------------------------------------
+
+--- Rótulos do corpo do trabalho (do primeiro capítulo em diante) por idioma.
+--- Os pré-textuais ficam sempre em português (manual 3.1.2.1), então só
+--- entram aqui os rótulos que aparecem no corpo e no pós-textual. `babel` é
+--- o nome do idioma para o pacote babel do LaTeX.
+M.ROTULOS = {
+  pt = {
+    babel = "brazil", figura = "Figura", tabela = "Tabela",
+    fonte = "Fonte", quadro = "Quadro",
+    apendice = "APÊNDICE", apendice_texto = "Apêndice",
+    anexo = "ANEXO", anexo_texto = "Anexo",
+    glossario = "GLOSSÁRIO", trabalho_academico = "Trabalho acadêmico",
+  },
+  en = {
+    babel = "english", figura = "Figure", tabela = "Table",
+    fonte = "Source", quadro = "Chart",
+    apendice = "APPENDIX", apendice_texto = "Appendix",
+    anexo = "ANNEX", anexo_texto = "Annex",
+    glossario = "GLOSSARY", trabalho_academico = "Academic work",
+  },
+  es = {
+    -- modificadores do babel: noshorthands (sem os atalhos ativos do
+    -- espanhol, <, > e ", que quebram as tabelas do Pandoc) e tabla
+    -- ("Tabla 1", não "Cuadro 1", nas tabelas)
+    babel = "spanish", babel_modificadores = ".noshorthands.tabla",
+    figura = "Figura", tabela = "Tabla", fonte = "Fuente", quadro = "Cuadro",
+    apendice = "APÉNDICE", apendice_texto = "Apéndice",
+    anexo = "ANEXO", anexo_texto = "Anexo",
+    glossario = "GLOSARIO", trabalho_academico = "Trabajo académico",
+  },
+}
+
+-- Variantes regionais com nome próprio no babel.
+local BABEL_REGIAO = { ["en-gb"] = "british", ["en-uk"] = "british" }
+
+--- Idioma do texto a partir de `lang` (pt, pt-BR, en, en-US, es, es-ES...).
+--- Devolve a chave de ROTULOS ("pt", "en" ou "es"), se o idioma é suportado
+--- (false: cai no português) e o valor escrito em `lang`. Sem `lang`, pt.
+function M.idioma(meta)
+  local bruto = texto(meta and meta.lang)
+  if bruto == "" then return "pt", true, bruto end
+  local base = bruto:lower():match("^([a-z]+)")
+  if base ~= nil and M.ROTULOS[base] then return base, true, bruto end
+  return "pt", false, bruto
+end
+
+--- Nome do idioma para o babel ("english", "british", "spanish", ...).
+function M.babel(meta)
+  local chave, _, bruto = M.idioma(meta)
+  return BABEL_REGIAO[bruto:lower():gsub("_", "-")] or M.ROTULOS[chave].babel
+end
+
 -- Referências cruzadas ----------------------------------------------------
 
 -- Prefixos de referência cruzada do Quarto: @fig-x, @tbl-x, ... não são

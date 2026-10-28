@@ -17,7 +17,12 @@
 % Text in TeX Gyre Termes (Times) through fontspec, so Unicode input
 % (μ, β, ≤, ő, ł, …) works without inputenc. Math stays in Times (mathptmx);
 % sans and mono stay at the fontspec defaults (Latin Modern), as in Pandoc.
-\usepackage[brazil]{babel}
+% Babel: Portuguese always loaded (pre-textual pages, manual 3.1.2.1); a
+% work written in another language (`lang: en`, `es`) has that language as
+% main, so captions (Figure, Table), \refname and hyphenation of the text
+% follow it. tipo.lua fills ufla-babel ("brazil, english": the last one is
+% the main language).
+\usepackage[$if(ufla-babel)$$ufla-babel$$else$brazil$endif$]{babel}
 \usepackage{mathptmx}      % Times in math mode
 \usepackage{fontspec}
 \setmainfont{TeX Gyre Termes}
@@ -194,7 +199,7 @@ $endif$
 % Source line below figures, tables and quadros (manual 3.2.9/3.2.10):
 % "Fonte: …", size 11, single spacing, centred. elementos-atributos.lua writes it
 % from the `fonte=` attribute; v1 documents call \fonte{} directly.
-\newcommand{\fontename}{Fonte}
+\newcommand{\fontename}{$if(ufla-rotulo-fonte)$$ufla-rotulo-fonte$$else$Fonte$endif$}
 % (\setstretch before \small: it reselects \@currsize, which the 11pt
 % \small defined above does not set, and would go back to 12pt)
 \newcommand{\fonte}[1]{\par
@@ -244,16 +249,18 @@ $endif$
 }
 \makeatother
 
+% List titles stay Portuguese (pre-textual); the entries repeat the label
+% of the caption in the text, which follows `lang` (Figure 1 – …)
 \renewcommand{\listoffigures}{%
-  {\renewcommand{\numberline}{Figura~}\listof{figure}{Lista de Figuras}}}
+  {\renewcommand{\numberline}{$if(ufla-rotulo-figura)$$ufla-rotulo-figura$$else$Figura$endif$~}\listof{figure}{Lista de Figuras}}}
 
 \renewcommand{\listoftables}{%
-  {\renewcommand{\numberline}{Tabela~}\listof{table}{Lista de Tabelas}}}
+  {\renewcommand{\numberline}{$if(ufla-rotulo-tabela)$$ufla-rotulo-tabela$$else$Tabela$endif$~}\listof{table}{Lista de Tabelas}}}
 
 % Quadro: the float is defined after the Quarto includes (see "UFLA
 % settings re-asserted" below), because Quarto defines it too when the
 % document uses @qdr- references
-\newcommand{\quadroname}{Quadro}
+\newcommand{\quadroname}{$if(ufla-rotulo-quadro)$$ufla-rotulo-quadro$$else$Quadro$endif$}
 
 %----------------------------------------------------------------------
 % Table of contents (sec 3.2.5: title UPPERCASE + bold + centered)
@@ -567,6 +574,8 @@ $endfor$
 
     \textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
+    % work in another language: Portuguese title below, in the same style
+    $if(ufla-titulo-traduzido)$\par\textbf{(\MakeUppercase{$ufla-titulo-traduzido$})}$endif$
 
     \vspace{\baselineskip}
   \end{center}
@@ -626,6 +635,12 @@ $endfor$
   \def\l@subsubsection{\@dottedtocline{3}{\identation}{\widthsechold}}
   \def\l@subsubsubsection{\@dottedtocline{4}{\identation}{\widthsechold}}
 }
+
+%----------------------------------------------------------------------
+% Pre-textual pages always in Portuguese (manual 3.1.2.1), even when the
+% text is in another language; that language comes back after the SUMÁRIO
+%----------------------------------------------------------------------
+$if(ufla-babel-principal)$\selectlanguage{brazil}$endif$
 
 %----------------------------------------------------------------------
 % CAPA — not counted, not numbered (page counter starts at 0)
@@ -784,6 +799,7 @@ $endif$
 % SUMÁRIO (mandatory, sec 3.1.2.1.14) — counted, not numbered
 %----------------------------------------------------------------------
 \tableofcontents
+$if(ufla-babel-principal)$\selectlanguage{$ufla-babel-principal$}$endif$
 
 %----------------------------------------------------------------------
 % BEGIN PAGE NUMBERING (sec 3.2.7)

@@ -253,9 +253,10 @@ local function itens_lista(lista)
   return blocos
 end
 
-local function glossario(lista)
+--- `titulo`: "GLOSSÁRIO", "GLOSSARY"... conforme `lang` (util.ROTULOS).
+local function glossario(lista, titulo)
   local blocos = pandoc.Blocks({
-    pandoc.RawBlock("latex", "\\uflaTituloPos{glossario}{GLOSSÁRIO}"),
+    pandoc.RawBlock("latex", "\\uflaTituloPos{glossario}{" .. titulo .. "}"),
   })
   local defs = {}
   for _, e in ipairs(lista) do
@@ -281,7 +282,8 @@ local filtro_listas = {
     end
     local termos = em_ordem_alfabetica(entradas(doc.meta["glossario"]))
     if #termos > 0 then
-      divs:insert(pandoc.Div(glossario(termos), pandoc.Attr("ufla-glossario")))
+      local titulo = util.ROTULOS[util.idioma(doc.meta)].glossario
+      divs:insert(pandoc.Div(glossario(termos, titulo), pandoc.Attr("ufla-glossario")))
     end
     if #divs == 0 then return nil end
     -- no início: no fim confundiriam referencias.lua, que procura um título

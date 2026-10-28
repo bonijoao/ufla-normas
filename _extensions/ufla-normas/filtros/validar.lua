@@ -13,7 +13,9 @@ Avisos (a renderização continua):
   - resumo/abstract fora de 150 a 500 palavras;
   - `defesa` sem membros da banca;
   - lembrete (uma vez) dos elementos da versão final de dissertações e teses;
-  - citações no texto sem `bibliography`.
+  - citações no texto sem `bibliography`;
+  - `lang` sem rótulos na extensão (cai no português);
+  - trabalho em outro idioma sem `titulo-traduzido`.
 
 Valores "" contam como ausentes: o _extension.yml declara vários campos com
 "" e esses padrões chegam aqui misturados aos do documento.
@@ -75,6 +77,8 @@ local CAMPOS_CONHECIDOS = {
   "revealjs-plugins",
   -- elementos.lua (listas pré-textuais, glossário, lista de quadros)
   "siglas", "simbolos", "glossario", "loq",
+  -- trabalhos em outro idioma (título em português na folha de aprovação)
+  "titulo-traduzido",
 }
 
 -- Prefixos de famílias de opções do Quarto (fig-width, tbl-cap-location, ...).
@@ -287,6 +291,20 @@ local function confere_citacoes(doc)
     table.concat(lista, ", ")))
 end
 
+local function confere_idioma(meta)
+  local idioma, suportado, bruto = util.idioma(meta)
+  if not suportado then
+    util.aviso(string.format('lang: "%s" não é suportado; os rótulos do texto (Figura, '
+      .. 'Fonte, APÊNDICE, REFERÊNCIAS...) ficam em português. Idiomas com rótulos '
+      .. 'próprios: pt, en, es.', bruto))
+    return
+  end
+  if idioma ~= "pt" and vazio(meta["titulo-traduzido"]) then
+    util.aviso('Trabalho em outro idioma: preencha "titulo-traduzido" (o manual exige '
+      .. 'o título em português na folha de aprovação).')
+  end
+end
+
 -- Filtro -----------------------------------------------------------------------
 
 function Pandoc(doc)
@@ -304,6 +322,7 @@ function Pandoc(doc)
   confere_banca(meta)
   confere_versao_final(meta, chave)
   confere_citacoes(doc)
+  confere_idioma(meta)
 
   util.erros(erros)
   return nil

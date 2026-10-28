@@ -39,6 +39,37 @@ contributes:
             latex-env: quadro
             latex-list-of-file-extension: loq
             latex-list-of-description: Quadros
+      # Reference prefixes in the text (@fig-x -> "Figura 1") follow `lang`.
+      # The top-level values are the Portuguese default, also used when the
+      # extension has no labels for `lang` (validar.lua warns, as for the
+      # captions, which babel gives in Portuguese then); en/es override them.
+      language:
+        crossref-fig-title: Figura
+        crossref-fig-prefix: Figura
+        crossref-tbl-title: Tabela
+        crossref-tbl-prefix: Tabela
+        crossref-qdr-title: Quadro
+        crossref-qdr-prefix: Quadro
+        crossref-sec-prefix: Seção
+        crossref-eq-prefix: Equação
+        en:
+          crossref-fig-title: Figure
+          crossref-fig-prefix: Figure
+          crossref-tbl-title: Table
+          crossref-tbl-prefix: Table
+          crossref-qdr-title: Chart
+          crossref-qdr-prefix: Chart
+          crossref-sec-prefix: Section
+          crossref-eq-prefix: Equation
+        es:
+          crossref-fig-title: Figura
+          crossref-fig-prefix: Figura
+          crossref-tbl-title: Tabla
+          crossref-tbl-prefix: Tabla
+          crossref-qdr-title: Cuadro
+          crossref-qdr-prefix: Cuadro
+          crossref-sec-prefix: Sección
+          crossref-eq-prefix: Ecuación
       # Title above figures and tables, source below (manual 3.2.9/3.2.10)
       fig-cap-location: top
       tbl-cap-location: top

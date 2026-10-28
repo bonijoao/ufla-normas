@@ -3,7 +3,8 @@ Elementos em Markdown, segunda parte (roda por último, depois de
 referencias.lua; elementos-atributos.lua faz a primeira parte).
 
 1. Apêndices e anexos: `# Título {.apendice}` vira "APÊNDICE A – TÍTULO" e
-   `# Título {.anexo}` vira "ANEXO A – TÍTULO" (A, B, ..., Z, AA, AB, ...),
+   `# Título {.anexo}` vira "ANEXO A – TÍTULO" (A, B, ..., Z, AA, AB, ...;
+   "APPENDIX A –"/"ANNEX A –" etc. conforme `lang`),
    sem número, em página nova e no sumário (manual 3.1.2.4.3). O primeiro
    deles abre a parte pós-textual: os títulos seguintes ficam sem número.
    `@apx-x` (id de um desses títulos) vira "Apêndice B" com link.
@@ -56,10 +57,16 @@ end
 
 -- Parte pós-textual -----------------------------------------------------------
 
-local ROTULOS = {
-  apendice = { titulo = "APÊNDICE", texto = "Apêndice" },
-  anexo = { titulo = "ANEXO", texto = "Anexo" },
-}
+-- Rótulos no idioma do texto (`lang`; util.ROTULOS), definidos em Pandoc().
+local ROTULOS
+
+local function define_rotulos(meta)
+  local r = util.ROTULOS[util.idioma(meta)]
+  ROTULOS = {
+    apendice = { titulo = r.apendice, texto = r.apendice_texto },
+    anexo = { titulo = r.anexo, texto = r.anexo_texto },
+  }
+end
 
 local function tipo_pos(b)
   if b.t ~= "Header" or b.level ~= 1 then return nil end
@@ -186,6 +193,7 @@ end
 
 local filtro_documento = {
   Pandoc = function(doc)
+    define_rotulos(doc.meta)
     local siglas = retira_div(doc, "ufla-lista-siglas")
     if siglas then doc.meta["ufla-lista-siglas"] = pandoc.MetaBlocks(siglas) end
     local simbolos = retira_div(doc, "ufla-lista-simbolos")

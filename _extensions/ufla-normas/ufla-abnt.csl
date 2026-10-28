@@ -7,7 +7,8 @@ Mudancas: URL sem < >; ponto final apos "Acesso em"; trabalho academico no forma
 "ano. Tipo - Instituicao, Local, ano."; trabalho em evento sem nome do evento com o titulo
 dos anais em negrito; intervalo de paginas com hifen; [S. l.], [s. n.] e [s.d.] como no manual;
 "In:" sem italico; trabalho academico com "Disponivel em/Acesso em"; demais tipos (misc)
-com "Site. Local: Editora, ano.". A chamada narrativa com 2 ou 3 autores ("Autor e Autor
+com "Site. Local: Editora, ano."; "Disponivel em/Acesso em" como termos de locale
+(pt, en, es), para a referencia seguir o idioma do texto. A chamada narrativa com 2 ou 3 autores ("Autor e Autor
 (ano)") nao e feita aqui: o CSL 1.0 nao a permite, e o filtro filtros/citacoes.lua da
 extensao a monta antes do citeproc.-->
   <!--Em caso de sobrenome composto, este nao sera desmontado para a montagem da citacao ou bibliografia como no caso de L. Van Der Pijl-->
@@ -66,8 +67,12 @@ extensao a monta antes do citeproc.-->
     <updated>2026-10-27T00:00:00+00:00</updated>
     <rights license="http://creativecommons.org/licenses/by-sa/3.0/">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License</rights>
   </info>
-  <locale xml:lang="pt-BR">
+  <!--xml:lang="pt" vale para pt e pt-BR (lang: pt ou pt-BR no YAML)-->
+  <locale xml:lang="pt">
     <terms>
+      <!--Prefixos da macro 'access' (a referencia segue o idioma do texto)-->
+      <term name="available at">Disponível em</term>
+      <term name="accessed">Acesso em</term>
       <!--Abreviacoes meses "Forma Curta"-->
       <term name="month-01" form="short">jan.</term>
       <term name="month-02" form="short">fev.</term>
@@ -96,6 +101,20 @@ extensao a monta antes do citeproc.-->
       </term>
       <term name="in">in</term>
       <term name="and">e</term>
+      <term name="page-range-delimiter">-</term>
+    </terms>
+  </locale>
+  <locale xml:lang="en">
+    <terms>
+      <term name="available at">Available at</term>
+      <term name="accessed">Accessed on</term>
+      <term name="page-range-delimiter">-</term>
+    </terms>
+  </locale>
+  <locale xml:lang="es">
+    <terms>
+      <term name="available at">Disponible en</term>
+      <term name="accessed">Consultado el</term>
       <term name="page-range-delimiter">-</term>
     </terms>
   </locale>
@@ -196,12 +215,18 @@ aparecera a expess o 'et. al.'. Na regra da ABNT 2023 essa expressao deve aparec
   <!--A macro 'access' e utilizada em arquivos de paginas da web. Ela e responsavel por mostrar a URL do site pesquisado e a data do acesso-->
   <macro name="access">
     <group delimiter=". ">
-      <text variable="URL" prefix="Disponível em: "/>
-      <date variable="accessed" prefix="Acesso em: ">
-        <date-part name="day" suffix=" "/>
-        <date-part name="month" form="short" suffix=" " text-case="lowercase"/>
-        <date-part name="year"/>
-      </date>
+      <group delimiter=": ">
+        <text term="available at"/>
+        <text variable="URL"/>
+      </group>
+      <group delimiter=": ">
+        <text term="accessed"/>
+        <date variable="accessed">
+          <date-part name="day" suffix=" "/>
+          <date-part name="month" form="short" suffix=" "/>
+          <date-part name="year"/>
+        </date>
+      </group>
     </group>
   </macro>
   <!--A macro 'title' e responsavel por mostrar o titulo principal do arquivo. Em todos os tipos ele aparecera em negrito logo apos os nomes dos

@@ -10,6 +10,19 @@ campos calculados que o template.tex lê:
   ufla-tipo                chave normalizada ("dissertacao", "tese", ...)
   ufla-tem-banca           true se algum banca-*-nome está preenchido
 
+Idioma (`lang`; os pré-textuais ficam sempre em português):
+
+  ufla-babel               opções do babel ("brazil" ou "brazil, english")
+  ufla-babel-principal     idioma do texto no babel, se não for português
+  ufla-rotulo-figura       "Figura", "Figure" (itens da lista de figuras)
+  ufla-rotulo-tabela       "Tabela", "Table", "Tabla" (itens da lista de tabelas)
+  ufla-rotulo-fonte        "Fonte", "Source", "Fuente"
+  ufla-rotulo-quadro       "Quadro", "Chart", "Cuadro"
+  ufla-titulo-traduzido    `titulo-traduzido` (só em trabalho em outro idioma)
+
+Idioma sem rótulos na extensão vira pt-BR (validar.lua avisa), para que as
+referências do citeproc saiam em português como os rótulos.
+
 Sobrescritas: `tipo-trabalho` troca o nome (gênero em `genero: f|m`),
 `titulo-pretendido` troca o título e `instituicao` a instituição.
 Sem `tipo` e sem `tipo-trabalho` vale `dissertacao` (comportamento da v1).
@@ -91,6 +104,27 @@ local function rotulos(meta)
   meta["ufla-coorientador-rotulo"] = coorientador
 end
 
+local function idioma(meta)
+  local chave, suportado = util.idioma(meta)
+  if not suportado then meta.lang = pandoc.MetaString("pt-BR") end
+  local r = util.ROTULOS[chave]
+  if chave == "pt" then
+    meta["ufla-babel"] = "brazil"
+  else
+    -- no babel, o último idioma da lista é o principal
+    local principal = util.babel(meta)
+    meta["ufla-babel"] = "brazil, " .. principal .. (r.babel_modificadores or "")
+    meta["ufla-babel-principal"] = principal
+    if not vazio(meta["titulo-traduzido"]) then
+      meta["ufla-titulo-traduzido"] = pandoc.MetaInlines(inlines(meta["titulo-traduzido"]))
+    end
+  end
+  meta["ufla-rotulo-figura"] = r.figura
+  meta["ufla-rotulo-tabela"] = r.tabela
+  meta["ufla-rotulo-fonte"] = r.fonte
+  meta["ufla-rotulo-quadro"] = r.quadro
+end
+
 function Meta(meta)
   local chave, conhecido = util.preset(meta, TIPOS)
   local p = TIPOS[chave]
@@ -137,5 +171,6 @@ function Meta(meta)
   end
   meta["ufla-tem-banca"] = banca
   rotulos(meta)
+  idioma(meta)
   return meta
 end
