@@ -7,7 +7,7 @@ import shutil
 
 import pytest
 
-from conftest import SAIDA
+from conftest import RAIZ, SAIDA
 
 LOGO = "_extensions/ufla-normas/logoUFLA.pdf"
 
@@ -202,8 +202,18 @@ def test_quadro(render):
         "| Item | Valor |\n|---|---|\n| Prazo | Curto |\n\n"
         ":::\n"
     )
-    r = render("quadro", yaml="loq: true", corpo=corpo)
+    r = render("quadro", yaml="loq: true\nkeep-tex: true", corpo=corpo)
     assert r.ok, r.log
+    # sem \floatstyle{ruled} nos quadros: os includes do Quarto deixam o
+    # estilo "ruled" ativo (para codelisting); o template volta a "plaintop"
+    # e reestiliza o quadro depois deles
+    tex = (SAIDA / "quadro" / "quadro.tex").read_text(encoding="utf-8")
+    # só comandos no início da linha (não os comentários do template)
+    ultimo_ruled = tex.rfind("\n" + r"\floatstyle{ruled}")
+    assert ultimo_ruled >= 0, "os includes do Quarto não estão no .tex"
+    i_plaintop = tex.find("\n" + r"\floatstyle{plaintop}", ultimo_ruled)
+    assert i_plaintop > ultimo_ruled, r"nenhum \floatstyle{plaintop} depois do ruled"
+    assert tex.find("\n" + r"\restylefloat{quadro}", i_plaintop) > i_plaintop
     texto = junta(r.texto)
     assert "conforme o Quadro 1 e o Quadro 2" in texto, texto
     corpo_pdf = junta(r.depois("resumidos"))
@@ -305,3 +315,34 @@ def test_include_in_header(render):
                corpo="# Introdução\n\nTexto \\minhamacro{} aqui.\n")
     assert r.ok, r.log
     assert "Texto Macro do autor aqui." in junta(r.texto)
+
+
+# Citações em fonte=, quadro= e nos campos do YAML ---------------------------
+
+def test_citacao_na_fonte_e_no_glossario(render):
+    """Citações escritas em `fonte=` e no glossário passam pelos mesmos
+    filtros que as do texto: chamada narrativa com dois autores vira
+    "Costa e Ferreira (2022)", chave inexistente vira "[chave?]" com aviso."""
+    bib = (RAIZ / "tests" / "fixtures" / "zotero.bib").read_text(encoding="utf-8")
+    yaml = (
+        "bibliography: refs.bib\n"
+        "glossario:\n"
+        "  Rede: Estrutura descrita por @costa_redes_2022.\n"
+    )
+    corpo = (
+        "# Introdução\n\n"
+        "Veja a @fig-logo e a @tbl-dados.\n\n"
+        f"![Logomarca]({LOGO}){{#fig-logo fonte=\"Adaptado de @costa_redes_2022\" width=3cm}}\n\n"
+        "| a | b |\n|---|---|\n| 1 | 2 |\n\n"
+        ": Dados {#tbl-dados fonte=\"@chave_que_nao_existe_2020\"}\n"
+    )
+    r = render("citacao-fonte", yaml=yaml, corpo=corpo, arquivos={"refs.bib": bib})
+    assert r.ok, r.log
+    texto = junta(r.texto)
+    assert "Fonte: Adaptado de Costa e Ferreira (2022)." in texto, texto
+    assert "[chave_que_nao_existe_2020?]" in texto, texto
+    assert "Citação não encontrada: @chave_que_nao_existe_2020" in r.log, r.log
+    glossario = junta(r.depois("GLOSSÁRIO"))
+    assert "Estrutura descrita por Costa e Ferreira (2022)." in glossario, glossario
+    # a obra citada só na fonte entra nas referências
+    assert "COSTA, Bruno; FERREIRA, Carla" in junta(r.depois("REFERÊNCIAS"))

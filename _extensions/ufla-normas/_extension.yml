@@ -15,16 +15,20 @@ contributes:
       # Order matters: validar.lua checks the YAML first (and stops on a
       # missing bibliography file or unknown tipo); referencias.lua cleans
       # the bibliography (and marks missing keys) before citacoes.lua reads
-      # it; elementos.lua comes last, after referencias.lua has handled the
-      # author's own "Referências" heading and #refs div, so it can move
+      # it; elementos-atributos.lua turns fonte=/quadro= attributes and the
+      # siglas/simbolos/glossario YAML into document text before those two,
+      # so citations written there get the same checks and "A e B (2020)"
+      # form; elementos.lua comes last, after referencias.lua has handled
+      # the author's own "Referências" heading and #refs div, so it can move
       # #refs before the apêndices; Quarto runs citeproc after all of these
       filters:
         - filtros/validar.lua
+        - filtros/elementos-atributos.lua
         - filtros/referencias.lua
         - filtros/citacoes.lua
         - filtros/tipo.lua
         - filtros/elementos.lua
-      # Quadros: ::: {#qdr-x} ... ::: with @qdr-x references (elementos.lua
+      # Quadros: ::: {#qdr-x} ... ::: with @qdr-x references (elementos-atributos.lua
       # adds the `quadro="Legenda"` and `fonte="..."` attributes)
       crossref:
         custom:
