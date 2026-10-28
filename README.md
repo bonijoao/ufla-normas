@@ -1,328 +1,591 @@
 # ufla-normas
 
-Extensão Quarto para produção de trabalhos acadêmicos (TCC, monografia,
-dissertação, tese) conforme as normas da **Universidade Federal de Lavras (UFLA)**,
-Manual de Normalização e Estrutura de Trabalhos Acadêmicos, **6ª edição (2025)**.
+Extensão do Quarto que gera em PDF o trabalho acadêmico (TCC, monografia,
+dissertação, tese, relatório de estágio) nas normas da **Universidade Federal
+de Lavras (UFLA)**: *Manual de normalização e estrutura de trabalhos
+acadêmicos*, 6. ed. (2025).
 
-## In English
+Você preenche o cabeçalho YAML e escreve em Markdown. A extensão monta capa,
+folha de rosto, ficha catalográfica, folha de aprovação, resumo, abstract,
+indicadores de impacto, listas e sumário, e formata citações e referências
+pela ABNT como o manual pede. Não é preciso saber LaTeX.
 
-`ufla-normas` is a Quarto PDF format for theses, dissertations and
-undergraduate monographs at the Universidade Federal de Lavras (UFLA, Brazil).
-It follows the university's *Manual de Normalização e Estrutura de Trabalhos
-Acadêmicos*, 6th edition (2025): margins, Times 12 pt, 1.5 line spacing, section
-styling, page numbering and ABNT author-date citations.
+Versão atual: **2.0.0**. Quem vem da 1.x deve ler
+[Migrar da versão 1.x](#migrar-da-versão-1x).
 
-From the YAML front matter it builds the cover, title page and abstracts in
-Portuguese and English, and optionally the cataloguing record (*ficha
-catalográfica*), the approval page and the impact indicators page required for
-graduate work by PRPG Resolution 012/2024.
+## Sumário
 
-Install it with:
+- [Começar](#começar)
+- [Escreva aqui: o cabeçalho YAML](#escreva-aqui-o-cabeçalho-yaml)
+- [Tipos de trabalho](#tipos-de-trabalho)
+- [Citações: escrevo isto, sai aquilo](#citações-escrevo-isto-sai-aquilo)
+- [O arquivo de referências (.bib)](#o-arquivo-de-referências-bib)
+- [Figuras, tabelas, quadros, apêndices e listas](#figuras-tabelas-quadros-apêndices-e-listas)
+- [Formato de artigos](#formato-de-artigos)
+- [Trabalho em outro idioma](#trabalho-em-outro-idioma)
+- [Mensagens da extensão e o que fazer](#mensagens-da-extensão-e-o-que-fazer)
+- [Migrar da versão 1.x](#migrar-da-versão-1x)
+- [In English](#in-english)
+- [Licença e créditos](#licença-e-créditos)
+
+## Começar
+
+### Requisitos
+
+- [Quarto](https://quarto.org) 1.4 ou mais novo.
+- Uma distribuição LaTeX com **LuaLaTeX** e a fonte **TeX Gyre Termes**
+  (equivalente à Times):
+  - **TinyTeX** (o LaTeX que o Quarto instala com `quarto install tinytex`):
+    rode uma vez `tlmgr install tex-gyre`.
+  - **MiKTeX**: instala os pacotes que faltarem na primeira renderização
+    (deixe a instalação automática ligada).
+  - **TeX Live** completo: já tem tudo.
+
+### Criar o trabalho
+
+Numa pasta vazia, no terminal:
+
+```bash
+quarto use template bonijoao/ufla-normas
+```
+
+O comando cria:
+
+- `<nome-da-pasta>.qmd`: o seu trabalho, já com exemplos de tudo;
+- `referencias.bib`: uma referência de exemplo de cada tipo comum;
+- `imgs/grafico-exemplo.png`: a figura do exemplo;
+- `_extensions/`: a extensão (não mexa).
+
+Abra o `.qmd`, troque os textos entre aspas no cabeçalho e renderize (botão
+**Render** no RStudio/Positron, ou `quarto render <nome-da-pasta>.qmd`). O
+exemplo renderiza sem nenhum aviso. Depois apague o texto de exemplo e
+escreva o seu.
+
+### Já tenho um .qmd
+
+Instale só a extensão na pasta do trabalho:
 
 ```bash
 quarto add bonijoao/ufla-normas
 ```
 
-Then set `format: ufla-normas-pdf` in your document. You need Quarto 1.4 or
-later and a LaTeX distribution with pdflatex. The rest of this README, including
-the full list of YAML fields, is in Portuguese, since the format is meant for
-UFLA students. `template.qmd` is a complete working example.
+e use o formato no cabeçalho:
 
-## Requisitos
-
-- [Quarto](https://quarto.org) ≥ 1.4
-- Distribuição LaTeX com pdflatex (ex.: TeX Live, MiKTeX)
-- Pacotes LaTeX: `pslatex`, `mathptmx`, `titlesec`, `fancyhdr`, `geometry`,
-  `caption`, `enumitem`, `float`, `alphalph`, `footmisc`, `setspace`
-
-## Instalação
-
-No terminal:
-
-```bash
-quarto add bonijoao/ufla-normas
+```yaml
+format:
+  ufla-normas-pdf: default
 ```
 
-Ou, para usar localmente sem instalar:
+Para atualizar depois, rode `quarto add bonijoao/ufla-normas` de novo. Para
+ficar na versão antiga: `quarto add bonijoao/ufla-normas@v1.0.0`.
 
-```bash
-git clone https://github.com/bonijoao/ufla-normas
-cd ufla-normas
-quarto render template.qmd
-```
+## Escreva aqui: o cabeçalho YAML
 
-## Uso mínimo
-
-Crie um arquivo `.qmd` com o seguinte cabeçalho YAML mínimo:
+Cabeçalho mínimo:
 
 ```yaml
 ---
-title: "TÍTULO DO TRABALHO"
+tipo: dissertacao
+title: "Título do trabalho"
 author: "Nome Completo do Autor"
-ano: "2025"
-abstract: |
-  Texto do resumo em parágrafo único, 150–500 palavras.
-keywords: [palavra1, palavra2, palavra3]
-abstract-en: |
-  Abstract text in a single paragraph.
-keywords-en: [keyword1, keyword2, keyword3]
-tipo-trabalho: "Dissertação"
-titulo-pretendido: "Mestre"
+ano: "2026"
 curso: "Agronomia/Fitotecnia"
 orientador: "Prof. Dr. Nome do Orientador"
-cidade: "Lavras-MG"
+abstract: |
+  Resumo em um parágrafo, de 150 a 500 palavras.
+keywords: [Palavra um, Palavra dois, Palavra três]
+abstract-en: |
+  Abstract in one paragraph.
+keywords-en: [Word one, Word two, Word three]
 bibliography: referencias.bib
 format:
   ufla-normas-pdf: default
 ---
 ```
 
-## Referência completa de campos
+Os nomes dos campos não têm acento (`genero`, `titulo-traduzido`). Campo com
+nome errado gera aviso com sugestão (veja [mensagens](#mensagens-da-extensão-e-o-que-fazer)).
 
-### Campos obrigatórios
+### Identificação
 
-| Campo | Descrição | Exemplo |
-|-------|-----------|---------|
-| `title` | Título em maiúsculas | `"TÍTULO DO TRABALHO"` |
-| `author` | Nome completo do autor | `"João da Silva"` |
-| `ano` | Ano de depósito (4 dígitos) | `"2025"` |
-| `abstract` | Resumo em PT | texto em bloco `\|` |
-| `keywords` | Palavras-chave em PT | `[p1, p2, p3]` |
-| `abstract-en` | Abstract em inglês | texto em bloco `\|` |
-| `keywords-en` | Keywords em inglês | `[k1, k2, k3]` |
-| `tipo-trabalho` | Natureza do trabalho | `"Dissertação"` |
-| `titulo-pretendido` | Título acadêmico | `"Mestre"` |
-| `orientador` | Nome do orientador | `"Prof. Dr. X"` |
-| `cidade` | Cidade e UF | `"Lavras-MG"` |
-| `bibliography` | Arquivo .bib | `referencias.bib` |
+| Campo | Para que serve | Exemplo |
+|---|---|---|
+| `tipo` | Tipo de trabalho; define a nota descritiva (veja [Tipos](#tipos-de-trabalho)) | `dissertacao` |
+| `title` | Título (a capa põe em maiúsculas) | `"Modelagem da produtividade do café"` |
+| `subtitle` | Subtítulo, se houver | `"um estudo no sul de Minas"` |
+| `author` | Nome completo | `"Ana Paula Souza"` |
+| `ano` | Ano de depósito | `"2026"` |
+| `curso` | Curso de graduação ou programa de pós-graduação | `"Agronomia/Fitotecnia"` |
+| `area-concentracao` | Área de concentração (opcional) | `"Produção Vegetal"` |
+| `orientador` ou `orientadora` | Nome; `orientadora` já escreve "Orientadora" | `"Prof. Dr. Nome"` |
+| `orientador-genero` | `f` ou `m`, para escolher o rótulo usando `orientador` | `f` |
+| `coorientador` ou `coorientadora` | Opcional | `"Profa. Dra. Nome"` |
+| `coorientador-genero` | `f` ou `m` | `m` |
+| `genero` | `f` ou `m`: "apresentada"/"apresentado" na nota descritiva. O `tipo` já escolhe; use só para mudar | `m` |
+| `tipo-trabalho` | Texto livre que troca o nome do trabalho na nota descritiva (ex.: formatos alternativos) | `"Produto técnico"` |
+| `titulo-pretendido` | Troca o título obtido (ex.: "Mestra") | `"Mestra"` |
+| `instituicao` | Padrão: `Universidade Federal de Lavras` | |
+| `cidade` | Padrão: `Lavras-MG` | |
 
-### Campos opcionais
+### Resumos
 
-| Campo | Descrição | Padrão |
-|-------|-----------|--------|
-| `subtitle` | Subtítulo (sem negrito) | — |
-| `curso` | Curso ou programa | — |
-| `area-concentracao` | Área de concentração | — |
-| `coorientador` | Coorientador | — |
-| `instituicao` | Instituição | `"Universidade Federal de Lavras"` |
-| `frente-verso` | Impressão frente e verso | `false` |
-| `ficha-catalografica` | Incluir ficha catalográfica | `false` |
-| `indicadores-impacto` | Incluir indicadores de impacto | `true` |
-| `dedicatoria` | Texto da dedicatória | — |
-| `agradecimentos` | Texto dos agradecimentos | — |
-| `epigrafe` / `epigrafe-autor` | Epígrafe e autoria | — |
-| `lof` | Incluir lista de figuras | `false` |
-| `lot` | Incluir lista de tabelas | `false` |
-| `defesa` | Data de defesa (gera folha de aprovação) | — |
-| `banca-um-nome` / `banca-um-inst` | 1º membro da banca | — |
-| `banca-dois-nome` / `banca-dois-inst` | 2º membro da banca | — |
-| `banca-tres-nome` / `banca-tres-inst` | 3º membro da banca | — |
-| `banca-quatro-nome` / `banca-quatro-inst` | 4º membro da banca | — |
+| Campo | Para que serve |
+|---|---|
+| `abstract` | Resumo em português, um parágrafo, 150 a 500 palavras |
+| `keywords` | Palavras-chave: `[Café, Produtividade, Regressão]` |
+| `abstract-en` | Abstract em inglês |
+| `keywords-en` | Keywords |
 
-### Campos da ficha catalográfica (quando `ficha-catalografica: true`)
+### Versão final
 
-| Campo | Descrição |
-|-------|-----------|
-| `fc-autor-sobrenome` | Autor no formato "Sobrenome, Nome" |
-| `fc-autores` | Autores após a barra "/" |
-| `fc-tipo` | Tipo do trabalho (ex.: "Dissertação (mestrado)") |
-| `fc-catalogacao` | Termos de catalogação gerados pela biblioteca |
-| `fc-classificacao` | Número CDD (ex.: "808.066") |
-| `fc-ilust` | Indicação de ilustrações (ex.: "il.") |
+Nada disto bloqueia o rascunho. Em dissertação e tese, enquanto faltar algum,
+o terminal mostra um lembrete; o PDF sai normalmente.
 
-## Referências bibliográficas
+| Campo | Para que serve |
+|---|---|
+| `defesa` | Data da defesa; com ela sai a folha de aprovação. Ex.: `"20 de março de 2026"` |
+| `banca-um-nome`, `banca-um-inst` … `banca-quatro-nome`, `banca-quatro-inst` | Membros da banca e instituição (até quatro) |
+| `ficha-catalografica` | `true` para incluir a ficha |
+| `fc-autor-sobrenome`, `fc-autores`, `fc-tipo`, `fc-catalogacao`, `fc-classificacao`, `fc-ilust` | Dados da ficha, como a Biblioteca Universitária fornece |
+| `indicadores-impacto-texto` | Página INDICADORES DE IMPACTO (Resolução PRPG n. 012/2024) |
+| `impact-indicators-texto` | Página IMPACT INDICATORS |
 
-### O arquivo `.bib`
+### Elementos opcionais
 
-As referências são gerenciadas por um arquivo de texto com extensão `.bib` (formato
-BibTeX). Cada fonte — artigo, livro, dissertação, etc. — é registrada como uma entrada
-identificada por uma **chave única** que você usa nas citações do texto.
+| Campo | Para que serve |
+|---|---|
+| `errata` | Página ERRATA |
+| `dedicatoria` | Dedicatória (sem título) |
+| `agradecimentos` | Página AGRADECIMENTOS |
+| `epigrafe`, `epigrafe-autor` | Epígrafe e sua autoria |
+| `lof`, `lot`, `loq` | `true` para LISTA DE FIGURAS, DE TABELAS, DE QUADROS |
+| `siglas` | LISTA DE ABREVIATURAS E SIGLAS ([exemplo](#siglas-símbolos-e-glossário)) |
+| `simbolos` | LISTA DE SÍMBOLOS |
+| `glossario` | GLOSSÁRIO, depois das referências |
+| `frente-verso` | `true` para impressão em frente e verso |
 
-O arquivo `.bib` deve estar **na mesma pasta que o seu `.qmd`**. Declare-o no YAML:
+### Outras opções
+
+| Campo | Para que serve |
+|---|---|
+| `bibliography` | Seu arquivo `.bib` (ou uma lista de arquivos), em qualquer pasta |
+| `lang` | Idioma do texto: `pt-BR` (padrão), `en`, `es` ([outro idioma](#trabalho-em-outro-idioma)) |
+| `titulo-traduzido` | Título em português, quando `lang` não é português |
+| `formato` | `texto-integral` (padrão) ou `artigos` ([formato de artigos](#formato-de-artigos)) |
+
+As opções comuns do Quarto (`execute`, `fig-width`, `include-in-header`,
+`keep-tex` etc.) continuam funcionando.
+
+## Tipos de trabalho
+
+O `tipo` escolhe a nota descritiva da folha de rosto e da folha de aprovação,
+como no Quadro 3.1 do manual. Exemplo com `tipo: dissertacao` e
+`curso: "Agronomia/Fitotecnia"`:
+
+> Dissertação apresentada à Universidade Federal de Lavras, como parte das
+> exigências do Programa de Pós-Graduação em Agronomia/Fitotecnia, para a
+> obtenção do título de Mestre.
+
+| `tipo` | Começo da nota | Antes do curso | Título |
+|---|---|---|---|
+| `tcc` | Trabalho de conclusão de curso apresentado | Curso de | Bacharel |
+| `monografia` | Monografia apresentada | Curso de | Bacharel |
+| `monografia-licenciatura` | Monografia apresentada | Curso de | Licenciado |
+| `especializacao` | Monografia apresentada | Curso de Pós-Graduação Lato Sensu em | Especialista |
+| `dissertacao` | Dissertação apresentada | Programa de Pós-Graduação em | Mestre |
+| `dissertacao-profissional` | Dissertação apresentada | Programa de Pós-Graduação do Mestrado Profissional em | Mestre |
+| `tese` | Tese apresentada | Programa de Pós-Graduação em | Doutor |
+| `relatorio-estagio` | Relatório de estágio supervisionado apresentado | Curso de | Bacharel |
+
+Com `area-concentracao`, a nota ganha ", área de concentração em ...".
+`dissertacao`, `dissertacao-profissional` e `tese` são stricto sensu: são
+esses que recebem o lembrete da versão final.
+
+Formatos alternativos (produto técnico, software etc.) usam o formato padrão:
+escolha o `tipo` do nível e troque o nome com `tipo-trabalho` (e, se
+preciso, `genero`).
+
+## Citações: escrevo isto, sai aquilo
+
+O manual usa só o sistema autor-data. Cite com a chave da referência no
+`.bib` (o texto depois de `@article{`, `@book{` etc.). Resultados reais da
+extensão:
+
+| Escrevo | Sai no PDF |
+|---|---|
+| `[@silva_metodos_2023]` (4 ou mais autores) | (Silva et al., 2023) |
+| `@souza_modelagem_2024` | Souza (2024) |
+| `[@souza_modelagem_2024, p. 45]` | (Souza, 2024, p. 45) |
+| `@souza_modelagem_2024 [p. 45]` | Souza (2024, p. 45) |
+| `[ver @souza_modelagem_2024, p. 45]` | (ver Souza, 2024, p. 45) |
+| `Souza [-@souza_modelagem_2024]` | Souza (2024) |
+| `@costa_redes_2022` (2 autores) | Costa e Ferreira (2022) |
+| `[@souza_modelagem_2024; @costa_redes_2022]` | (Costa; Ferreira, 2022; Souza, 2024) |
+| `[@silva_a_2020; @silva_b_2020]` (mesmo autor e ano) | (Silva, 2020a, 2020b) |
+| `[@silva_sd]` (sem ano) | (Silva, [s.d.]) |
+| `[@chave_que_nao_existe]` | **[chave_que_nao_existe?]** em vermelho, com aviso no terminal |
+
+Citação direta com mais de três linhas: comece cada linha com `>`. Sai com
+recuo de 4 cm, letra menor, espaçamento simples e sem aspas.
+
+```markdown
+> Texto citado com mais de três linhas, sem aspas ...
+> [@souza_modelagem_2024, p. 12].
+```
+
+A lista REFERÊNCIAS entra sozinha depois do último capítulo (e antes de
+glossário, apêndices e anexos), só com as obras citadas, em ordem
+alfabética. Não escreva o título "Referências": se escrever, a extensão usa
+o lugar dele e não repete o título. Para pôr a lista num ponto exato, use:
+
+```markdown
+::: {#refs}
+:::
+```
+
+Na lista, as entradas seguem a NBR 6023, por exemplo:
+
+```
+SOUZA, Ana Paula. Modelagem da produtividade do café. 2024. Dissertação
+(Mestrado em Estatística e Experimentação Agropecuária) – Universidade
+Federal de Lavras, Lavras, 2024.
+
+INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA. Censo Demográfico 2022.
+IBGE, 2023. Disponível em: https://www.ibge.gov.br/... Acesso em: 20 out. 2026.
+```
+
+## O arquivo de referências (.bib)
+
+Qualquer `.bib` em BibTeX ou BibLaTeX funciona, com acentos normais (UTF-8).
+O arquivo pode estar em qualquer pasta e o caminho pode ter espaço, acento ou
+`_`:
 
 ```yaml
 bibliography: referencias.bib
-```
-
-Para usar mais de um arquivo (ex.: seu `.bib` + o da extensão):
-
-```yaml
+# ou vários:
 bibliography:
   - referencias.bib
-  - _extensions/bonijoao/ufla-normas/referencias.bib
+  - "capitulo 2/refs_extra.bib"
 ```
 
-> **Dica:** Crie o arquivo `referencias.bib` antes de renderizar. Se o arquivo
-> declarado em `bibliography:` não existir, o PDF será gerado com citações exibidas
-> como `[?]` e sem seção de referências.
+Não é preciso pôr `\textbf{}` nem `{\'e}` nos títulos: a extensão limpa
+esses comandos e põe o negrito onde a ABNT manda. Instituição como autor vai
+entre chaves duplas, para não virar "sobrenome, nome":
+`author = {{Empresa Brasileira de Pesquisa Agropecuária}}`.
 
-### Criando o arquivo `.bib`
+O `referencias.bib` do modelo tem um exemplo de cada tipo: livro, capítulo,
+artigo, dissertação, tese, trabalho em evento, página da internet, lei,
+norma técnica e conjunto de dados. Para tipos raros (partitura, documento
+tridimensional etc.), use `@misc` com `howpublished` ou `note`.
 
-Crie um arquivo de texto chamado `referencias.bib` na pasta do seu trabalho. Cada
-entrada segue o padrão abaixo — os campos variam conforme o tipo de documento.
+Para "Disponível em ... Acesso em ...", preencha `url` e `urldate`
+(`urldate = {2026-10-20}`). Em dissertação e tese, `type` define o texto do
+nível: `type = {Dissertação (Mestrado em Estatística)}`. Sem `type`, sai
+"Dissertação (Mestrado)" para `@mastersthesis` e "Tese (Doutorado)" para
+`@phdthesis`.
 
-#### Artigo de periódico (`@article`)
+### Exportar do seu gerenciador
 
-```bibtex
-@article{Silva2020exemplo,
-  author  = {Silva, João and Souza, Maria},
-  title   = {Título do artigo em letras minúsculas},
-  journal = {Revista Brasileira de Ciências},
-  year    = {2020},
-  volume  = {15},
-  number  = {3},
-  pages   = {100--115},
-  doi     = {10.0000/exemplo},
-}
-```
+- **Zotero**: clique com o botão direito na coleção → *Exportar coleção…* →
+  formato *BibTeX* ou *BibLaTeX* → salve como `referencias.bib` na pasta do
+  trabalho. Com o complemento [Better BibTeX](https://retorque.re/zotero-better-bibtex/),
+  marque *Manter atualizado* (*Keep updated*): o `.bib` se atualiza sozinho
+  quando você adiciona referências.
+- **Mendeley Reference Manager**: selecione as referências → *Export…* (ou
+  clique com o botão direito → *Export*) → *BibTeX (\*.bib)*.
+- **Google Acadêmico**: clique em *Citar* (as aspas) abaixo do resultado →
+  *BibTeX* → copie o texto e cole no fim do seu `referencias.bib`. Confira os
+  dados: o Google costuma deixar o nome do periódico ou da instituição
+  incompleto.
+- **JabRef**: o arquivo do JabRef já é um `.bib`. Salve-o na pasta do
+  trabalho, com codificação UTF-8.
 
-#### Livro (`@book`)
+## Figuras, tabelas, quadros, apêndices e listas
 
-```bibtex
-@book{Franca2021livro,
-  author    = {França, Júnia Lessa and Vasconcellos, Ana Cristina de},
-  title     = {Manual para normalização de publicações técnico-científicas},
-  edition   = {9},
-  address   = {Belo Horizonte},
-  publisher = {Editora UFMG},
-  year      = {2021},
-}
-```
+Tudo em Markdown. Título vai acima e fonte abaixo, em letra menor, como no
+manual. Figuras, tabelas e quadros são numerados em sequência no trabalho
+todo (Figura 1, Figura 2…).
 
-#### Capítulo de livro (`@incollection`)
-
-```bibtex
-@incollection{Autor2022capitulo,
-  author    = {Autor, Nome do},
-  title     = {Título do capítulo},
-  booktitle = {Título do livro},
-  editor    = {Editor, Nome do},
-  address   = {Cidade},
-  publisher = {Editora},
-  year      = {2022},
-  pages     = {50--75},
-}
-```
-
-#### Dissertação de mestrado (`@mastersthesis`)
-
-```bibtex
-@mastersthesis{Sobrenome2024dis,
-  author  = {Sobrenome, Nome},
-  title   = {Título da dissertação},
-  school  = {Universidade Federal de Lavras},
-  address = {Lavras},
-  year    = {2024},
-  type    = {Dissertação (mestrado em Agronomia/Fitotecnia)},
-}
-```
-
-#### Tese de doutorado (`@phdthesis`)
-
-```bibtex
-@phdthesis{Sobrenome2023tese,
-  author  = {Sobrenome, Nome},
-  title   = {Título da tese},
-  school  = {Universidade Federal de Lavras},
-  address = {Lavras},
-  year    = {2023},
-  type    = {Tese (doutorado em Agronomia/Fitotecnia)},
-}
-```
-
-#### Documento online / site (`@misc`)
-
-```bibtex
-@misc{IBGE2023pop,
-  author       = {{Instituto Brasileiro de Geografia e Estatística}},
-  title        = {Censo Demográfico 2022},
-  year         = {2023},
-  url          = {https://www.ibge.gov.br/censo2022},
-  urlaccessdate = {14 jun. 2026},
-}
-```
-
-> **Nota:** Nomes de instituições como autores devem ficar entre `{{ }}` duplas para
-> que o BibTeX não interprete vírgulas internas como separador de campos.
-
-#### Manual / relatório técnico (`@manual`)
-
-```bibtex
-@manual{UFLA2025normas,
-  address      = {Lavras},
-  author       = {{Universidade Federal de Lavras}},
-  organization = {Biblioteca Universitária},
-  title        = {Manual de normalização e estrutura de trabalhos acadêmicos},
-  year         = {2025},
-  edition      = {6},
-}
-```
-
-### Chave de citação
-
-A chave (ex.: `Silva2020exemplo`) é definida por você e deve ser **única** no arquivo.
-Por convenção use `SobrenomeAnopalavra`. Evite acentos, espaços e caracteres especiais.
-
-### Gerenciadores de referências (recomendado)
-
-Em vez de editar o `.bib` manualmente, use um gerenciador que exporta diretamente:
-
-- **[Zotero](https://www.zotero.org)** (gratuito) + plugin
-  [Better BibTeX](https://retorque.re/zotero-better-bibtex/): exporta e sincroniza o
-  `.bib` automaticamente conforme você adiciona fontes.
-- **[JabRef](https://www.jabref.org)** (gratuito): editor visual de arquivos `.bib`.
-
-### Citações no texto
-
-O sistema **autor-data** é o único aceito pela UFLA. Use a sintaxe padrão do Quarto:
+### Figura
 
 ```markdown
-Citação inline:       @Silva2020exemplo afirma que...
-Citação parentética:  ... (texto) [@Silva2020exemplo].
-Com página:           [@Silva2020exemplo, p. 45]
-Múltiplos autores:    [@Silva2020exemplo; @Franca2021livro]
-Quatro ou mais autores: aparecem automaticamente como "Autor et al."
+![Produtividade média do cafeeiro.](imgs/grafico.png){#fig-produtividade fonte="Elaboração própria (2026)" width=80%}
+
+A @fig-produtividade mostra ...      → "A Figura 1 mostra ..."
 ```
 
-**Citação longa** (mais de 3 linhas): use bloco de citação Markdown (`>`):
+Em célula de código R ou Python, use `fig-fonte`:
+
+````markdown
+```{r}
+#| label: fig-pontos
+#| fig-cap: "Pontos"
+#| fig-fonte: "Dados simulados (2026)"
+plot(1:3)
+```
+````
+
+### Tabela
 
 ```markdown
-> Texto longo com mais de três linhas que deve ser recuado 4 cm,
-> em fonte 11pt e espaçamento simples, conforme a norma.
-> [@Autor2022capitulo, p. 67].
+| Espaçamento | Produtividade |
+|---|---:|
+| 3,5 × 0,5 | 34,1 |
+
+: Produtividade por espaçamento. {#tbl-espacamento fonte="Elaboração própria (2026)"}
 ```
 
-### Erros comuns com referências
+Em célula de código, `tbl-cap` e `tbl-fonte`.
 
-| Sintoma | Causa provável | Solução |
-|---------|---------------|---------|
-| Citações aparecem como `[?]` | Arquivo `.bib` não encontrado | Verifique o caminho em `bibliography:` e se o arquivo existe na pasta |
-| Seção "REFERÊNCIAS" não aparece | Campo `bibliography:` ausente no YAML | Adicione `bibliography: referencias.bib` ao cabeçalho |
-| Nome do autor em maiúsculas erradas | Organização sem `{{ }}` duplas | Envolva o nome: `author = {{Instituto Brasileiro...}}` |
-| `et al.` não aparece em itálico | Opção não propagada | Não é necessário configurar — a extensão aplica automaticamente |
-| Erro no LaTeX: `I found no \citation` | Nenhuma citação usada no texto | Use ao menos uma citação `@chave` ou remova o campo `bibliography:` |
+### Quadro
 
-## Normas implementadas
+Quadro (texto em células) é um bloco `::: {#qdr-...}`. O título vem em
+`quadro=` ou na última linha do bloco:
 
-- Margens: sup/esq 3cm, inf/dir 2cm (sec 3.2.2)
-- Fonte Times 12pt; 11pt para citações longas, notas, legendas (sec 3.2.1)
-- Espaçamento 1,5 no texto; simples em citações/notas/referências (sec 3.2.3)
-- Parágrafo 1,25cm, justificado, sem espaço entre parágrafos (sec 3.2.3)
-- Seções primárias: MAIÚSCULAS + negrito; nova página (sec 3.2.4)
-- Títulos sem indicativo numérico: centralizados MAIÚSCULAS negrito (sec 3.2.5)
-- Paginação: algarismos arábicos, canto superior direito, a partir da Introdução (sec 3.2.7)
-- Citações curtas com aspas duplas; longas recuadas 4cm (sec 4.1)
-- Referências: título em negrito, et al. em itálico, ordem alfabética (sec 5)
-- Indicadores de Impacto (Resolução PRPG n. 012/2024)
+```markdown
+::: {#qdr-conceitos quadro="Conceitos usados" fonte="Elaboração própria (2026)"}
 
+| Conceito | Definição |
+|---|---|
+| Bienalidade | Alternância de safras altas e baixas |
 
-## Referência
+:::
 
-UNIVERSIDADE FEDERAL DE LAVRAS. Biblioteca Universitária. Manual de normalização e estrutura de trabalhos acadêmicos. 6. ed. Lavras, 2025.
+O @qdr-conceitos resume ...     → "O Quadro 1 resume ..."
+```
 
-## Licença
+Citações dentro de `fonte="..."` funcionam: `fonte="Adaptado de @costa_redes_2022"`
+sai "Fonte: Adaptado de Costa e Ferreira (2022)."
 
-O código da extensão é distribuído sob a licença MIT; veja [LICENSE](LICENSE).
-Os arquivos do abnTeX2 incluídos na extensão (`abntex2cite.sty` e
-`abntex2-alf.bst`) seguem a LaTeX Project Public License, e o logo da UFLA
-pertence à universidade.
+### Apêndices e anexos
+
+```markdown
+# Roteiro da entrevista {#apx-roteiro .apendice}     → APÊNDICE A – ROTEIRO DA ENTREVISTA
+# Lei de criação {.anexo}                            → ANEXO A – LEI DE CRIAÇÃO
+
+Veja o @apx-roteiro.                                 → "Veja o Apêndice A."
+```
+
+Use título de nível 1 (`#`). Cada um abre página nova, entra no sumário e
+fica sem número de seção; as subdivisões (`##`) ficam fora do sumário. As
+referências sempre vêm antes deles.
+
+### Siglas, símbolos e glossário
+
+```yaml
+siglas:                 # sai em ordem alfabética
+  UFLA: Universidade Federal de Lavras
+  ABNT: Associação Brasileira de Normas Técnicas
+simbolos:               # sai na ordem escrita
+  - "$\\alpha$": Nível de significância
+  - "$\\beta$": Coeficiente angular
+glossario:              # sai em ordem alfabética, depois das referências
+  Bienalidade: Alternância de safras altas e baixas no cafeeiro.
+```
+
+### Caixas de destaque e outros recursos do Quarto
+
+Caixas (`::: {.callout-tip}`), notas de rodapé, equações, código R/Python e
+`include-in-header` funcionam normalmente.
+
+## Formato de artigos
+
+Para dissertação ou tese em formato de artigos (manual, Figura 3.23), use
+`formato: artigos` e divida o texto em partes com títulos de nível 1:
+
+```markdown
+---
+formato: artigos
+---
+
+# Primeira parte {.parte}
+
+# Introdução
+Texto da introdução geral [@silva_estatistica_2020].
+
+# Segunda parte – Artigos {.parte}
+
+# Modelagem da produtividade do café {.artigo nota="Artigo redigido conforme a NBR 6022 (ABNT, 2018)."}
+
+## Introdução
+Texto do artigo [@souza_modelagem_2024].
+
+## Material e métodos
+...
+
+# Redes neurais e preços {.artigo csl="periodico.csl"}
+
+## Introdução
+...
+
+# Terceira parte {.parte}
+
+# Considerações finais
+...
+
+# Questionário aplicado {.apendice}
+```
+
+O que acontece:
+
+- Cada `.parte` abre uma página com o título em maiúsculas. Título vazio
+  (`# {.parte}`) recebe o nome sozinho: PRIMEIRA PARTE, SEGUNDA PARTE –
+  ARTIGOS (quando tem artigos), TERCEIRA PARTE. `nota="..."` no título da
+  parte vira nota de rodapé.
+- Cada `.artigo` vira "ARTIGO 1 – TÍTULO". `nota="..."` vira nota de rodapé
+  no título (por exemplo, a norma do periódico). As seções do artigo
+  (`##`) são numeradas de novo a partir de 1 em cada artigo.
+- No sumário entram as partes, os capítulos da primeira e da terceira parte
+  e "ARTIGO n – TÍTULO", sem as seções internas dos artigos.
+- **Onde ficam as referências:**
+  - cada artigo tem sua lista REFERÊNCIAS no fim do artigo (ou onde você
+    puser `::: {#refs}` dentro dele), só com o que o artigo cita;
+  - a primeira parte, se tiver citações, ganha sua lista no fim dela;
+  - o que é citado na terceira parte vai para a lista geral, antes dos
+    apêndices e anexos.
+- `csl="arquivo.csl"` no título de um artigo usa o estilo do periódico só
+  naquele artigo (baixe o `.csl` em [zotero.org/styles](https://www.zotero.org/styles)
+  e ponha na pasta do `.qmd`). Sem `csl=`, vale a ABNT.
+
+## Trabalho em outro idioma
+
+Para um trabalho redigido em inglês ou espanhol:
+
+```yaml
+lang: en                 # ou es
+titulo-traduzido: "Título do trabalho em português"
+```
+
+- Capa, folha de rosto, ficha, folha de aprovação, resumos, listas e
+  sumário continuam em português, como o manual manda.
+- Na folha de aprovação, o título traduzido aparece entre parênteses abaixo
+  do título original.
+- Da INTRODUÇÃO em diante, rótulos e referências seguem o idioma do texto:
+
+| | `pt` | `en` | `es` |
+|---|---|---|---|
+| Figura | Figura 1 | Figure 1 | Figura 1 |
+| Tabela | Tabela 1 | Table 1 | Tabla 1 |
+| Quadro | Quadro 1 | Chart 1 | Cuadro 1 |
+| Fonte | Fonte: | Source: | Fuente: |
+| Referências | REFERÊNCIAS | REFERENCES | REFERENCIAS |
+| Apêndice | APÊNDICE A – | APPENDIX A – | APÉNDICE A – |
+| Anexo | ANEXO A – | ANNEX A – | ANEXO A – |
+| Glossário | GLOSSÁRIO | GLOSSARY | GLOSARIO |
+| Acesso | Disponível em: … Acesso em: 20 out. 2026. | Available at: … Accessed on: 20 Oct. 2026. | Disponible en: … Consultado el: … |
+| Artigos | ARTIGO 1 – | ARTICLE 1 – | ARTÍCULO 1 – |
+
+Outros idiomas (`lang: fr`, por exemplo) geram aviso e ficam com os
+rótulos em português.
+
+## Mensagens da extensão e o que fazer
+
+As mensagens aparecem no terminal (ou na aba *Background Jobs* do RStudio) e
+começam com `[ufla-normas]`. **ERRO** para a renderização; **AVISO** deixa o
+PDF sair.
+
+### Erros
+
+| Mensagem | O que fazer |
+|---|---|
+| `Não encontrei o arquivo de referências "refs.bib". Procurei em: C:\...\minha-pasta. Confira o nome e se ele está na mesma pasta do .qmd.` | Confira o nome do arquivo em `bibliography:` (maiúsculas, extensão `.bib`) e a pasta. O caminho é relativo à pasta do `.qmd`. |
+| `tipo: "dissertação" não existe. Você quis dizer "dissertacao"? Use um destes: tcc, monografia, monografia-licenciatura, especializacao, dissertacao, dissertacao-profissional, tese, relatorio-estagio.` | Escreva o `tipo` sem acento, como na lista. |
+| `Não encontrei o arquivo de estilo "periodico.csl" do artigo "...". Procurei em: .... Confira o nome e se ele está na mesma pasta do .qmd.` | Ponha o `.csl` na pasta do `.qmd` ou corrija o `csl=` do artigo. |
+
+### Avisos
+
+| Mensagem | O que fazer |
+|---|---|
+| `Campo "orientdor" desconhecido — você quis dizer "orientador"?` | Corrija o nome do campo. |
+| `Campo "x" não é usado pela extensão.` | O campo não existe; veja a [lista de campos](#escreva-aqui-o-cabeçalho-yaml). |
+| `Falta preencher "curso" (aparece como [preencha: curso] no PDF).` | Preencha o campo. Vale para `title`, `author`, `ano`, `curso` e `orientador`. |
+| `genero: "x" não é válido; use f (feminino) ou m (masculino).` | Use `f` ou `m` (também em `orientador-genero` e `coorientador-genero`). |
+| `tipo-trabalho "Projeto final" sem tipo: — a nota descritiva usará "Programa de Pós-Graduação em" e o título "Mestre". Defina tipo: para escolher o nível (ex.: tipo: tcc).` | Acrescente `tipo:` com o nível do seu curso. |
+| `O resumo tem 42 palavras; o manual pede de 150 a 500.` (ou `O abstract tem ...`) | Ajuste o tamanho do resumo ou do abstract. |
+| `A folha de aprovação está sem membros da banca (banca-um-nome, banca-um-inst, banca-dois-nome, ...).` | Preencha a banca ou tire `defesa:` até a defesa. |
+| `Lembrete para a versão final: dissertações e teses precisam de folha de aprovação (defesa:), ficha catalográfica e indicadores de impacto.` | Só um lembrete no rascunho. Na versão final, preencha `defesa` e a banca, `ficha-catalografica: true` e `indicadores-impacto-texto`. |
+| `Citação não encontrada: @souza2042 (você quis dizer @souza2024?)` | A chave não está no `.bib`. Corrija a chave ou exporte a referência de novo. No PDF ela aparece como **[souza2042?]** em vermelho. |
+| `2 chave(s) sem entrada na bibliografia: @a, @b` | Resumo das citações não encontradas. |
+| `O texto cita @silva2020, mas não há "bibliography:" no YAML.` | Acrescente `bibliography: referencias.bib`. |
+| `lang: "fr" não é suportado; os rótulos do texto (Figura, Fonte, APÊNDICE, REFERÊNCIAS...) ficam em português. Idiomas com rótulos próprios: pt, en, es.` | Use `pt-BR`, `en` ou `es`. |
+| `Trabalho em outro idioma: preencha "titulo-traduzido" (o manual exige o título em português na folha de aprovação).` | Acrescente `titulo-traduzido`. |
+| `formato: "artigo" não é válido. Você quis dizer "artigos"? Use um destes: texto-integral, artigos. O trabalho segue como texto-integral.` | Corrija o valor de `formato`. |
+| `formato: artigos — use # Primeira parte {.parte}, # Segunda parte – Artigos {.parte} e # Terceira parte {.parte} para dividir o trabalho (manual, Figura 3.23). ...` | Acrescente os títulos `{.parte}`. |
+| `formato: artigos, mas nenhum título tem a classe {.artigo} ...` | Marque o título de cada artigo com `{.artigo}`. |
+| `Há títulos {.parte} ou {.artigo}, mas o formato é "texto-integral": eles ficaram como capítulos comuns. Para o formato de artigos, use formato: artigos no YAML.` | Acrescente `formato: artigos` ou tire as classes. |
+| `"Título": partes e artigos usam título de nível 1 (# Título {.artigo}); este ficou como seção comum.` | Use `#`, não `##`, no título da parte ou do artigo. |
+| `"Título": apêndices e anexos usam título de nível 1 (# Título {.apendice}); este ficou como seção comum.` | Use `#` no título do apêndice ou anexo. |
+| `Esta versão do Quarto não permite aplicar fig-fonte/tbl-fonte de células de código; use fonte="..." na figura ou tabela.` | Atualize o Quarto, ou escreva a figura/tabela em Markdown com `fonte=`. |
+
+### Problemas do LaTeX
+
+| Sintoma | O que fazer |
+|---|---|
+| Erro dizendo que a fonte `TeX Gyre Termes` não foi encontrada | TinyTeX: `tlmgr install tex-gyre`. MiKTeX: abra o *MiKTeX Console* e ligue a instalação automática de pacotes. |
+| O PDF sai, mas uma citação aparece como **[chave?]** em vermelho | Veja o aviso `Citação não encontrada` no terminal. |
+
+## Migrar da versão 1.x
+
+Documentos da 1.x continuam renderizando. Para aproveitar a 2.0:
+
+1. Troque `tipo-trabalho` + `titulo-pretendido` por `tipo:` (veja
+   [Tipos](#tipos-de-trabalho)). Os campos antigos ainda funcionam e têm
+   prioridade sobre o `tipo`.
+2. Em `bibliography:`, deixe só o seu `.bib`. O
+   `_extensions/bonijoao/ufla-normas/referencias.bib` não é mais necessário
+   (o arquivo continua lá para não quebrar documentos antigos).
+3. Tire `\textbf{}` dos títulos no `.bib`; não faz mais diferença.
+4. Troque `Fonte: ...` escrito à mão abaixo de figuras e tabelas por
+   `fonte="..."` no elemento, e `\apendice{Título}` por
+   `# Título {.apendice}`. O comando `\apendice{}` ainda funciona.
+5. Se usou `\subfigure{}` em LaTeX, troque por subfiguras do Quarto
+   (`layout-ncol`); o pacote `subfigure` foi substituído por `subcaption`.
+6. Figuras, tabelas e quadros agora são numerados em sequência (Figura 1,
+   2…), e não por capítulo (Figura 1.1). O manual (3.2.9) aceita os dois.
+7. O motor passou de `pdflatex` para `lualatex` com TeX Gyre Termes. No
+   TinyTeX, rode `tlmgr install tex-gyre`; o MiKTeX instala sozinho.
+
+Veja o [CHANGELOG](CHANGELOG.md) para a lista completa.
+
+## In English
+
+`ufla-normas` is a Quarto PDF format for theses, dissertations and
+undergraduate monographs at the Universidade Federal de Lavras (UFLA,
+Brazil). It follows the university's *Manual de normalização e estrutura de
+trabalhos acadêmicos*, 6th edition (2025).
+
+Start a new project with `quarto use template bonijoao/ufla-normas`, or add
+the format to an existing one with `quarto add bonijoao/ufla-normas` and
+`format: ufla-normas-pdf`. You need Quarto 1.4 or later and LuaLaTeX with the
+TeX Gyre Termes font (TinyTeX: `tlmgr install tex-gyre`).
+
+From the YAML header it builds the cover, title page, cataloguing record,
+approval page, abstracts, impact indicators, lists and table of contents.
+`tipo:` selects one of the eight work types of the manual. Citations and
+references use citeproc with a bundled ABNT style; any BibTeX or BibLaTeX
+file works. Figures, tables and *quadros* take a `fonte="..."` attribute,
+appendices are `# Title {.apendice}`, and `formato: artigos` builds the
+article-based thesis layout with one reference list per article. Works
+written in English or Spanish (`lang: en`, `lang: es`) keep the pre-textual
+pages in Portuguese and use the text language from the introduction on. The
+extension checks the YAML and prints its warnings in Portuguese.
+
+The rest of this README is in Portuguese, since the format is meant for UFLA
+students.
+
+## Licença e créditos
+
+- O código da extensão é distribuído sob a licença MIT; veja
+  [LICENSE](LICENSE).
+- O estilo de citação `ufla-abnt.csl` é derivado de
+  `associacao-brasileira-de-normas-tecnicas.csl`, do repositório
+  [citation-style-language/styles](https://github.com/citation-style-language/styles),
+  e segue a licença [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+  Os autores e colaboradores do estilo original estão listados no próprio
+  arquivo.
+- O logotipo da UFLA (`logoUFLA.pdf`) pertence à Universidade Federal de
+  Lavras.
+
+Referência normativa: UNIVERSIDADE FEDERAL DE LAVRAS. Biblioteca
+Universitária. **Manual de normalização e estrutura de trabalhos
+acadêmicos**. 6. ed. Lavras: UFLA, 2025.

@@ -2,8 +2,10 @@
 Funções compartilhadas pelos filtros da extensão.
 
 Os filtros do Quarto não conseguem dar `require` uns nos outros de forma
-confiável, então cada filtro carrega este arquivo com a função `carrega`
-(veja referencias.lua), que funciona também em pastas com acento no Windows.
+confiável, então cada filtro carrega este arquivo com a função `carrega`,
+copiada no começo de cada filtro. Não use `dofile` sozinho: no Windows ele
+não abre caminhos com acento ou "°"; `carrega` tenta o `dofile` e, se ele
+falhar, lê o arquivo pelo Pandoc (pandoc.mediabag.fetch).
 ]]
 
 local M = {}

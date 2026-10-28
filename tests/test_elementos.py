@@ -346,3 +346,24 @@ def test_citacao_na_fonte_e_no_glossario(render):
     assert "Estrutura descrita por Costa e Ferreira (2022)." in glossario, glossario
     # a obra citada só na fonte entra nas referências
     assert "COSTA, Bruno; FERREIRA, Carla" in junta(r.depois("REFERÊNCIAS"))
+
+
+def test_quadro_nao_conta_como_tabela(render):
+    """A tabela dentro de um quadro não avança o contador de tabelas: a
+    primeira tabela depois de um quadro é a Tabela 1."""
+    corpo = (
+        "# Introdução\n\n"
+        "O @qdr-a e a @tbl-b.\n\n"
+        "::: {#qdr-a quadro=\"Quadro de teste\" fonte=\"Elaboração própria (2025)\"}\n\n"
+        "| a | b |\n|---|---|\n| 1 | 2 |\n\n"
+        ":::\n\n"
+        "| c | d |\n|---|---|\n| 3 | 4 |\n\n"
+        ": Tabela de teste {#tbl-b fonte=\"Elaboração própria (2025)\"}\n"
+    )
+    r = render("quadro-e-tabela", yaml="lot: true\nloq: true", corpo=corpo)
+    assert r.ok, r.log
+    texto = junta(r.texto)
+    assert "O Quadro 1 e a Tabela 1." in texto, texto
+    assert "Tabela 1 – Tabela de teste" in texto
+    assert "Tabela 2" not in texto
+    assert "duplicate" not in r.log.lower()

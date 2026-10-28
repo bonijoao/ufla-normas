@@ -52,7 +52,7 @@ local CAMPOS_CONHECIDOS = {
   "instituicao", "frente-verso", "ficha-catalografica", "indicadores-impacto",
   "banca-um-nome", "banca-um-inst", "banca-dois-nome", "banca-dois-inst",
   "banca-tres-nome", "banca-tres-inst", "banca-quatro-nome", "banca-quatro-inst",
-  "defesa", "dedicatoria", "agradecimentos", "epigrafe", "epigrafe-autor",
+  "defesa", "errata", "dedicatoria", "agradecimentos", "epigrafe", "epigrafe-autor",
   "abstract-en", "keywords-en", "indicadores-impacto-texto",
   "impact-indicators-texto", "fc-autor-sobrenome", "fc-autores", "fc-tipo",
   "fc-catalogacao", "fc-classificacao", "fc-ilust",

@@ -96,6 +96,14 @@ def test_campo_desconhecido_sem_sugestao(render):
     assert sum("Campo " in a for a in avisos(r)) == 1
 
 
+def test_errata_e_campo_conhecido(render):
+    """`errata` é usado pelo template (página ERRATA) e não gera aviso."""
+    r = render("val_errata", yaml='errata: "Folha 12, linha 3: onde se lê x, leia-se y."\n')
+    assert r.ok, r.log
+    assert '"errata"' not in r.log
+    assert "ERRATA" in r.texto
+
+
 # Campos básicos -------------------------------------------------------------
 
 def test_campo_basico_vazio(render):

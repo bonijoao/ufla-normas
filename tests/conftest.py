@@ -83,7 +83,10 @@ def render():
         for rel, conteudo in (arquivos or {}).items():
             p = pasta / rel
             p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(conteudo, encoding="utf-8")
+            if isinstance(conteudo, bytes):  # imagens, PDFs
+                p.write_bytes(conteudo)
+            else:
+                p.write_text(conteudo, encoding="utf-8")
         qmd = pasta / f"{nome}.qmd"
         qmd.write_text(
             "---\n" + _monta_yaml(yaml, yaml_base) + "---\n\n" + corpo + "\n",

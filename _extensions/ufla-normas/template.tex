@@ -464,6 +464,13 @@ $endfor$
 \counterwithout{figure}{chapter}
 \counterwithout{table}{chapter}
 \counterwithout{quadro}{chapter}
+% Tables inside a quadro (or a figure) come out as longtable*, which must
+% not count as a Tabela. Recent longtable only skips the table counter
+% when \LTcaptype is empty, and ltcaption's longtable* does not empty it,
+% so a quadro followed by a table gave "Tabela 2" for the first table.
+\ifdefined\AddToHook
+  \AddToHook{env/longtable*/begin}{\def\LTcaptype{}}
+\fi
 \AtBeginDocument{\renewcommand*{\contentsname}{Sumário}}
 
 %----------------------------------------------------------------------

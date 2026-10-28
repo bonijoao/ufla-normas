@@ -1,65 +1,122 @@
-@manual{UFLA2025normas,
-  title        = {\textbf{Manual de normalização e estrutura de trabalhos acadêmicos}},
-  organization = {Universidade Federal de Lavras. Biblioteca Universitária},
-  address      = {Lavras},
-  year         = {2025},
-  edition      = {6. ed.}
+% Referências de exemplo: uma de cada tipo comum. Apague as que não usar e
+% acrescente as suas (exportadas do Zotero, Mendeley, JabRef ou Google
+% Acadêmico). Escreva em texto puro, com acentos normais e sem comandos do
+% LaTeX: a extensão já põe o destaque (negrito) no lugar certo.
+% Nome de instituição como autor vai entre chaves duplas: {{Nome da instituição}}.
+
+% Livro
+@book{silva_estatistica_2020,
+  author    = {Silva, João da},
+  title     = {Estatística experimental aplicada às ciências agrárias},
+  edition   = {2},
+  address   = {Lavras},
+  publisher = {Editora UFLA},
+  year      = {2020}
 }
 
-@book{Brasil2025,
-  author    = {Brasil},
-  title     = {\textbf{Constituição da República Federativa do Brasil}},
-  year      = {2025},
-  address   = {Brasília},
-  publisher = {Senado Federal}
+% Livro de instituição (o manual da UFLA)
+@book{ufla_manual_2025,
+  author    = {{Universidade Federal de Lavras}},
+  title     = {Manual de normalização e estrutura de trabalhos acadêmicos},
+  edition   = {6},
+  address   = {Lavras},
+  publisher = {UFLA},
+  year      = {2025}
 }
 
-@article{SilvaEtAl2023,
-  author  = {Silva, João da and Santos, Maria de and Oliveira, Pedro and Lima, Ana},
-  title   = {Métodos de análise estatística em ciências agrárias},
-  journal = {Ciência e Agrotecnologia},
-  year    = {2023},
-  volume  = {47},
-  number  = {2},
-  pages   = {123--145},
-  doi     = {10.1590/1413-70542023472001}
-}
-
-@book{FrancaVasconcellos2021,
-  author    = {França, Júnia Lessa and Vasconcellos, Ana Cristina de},
-  title     = {\textbf{Manual para normalização de publicações técnico-científicas}},
-  edition   = {9. ed.},
+% Capítulo de livro
+@incollection{pereira_delineamentos_2021,
+  author    = {Pereira, Luís Carlos},
+  title     = {Delineamentos experimentais},
+  booktitle = {Métodos quantitativos na agronomia},
+  editor    = {Ferreira, Daniel},
+  address   = {Lavras},
+  publisher = {Editora UFLA},
   year      = {2021},
-  address   = {Belo Horizonte},
-  publisher = {Editora UFMG}
+  pages     = {45--78}
 }
 
-@phdthesis{Sobrenome2024,
-  author  = {Sobrenome, Nome do Autor},
-  title   = {\textbf{Título da dissertação de exemplo}},
-  year    = {2024},
+% Artigo de periódico (quatro autores: no texto sai "Santos et al.")
+@article{santos_produtividade_2023,
+  author  = {Santos, Maria de and Oliveira, Pedro and Lima, Ana and Costa, Bruno},
+  title   = {Produtividade do cafeeiro em diferentes espaçamentos},
+  journal = {Coffee Science},
+  volume  = {18},
+  number  = {2},
+  pages   = {1--12},
+  year    = {2023}
+}
+
+% Dissertação (o campo type diz o nível e o programa)
+@mastersthesis{souza_modelagem_2024,
+  author  = {Souza, Ana Paula},
+  title   = {Modelagem da produtividade do café},
   school  = {Universidade Federal de Lavras},
   address = {Lavras},
-  type    = {Dissertação (mestrado)}
+  year    = {2024},
+  type    = {Dissertação (Mestrado em Estatística e Experimentação Agropecuária)}
 }
 
-@incollection{AutorCapitulo2022,
-  author    = {Autor, Nome do},
-  title     = {Título do capítulo de livro},
-  booktitle = {\textbf{Título do livro coletivo}},
-  editor    = {Editor, Nome do},
-  year      = {2022},
-  address   = {São Paulo},
-  publisher = {Editora Exemplo},
-  pages     = {45--67}
+% Tese, disponível on-line
+@phdthesis{oliveira_geoestatistica_2021,
+  author  = {Oliveira, Marcos Vinícius de},
+  title   = {Geoestatística aplicada à fertilidade do solo},
+  school  = {Universidade Federal de Lavras},
+  address = {Lavras},
+  year    = {2021},
+  type    = {Tese (Doutorado em Ciência do Solo)},
+  url     = {https://repositorio.ufla.br/},
+  urldate = {2026-10-20}
 }
 
-@article{GomesUFLA2020,
-  author  = {Gomes, Carlos Eduardo and Ribeiro, Nivaldo Calixto},
-  title   = {Normalização bibliográfica: desafios e perspectivas},
-  journal = {Perspectivas em Ciência da Informação},
-  year    = {2020},
-  volume  = {25},
-  number  = {1},
-  pages   = {1--18}
+% Trabalho apresentado em evento
+@inproceedings{costa_redes_2022,
+  author     = {Costa, Bruno and Ferreira, Carla},
+  title      = {Redes neurais para previsão de preços agrícolas},
+  booktitle  = {Anais [...]},
+  eventtitle = {Simpósio Brasileiro de Pesquisa Operacional, 54},
+  address    = {Campinas},
+  publisher  = {Sobrapo},
+  year       = {2022},
+  pages      = {1--12}
+}
+
+% Página da internet
+@online{embrapa_cafe_2024,
+  author  = {{Empresa Brasileira de Pesquisa Agropecuária}},
+  title   = {Café: pré-produção},
+  year    = {2024},
+  url     = {https://www.embrapa.br/agencia-de-informacao-tecnologica/cultivos/cafe},
+  urldate = {2026-10-20}
+}
+
+% Lei
+@misc{brasil_lei_1998,
+  author       = {Brasil},
+  title        = {Lei nº 9.610, de 19 de fevereiro de 1998},
+  howpublished = {Diário Oficial da União},
+  address      = {Brasília, DF},
+  year         = {1998},
+  url          = {https://www.planalto.gov.br/ccivil_03/leis/l9610.htm},
+  urldate      = {2026-10-20}
+}
+
+% Norma técnica
+@misc{abnt_nbr6023_2018,
+  author    = {{Associação Brasileira de Normas Técnicas}},
+  title     = {NBR 6023: informação e documentação: referências: elaboração},
+  address   = {Rio de Janeiro},
+  publisher = {ABNT},
+  year      = {2018}
+}
+
+% Conjunto de dados
+@dataset{conab_safras_2026,
+  author    = {{Companhia Nacional de Abastecimento}},
+  title     = {Séries históricas das safras},
+  location  = {Brasília},
+  publisher = {Conab},
+  year      = {2026},
+  url       = {https://www.conab.gov.br/info-agro/safras/serie-historica-das-safras},
+  urldate   = {2026-10-20}
 }
