@@ -13,11 +13,19 @@
 %----------------------------------------------------------------------
 % Encoding, fonts, language
 %----------------------------------------------------------------------
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage[brazil]{babel}
-\usepackage{pslatex}       % Times New Roman (text), Helvetica (sans), Courier (mono)
+% Engine: LuaLaTeX (pdf-engine: lualatex in _extension.yml).
+% Text in TeX Gyre Termes (Times) through fontspec, so Unicode input
+% (μ, β, ≤, ő, ł, …) works without inputenc. Math stays in Times (mathptmx);
+% sans and mono stay at the fontspec defaults (Latin Modern), as in Pandoc.
+% Babel: Portuguese always loaded (pre-textual pages, manual 3.1.2.1); a
+% work written in another language (`lang: en`, `es`) has that language as
+% main, so captions (Figure, Table), \refname and hyphenation of the text
+% follow it. tipo.lua fills ufla-babel ("brazil, english": the last one is
+% the main language).
+\usepackage[$if(ufla-babel)$$ufla-babel$$else$brazil$endif$]{babel}
 \usepackage{mathptmx}      % Times in math mode
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
 
 %----------------------------------------------------------------------
 % Utility packages (order matters)
@@ -38,13 +46,50 @@
 \usepackage{multirow}
 \usepackage{colortbl}
 \usepackage{multicol}
-\usepackage{subfigure}
+% subcaption (not the obsolete subfigure, which it refuses to load with):
+% Quarto's subfigures (layout-ncol, fig-subcap) use it
+\usepackage{subcaption}
 
 %----------------------------------------------------------------------
 % Code highlighting (Pandoc Shaded/Highlighting environments)
 %----------------------------------------------------------------------
 $if(highlighting-macros)$
 $highlighting-macros$
+$endif$
+
+%----------------------------------------------------------------------
+% Markdown features the Pandoc LaTeX writer turns into commands from
+% optional packages (same blocks as Pandoc's default template), so that
+% ordinary Markdown never breaks the PDF:
+%   ~~x~~ and [x]{.underline} -> \st, \ul;  csquotes: true -> \enquote;
+%   verbatim code in footnotes -> \VerbatimFootnotes (after hyperref);
+%   listings: true -> \lstinline; SVG images -> \includesvg.
+% Task lists (- [ ] / - [x]) use \square/\boxtimes from amssymb (below).
+%----------------------------------------------------------------------
+\usepackage{iftex}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+$if(strikeout)$
+\ifLuaTeX
+  \usepackage{luacolor}
+  \usepackage[soul]{lua-ul}
+\else
+  \usepackage{soul}
+\fi
+$endif$
+$if(csquotes)$
+\usepackage{csquotes}
+$endif$
+$if(verbatim-in-note)$
+\usepackage{fancyvrb}
+$endif$
+$if(listings)$
+\usepackage{listings}
+\newcommand{\passthrough}[1]{#1}
+\lstset{defaultdialect=[5.3]Lua}
+\lstset{defaultdialect=[x86masm]Assembler}
+$endif$
+$if(svg)$
+\usepackage{svg}
 $endif$
 
 %----------------------------------------------------------------------
@@ -186,9 +231,14 @@ $endif$
 \DeclareCaptionListFormat{ufla}{#1#2~\textendash~}
 \captionsetup{listformat=ufla, format=hang}
 
-% Source command (obrigatório em ilustrações e tabelas)
-\newcommand{\fontename}{Fonte}
-\newcommand{\fonte}[1]{\par\small\fontename: #1\par}
+% Source line below figures, tables and quadros (manual 3.2.9/3.2.10):
+% "Fonte: …", size 11, single spacing, centred. elementos-atributos.lua writes it
+% from the `fonte=` attribute; v1 documents call \fonte{} directly.
+\newcommand{\fontename}{$if(ufla-rotulo-fonte)$$ufla-rotulo-fonte$$else$Fonte$endif$}
+% (\setstretch before \small: it reselects \@currsize, which the 11pt
+% \small defined above does not set, and would go back to 12pt)
+\newcommand{\fonte}[1]{\par
+  {\centering\setstretch{1}\small\fontename: #1\par}}
 
 %----------------------------------------------------------------------
 % Long quotation environment (sec 4.1b: >3 lines → 4cm indent, size 11, single space, no quotes)
@@ -234,18 +284,18 @@ $endif$
 }
 \makeatother
 
+% List titles stay Portuguese (pre-textual); the entries repeat the label
+% of the caption in the text, which follows `lang` (Figure 1 – …)
 \renewcommand{\listoffigures}{%
-  {\renewcommand{\numberline}{Figura~}\listof{figure}{Lista de Figuras}}}
+  {\renewcommand{\numberline}{$if(ufla-rotulo-figura)$$ufla-rotulo-figura$$else$Figura$endif$~}\listof{figure}{Lista de Figuras}}}
 
 \renewcommand{\listoftables}{%
-  {\renewcommand{\numberline}{Tabela~}\listof{table}{Lista de Tabelas}}}
+  {\renewcommand{\numberline}{$if(ufla-rotulo-tabela)$$ufla-rotulo-tabela$$else$Tabela$endif$~}\listof{table}{Lista de Tabelas}}}
 
-% Quadro (table with all borders)
-\newcommand{\quadroname}{Quadro}
-\newfloat{quadro}{htb!}{loq}[chapter]
-\floatname{quadro}{\quadroname}
-\newcommand{\listofquadros}{%
-  {\renewcommand{\numberline}{\quadroname~}\listof{quadro}{Lista de Quadros}}}
+% Quadro: the float is defined after the Quarto includes (see "UFLA
+% settings re-asserted" below), because Quarto defines it too when the
+% document uses @qdr- references
+\newcommand{\quadroname}{$if(ufla-rotulo-quadro)$$ufla-rotulo-quadro$$else$Quadro$endif$}
 
 %----------------------------------------------------------------------
 % Table of contents (sec 3.2.5: title UPPERCASE + bold + centered)
@@ -254,23 +304,15 @@ $endif$
 \makeatletter
 \renewcommand{\tableofcontents}{
   \newpage
-  \begin{center}\textbf{\MakeUppercase{\contentsname}}\end{center}
+  % fixed title: pre-textual pages are always in Portuguese, and Quarto's
+  % includes rename \contentsname to "Índice"
+  \begin{center}\textbf{SUMÁRIO}\end{center}
   \normalfont\normalsize\@starttoc{toc}
+  % the article format lowers tocdepth inside the .toc (\uflaArtigo)
+  \setcounter{tocdepth}{6}
   \clearpage
 }
 \makeatother
-
-%----------------------------------------------------------------------
-% References section helper
-%----------------------------------------------------------------------
-\newcommand\referencias{%
-  \phantomsection%
-  \addcontentsline{toc}{chapter}{\numberline{} REFERÊNCIAS}%
-  \renewcommand{\bibname}{%
-    \centering\vspace{1.8ex}%
-    \bfseries REFERÊNCIAS\par
-    \vspace{-1.8ex}}%
-}
 
 %----------------------------------------------------------------------
 % Appendices and annexes (alphanumeric labels: A, B, …, Z, AA, AB, …)
@@ -289,31 +331,182 @@ $endif$
   {\noindent\bfseries ANEXO~\theanexo\ -- \MakeUppercase{#1}\vspace{\baselineskip}}%
 }
 
+% Post-textual titles written in Markdown (elementos.lua): apêndices,
+% anexos and glossário. Unnumbered, uppercase (done by the filter), bold,
+% centred, new page, in the sumário (manual 3.1.2.4 and 3.2.5).
+% #1 = label, #2 = title
+\newcommand\uflaTituloPos[2]{%
+  \clearpage
+  \phantomsection\label{#1}%
+  \addcontentsline{toc}{chapter}{\numberline{}#2}%
+  \begin{center}\bfseries #2\end{center}%
+}
+
+% Article format (`formato: artigos`, artigos.lua; manual Figura 3.23).
+% \uflaParte{label}{PRIMEIRA PARTE}{footnote}: unnumbered, bold, centred, in
+% the sumário, alone on its own page (the chapter or article that follows
+% opens a new page itself).
+% \uflaArtigo{label}{ARTIGO 1 – TÍTULO}{footnote}: same style, new page; the
+% article's sections (##) are numbered 1, 1.1, ... again, primary ones in
+% uppercase, until \uflaFimArtigos. Inside the articles the sumário shows
+% only the "ARTIGO n – TÍTULO" lines (tocdepth 0, written into the .toc) and
+% hyperref gets a per-article prefix, so article 2's "1 INTRODUÇÃO" is not a
+% duplicate of article 1's. \uflaRefsArtigo (inside a group) makes the
+% article's REFERÊNCIAS follow its text, outside the sumário.
+\newcounter{uflaartigo}
+\newcommand\uflaParte[3]{%
+  \clearpage
+  \phantomsection\label{#1}%
+  \addcontentsline{toc}{chapter}{\numberline{}#2}%
+  \begin{center}\bfseries #2#3\end{center}%
+  \vspace{\baselineskip}}
+\newcommand\uflaArtigo[3]{%
+  \clearpage
+  \stepcounter{uflaartigo}%
+  \phantomsection\label{#1}%
+  \addcontentsline{toc}{chapter}{\numberline{}#2}%
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}%
+  \begin{center}\bfseries #2#3\end{center}%
+  \setcounter{section}{0}%
+  \renewcommand\thesection{\arabic{section}}%
+  \renewcommand\theHsection{artigo\arabic{uflaartigo}.\arabic{section}}%
+  \titleformat{\section}{\normalfont\normalsize\bfseries}{\thesection}{1ex}%
+    {\MakeUppercase}[\testasecao]}
+\newcommand\uflaFimArtigos{%
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{6}}%
+  \renewcommand\thesection{\thechapter.\arabic{section}}%
+  \renewcommand\theHsection{\theHchapter.\arabic{section}}%
+  \titleformat{\section}{\normalfont\normalsize\bfseries}{\thesection}{1ex}%
+    {}[\testasecao]}
+\newcommand\uflaRefsArtigo{%
+  \renewcommand\referencias{%
+    \par\vspace{\baselineskip}%
+    \phantomsection
+    \begin{center}\bfseries\MakeUppercase{\refname}\end{center}}}
+
+% Lists of abreviaturas/siglas and símbolos (manual 3.1.2.1.13): item on
+% the left, meaning on the right
+\newenvironment{uflaLista}
+ {\begin{list}{}{%
+   \setlength{\labelwidth}{3cm}%
+   \setlength{\labelsep}{0.5cm}%
+   \setlength{\leftmargin}{3.5cm}%
+   \setlength{\itemsep}{0pt}%
+   \setlength{\parsep}{0pt}%
+   \setlength{\topsep}{0pt}%
+   \renewcommand{\makelabel}[1]{##1\hfil}}}
+ {\end{list}}
+
 %----------------------------------------------------------------------
 % Auxiliary column helper for tables
 %----------------------------------------------------------------------
 \newcommand{\linhadir}[1]{\multicolumn{1}{c|}{#1}}
 
 %----------------------------------------------------------------------
-% Citations: abntex2cite (author-date, bold title, et al. in italic after 1st author with >3)
-% Must be loaded BEFORE hyperref.
-% ABNThyperref=false: store plain year text in b@key++YEAR instead of
-% \hyper@@link{...}{year}, which avoids a \@citeyear/\@ mismatch in pass 3.
+% Citations and references: Pandoc citeproc + ufla-abnt.csl
+% Macros the Pandoc 3 LaTeX writer emits (lists, images, citeproc output).
 %----------------------------------------------------------------------
-\usepackage[alf, abnt-etal-list=3, abnt-emphasize=bf]{abntex2cite}
-\setboolean{ABNThyperref}{false}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% Natbib-compatible aliases so Pandoc-generated \citep{} and \citet{} work
 \makeatletter
-\providecommand{\citep}[2][]{%
-  \def\@citearg{#1}%
-  \ifx\@citearg\@empty\cite{#2}\else\cite[#1]{#2}\fi%
-}
-\providecommand{\citet}[2][]{%
-  \def\@citearg{#1}%
-  \ifx\@citearg\@empty\citeonline{#2}\else\citeonline[#1]{#2}\fi%
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
 }
 \makeatother
+
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+
+% REFERÊNCIAS (manual 5.2): title uppercase, bold, centred, unnumbered and in
+% the sumário; entries left-aligned, single spacing, one blank line between
+% them, no hanging indent, no hyphenation. The CSLReferences environment
+% prints the title itself, so it shows up both where the author puts
+% ::: {#refs} and at the end of the document (Pandoc's default place).
+\newcommand\referencias{%
+  \clearpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\numberline{}\MakeUppercase{\refname}}%
+  \begin{center}\bfseries\MakeUppercase{\refname}\end{center}%
+}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.25cm}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\referencias
+  \singlespacing
+  \begin{list}{}{%
+   \setlength{\itemindent}{0pt}%
+   \setlength{\leftmargin}{0pt}%
+   \setlength{\parsep}{0pt}%
+   \setlength{\topsep}{0pt}%
+   % hanging indent only if the CSL asks for it (ufla-abnt.csl does not)
+   \ifodd #1
+    \setlength{\leftmargin}{\cslhangindent}%
+    \setlength{\itemindent}{-1\cslhangindent}%
+   \fi
+   % entry-spacing="1": one blank single-spaced line between entries
+   \setlength{\itemsep}{#2\baselineskip}}%
+  \raggedright\hyphenpenalty=10000\relax}
+ {\end{list}}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+%----------------------------------------------------------------------
+% Quarto/Pandoc includes: Quarto's own (callouts, crossref floats, …) and
+% the author's include-in-header / header-includes
+%----------------------------------------------------------------------
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+%----------------------------------------------------------------------
+% UFLA settings re-asserted after the includes. Quarto's includes rename
+% \contentsname to "Índice" (the SUMÁRIO title above is fixed text),
+% define the quadro float numbered by chapter and leave
+% \floatstyle{ruled} active.
+%----------------------------------------------------------------------
+\makeatletter
+\@ifundefined{c@quadro}{\newfloat{quadro}{htb!}{loq}}{}
+\makeatother
+\floatstyle{plaintop}      % caption above (manual 3.2.9)
+\restylefloat{quadro}
+\floatplacement{quadro}{htb!}
+\floatname{quadro}{\quadroname}
+\providecommand{\listofquadros}{}
+\renewcommand{\listofquadros}{%
+  {\renewcommand{\numberline}{\quadroname~}\listof{quadro}{Lista de Quadros}}}
+% sequential numbering (Figura 1, Tabela 1, Quadro 1), one of the two
+% options in manual 3.2.9
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{quadro}{chapter}
+% Tables inside a quadro (or a figure) come out as longtable*, which must
+% not count as a Tabela. Recent longtable only skips the table counter
+% when \LTcaptype is empty, and ltcaption's longtable* does not empty it,
+% so a quadro followed by a table gave "Tabela 2" for the first table.
+\ifdefined\AddToHook
+  \AddToHook{env/longtable*/begin}{\def\LTcaptype{}}
+\fi
+\AtBeginDocument{\renewcommand*{\contentsname}{Sumário}}
 
 %----------------------------------------------------------------------
 % Hyperref (always last before document)
@@ -322,27 +515,13 @@ $endif$
 \hypersetup{
   pdftitle={$title$},
   pdfauthor={$author$},
-  pdfsubject={$if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$ — UFLA},
+  pdfsubject={$ufla-tipo-nome$ — UFLA},
   pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$}
 }
-
-% Override hyperref's \bibcite to store plain text in b@labels.
-% Reason: \@input{aux} inside \document runs BEFORE \AtBeginDocument hooks, so
-% we must redefine \bibcite here in the preamble (not via \AtBeginDocument).
-% Without this, hyperref's \bibcite stores \hyper@@link in b@key++YEAR, which
-% causes abntex2cite's {\yearstyle\@citeyear\@} to fail with
-% "Use of \@ doesn't match its definition" in the third pdflatex pass.
-\makeatletter
-\def\bibcite#1#2{\@newl@bel{b}{#1}{#2}}
-\makeatother
-
-% Patch \@lbibitem so abntex2cite's \abntnextkey is set even when hyperref
-% overwrites \@lbibitem (hyperref is loaded after abntex2cite, so its
-% definition wins; we add \gdef\abntnextkey{#2} to restore the tracking).
-\makeatletter
-\let\abnt@orig@lbibitem\@lbibitem
-\def\@lbibitem[#1]#2{\gdef\abntnextkey{#2}\abnt@orig@lbibitem[{#1}]{#2}}
-\makeatother
+\urlstyle{same}  % URLs in the text font, as in the manual's references
+$if(verbatim-in-note)$
+\VerbatimFootnotes % allow verbatim text in footnotes
+$endif$
 
 %----------------------------------------------------------------------
 % Babel adaptations
@@ -372,17 +551,17 @@ $endif$
 
     \vfill
 
-    {\Large\textbf{\MakeUppercase{$author$}}}
+    {\Large\textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}}
 
     \vfill
 
-    {\LARGE\textbf{\MakeUppercase{$title$}}%
+    {\LARGE\textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$}%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
 
     \vfill
 
     {\Large\textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par}
-    {\Large\textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}}
+    {\Large\textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}}
     \renewcommand{\baselinestretch}{1.5}\normalsize
   \end{center}%
 }
@@ -395,11 +574,11 @@ $endif$
 \newcommand{\imprimeFolhaRosto}{%
   \newpage
   \begin{center}
-    \textbf{\MakeUppercase{$author$}}
+    \textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}
 
     \vspace{\stretch{1}}
 
-    \textbf{\MakeUppercase{$title$}%
+    \textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
 
     \vspace{\stretch{.10}}
@@ -408,26 +587,19 @@ $endif$
     {
       \hfill
       \begin{minipage}{8cm}
-        $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
-        apresentado à
-        $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
-        como parte das exigências do
-        $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
-        $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
-        para a obtenção do título de
-        $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+        $ufla-nota-descritiva$
       \end{minipage}
     }
 
     \vspace{\stretch{1}}
 
-    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
-    $if(coorientador)$\vspace{\stretch{.25}}{\textbf{$coorientador$}\par Coorientador}$endif$
+    {\textbf{$if(orientador)$$orientador$$else$\textcolor{red}{[preencha: orientador]}$endif$}\par $ufla-orientador-rotulo$}
+    $if(coorientador)$\par\vspace{\stretch{.25}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
 
     \vspace{\stretch{.86}}
 
     \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
-    \textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}
+    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}
     \renewcommand{\baselinestretch}{1.5}\normalsize
   \end{center}%
 }
@@ -458,14 +630,14 @@ $endif$
       $if(subtitle)$$title$\ : $subtitle$$else$$title$$endif$ /
       $if(fc-autores)$$fc-autores$$else$$author$$endif$.
       -- $if(cidade)$$cidade$$else$Lavras$endif$ : UFLA,
-      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$.\\
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$.\\
       \tab \pageref{LastPage} p. :
       $if(fc-ilust)$$fc-ilust$$else$il.$endif$
       \vfil
       $if(fc-tipo)$\tab $fc-tipo$--Universidade Federal de Lavras,
-      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$. \\$endif$
-      $if(orientador)$\tab Orientador: $orientador$. \\$endif$
-      $if(coorientador)$\tab Coorientador: $coorientador$. \\$endif$
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$. \\$endif$
+      $if(orientador)$\tab $ufla-orientador-rotulo$: $orientador$. \\$endif$
+      $if(coorientador)$\tab $ufla-coorientador-rotulo$: $coorientador$. \\$endif$
       \tab Bibliografia.
       \vfil
       $if(fc-catalogacao)$\tab $fc-catalogacao$$endif$
@@ -485,47 +657,45 @@ $endif$
   \newpage
   \renewcommand{\baselinestretch}{1}\normalsize
   \begin{center}
-    \textbf{\MakeUppercase{$author$}}
+    \textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}
 
     \vspace{\stretch{0.6}}
 
-    \textbf{\MakeUppercase{$title$}%
+    \textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
+    % work in another language: Portuguese title below, in the same style
+    $if(ufla-titulo-traduzido)$\par\textbf{(\MakeUppercase{$ufla-titulo-traduzido$})}$endif$
 
     \vspace{\baselineskip}
   \end{center}
 
   \hfill
   \begin{minipage}{8cm}
-    $if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$
-    apresentado à
-    $if(instituicao)$$instituicao$$else$Universidade Federal de Lavras$endif$,
-    como parte das exigências do
-    $if(curso)$Curso de $curso$$else$Programa de Pós-Graduação$endif$%
-    $if(area-concentracao)$, área de concentração em $area-concentracao$$endif$,
-    para a obtenção do título de
-    $if(titulo-pretendido)$$titulo-pretendido$$else$Mestre$endif$.
+    $ufla-nota-descritiva$
   \end{minipage}
 
   \vspace{\stretch{.5}}
 
   $if(defesa)$\noindent APROVADA em $defesa$.$endif$
 
+  % no list without members: an empty itemize is a LaTeX error
+  $if(ufla-tem-banca)$
   \begin{itemize}[align=left, left=0cm, leftmargin=!, labelwidth=5cm, labelsep=2ex, noitemsep, nosep]
     $if(banca-um-nome)$\item[$banca-um-nome$] $if(banca-um-inst)$$banca-um-inst$$endif$$endif$
     $if(banca-dois-nome)$\item[$banca-dois-nome$] $if(banca-dois-inst)$$banca-dois-inst$$endif$$endif$
     $if(banca-tres-nome)$\item[$banca-tres-nome$] $if(banca-tres-inst)$$banca-tres-inst$$endif$$endif$
     $if(banca-quatro-nome)$\item[$banca-quatro-nome$] $if(banca-quatro-inst)$$banca-quatro-inst$$endif$$endif$
   \end{itemize}
+  $endif$
 
   \vspace{\stretch{.6}}
 
   \begin{center}
-    $if(orientador)${\textbf{$orientador$}\par Orientador}$endif$
-    $if(coorientador)$\vspace{\stretch{.5}}{\textbf{$coorientador$}\par Coorientador}$endif$
+    {\textbf{$if(orientador)$$orientador$$else$\textcolor{red}{[preencha: orientador]}$endif$}\par $ufla-orientador-rotulo$}
+    $if(coorientador)$\par\vspace{\stretch{.5}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
     \vspace*{\stretch{.6}}
     \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
-    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}
+    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}
   \end{center}
 
   \renewcommand{\baselinestretch}{1.5}\normalsize
@@ -536,6 +706,11 @@ $endif$
 %% DOCUMENT BEGIN
 %%======================================================================
 \begin{document}
+
+$for(include-before)$
+$include-before$
+
+$endfor$
 
 %----------------------------------------------------------------------
 % TOC spacing setup (reads saved width from previous run)
@@ -549,6 +724,12 @@ $endif$
   \def\l@subsubsection{\@dottedtocline{3}{\identation}{\widthsechold}}
   \def\l@subsubsubsection{\@dottedtocline{4}{\identation}{\widthsechold}}
 }
+
+%----------------------------------------------------------------------
+% Pre-textual pages always in Portuguese (manual 3.1.2.1), even when the
+% text is in another language; that language comes back after the SUMÁRIO
+%----------------------------------------------------------------------
+$if(ufla-babel-principal)$\selectlanguage{brazil}$endif$
 
 %----------------------------------------------------------------------
 % CAPA — not counted, not numbered (page counter starts at 0)
@@ -683,11 +864,31 @@ $endif$
 %----------------------------------------------------------------------
 $if(lof)$\listoffigures$endif$
 $if(lot)$\listoftables$endif$
+$if(loq)$\listofquadros$endif$
+
+$if(ufla-lista-siglas)$
+\newpage
+\begin{center}\textbf{LISTA DE ABREVIATURAS E SIGLAS}\end{center}
+\begin{uflaLista}
+$ufla-lista-siglas$
+\end{uflaLista}
+\clearpage
+$endif$
+
+$if(ufla-lista-simbolos)$
+\newpage
+\begin{center}\textbf{LISTA DE SÍMBOLOS}\end{center}
+\begin{uflaLista}
+$ufla-lista-simbolos$
+\end{uflaLista}
+\clearpage
+$endif$
 
 %----------------------------------------------------------------------
 % SUMÁRIO (mandatory, sec 3.1.2.1.14) — counted, not numbered
 %----------------------------------------------------------------------
 \tableofcontents
+$if(ufla-babel-principal)$\selectlanguage{$ufla-babel-principal$}$endif$
 
 %----------------------------------------------------------------------
 % BEGIN PAGE NUMBERING (sec 3.2.7)
@@ -705,16 +906,15 @@ $body$
 %%======================================================================
 
 %----------------------------------------------------------------------
-% REFERÊNCIAS (mandatory) — no section number, UPPERCASE centered title
+% REFERÊNCIAS (mandatory) — generated by citeproc inside the body, where
+% the author puts ::: {#refs} or at the end; the CSLReferences environment
+% (preamble) prints the unnumbered "REFERÊNCIAS" title. elementos.lua
+% moves them before the glossário, apêndices and anexos.
 %----------------------------------------------------------------------
-$if(bibliography)$
-\referencias
-\bibliographystyle{$if(biblio-style)$$biblio-style$$else$abntex2-alf$endif$}
-\citeoption{abnt-etal-text=it}
-\citeoption{abnt-etal-cite=3}
-\citeoption{abnt-missing-year=sd}
-\citeoption{abnt-nbr10520=1988}
-\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
-$endif$
+
+$for(include-after)$
+$include-after$
+
+$endfor$
 
 \end{document}

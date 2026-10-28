@@ -1,254 +1,231 @@
 ---
-# ============================================================
-# UFLA Normas 6ª edição — Template de exemplo
-# Documentação de todos os campos disponíveis
-# ============================================================
+# =====================================================================
+# Modelo de trabalho acadêmico da UFLA (manual de normalização, 6. ed.)
+#
+# 1. Troque os textos entre aspas pelos do seu trabalho.
+# 2. Renderize no RStudio/Positron (botão Render) ou no terminal:
+#      quarto render nome-deste-arquivo.qmd
+# 3. Leia o terminal: avisos da extensão começam com [ufla-normas].
+#
+# Linhas que começam com # são comentários (desligadas). Para usar um
+# campo comentado, apague o # do começo da linha.
+# Guia completo: https://github.com/bonijoao/ufla-normas
+# =====================================================================
 
-# Título e subtítulo (o subtítulo, se houver, aparece sem negrito após dois-pontos)
-title: "TÍTULO COMPLETO DO TRABALHO EM LETRAS MAIÚSCULAS"
-subtitle: "subtítulo em letras minúsculas se houver"   # opcional — remova se não houver
+# --- Tipo de trabalho --------------------------------------------------
+# Define a nota descritiva da folha de rosto ("Dissertação apresentada à
+# Universidade Federal de Lavras, como parte das exigências do Programa de
+# Pós-Graduação em ..."). Valores aceitos (Quadro 3.1 do manual):
+#   tcc, monografia, monografia-licenciatura, especializacao,
+#   dissertacao, dissertacao-profissional, tese, relatorio-estagio
+tipo: dissertacao
 
-# Autoria
+# --- Identificação -----------------------------------------------------
+title: "Título do trabalho"            # a capa põe em maiúsculas
+# subtitle: "subtítulo, se houver"
 author: "Nome Completo do Autor"
-
-# Ano de depósito (entrega) — use "ano" para exibir apenas o ano nas capas.
-# O campo "date" pode ser mantido para metadados do PDF, mas o Quarto
-# normaliza datas, por isso usamos "ano" para controle direto.
-ano: "2025"
-date: "2025"
-
-# ============================================================
-# RESUMO e PALAVRAS-CHAVE (obrigatórios)
-# Texto corrido, parágrafo único, 150-500 palavras
-# ============================================================
-abstract: |
-  O resumo deve ser redigido em um único parágrafo, em espaçamento 1,5,
-  sem enumeração de tópicos, utilizando o verbo na terceira pessoa.
-  Deve conter entre 150 e 500 palavras para trabalhos acadêmicos.
-  As palavras-chave são listadas abaixo separadas por ponto e vírgula.
-
-keywords: [normalização bibliográfica, trabalho de conclusão de curso, ABNT, UFLA]
-
-# ============================================================
-# ABSTRACT e KEYWORDS (obrigatórios)
-# ============================================================
-abstract-en: |
-  The abstract must be written in a single paragraph, using the verb in
-  the third person. It must contain between 150 and 500 words for
-  academic papers.
-
-keywords-en: [bibliographic standardization, course completion paper, ABNT, UFLA]
-
-# ============================================================
-# NATUREZA DO TRABALHO (metadados para capa, folha de rosto e aprovação)
-# ============================================================
-tipo-trabalho: "Dissertação"
-# Opções comuns: "Trabalho de conclusão de curso", "Monografia",
-#               "Dissertação", "Tese", "Relatório de estágio supervisionado"
-
-titulo-pretendido: "Mestre"
-# Opções: "Bacharel", "Licenciado", "Especialista", "Mestre", "Doutor"
-
-curso: "Agronomia/Fitotecnia"
-# Curso (graduação) ou Programa de Pós-Graduação (pós-grad)
-
-area-concentracao: "Produção Vegetal"
-# Opcional — remova se não houver área de concentração
-
-instituicao: "Universidade Federal de Lavras"
-
-cidade: "Lavras-MG"
-
-# ============================================================
-# ORIENTAÇÃO
-# ============================================================
+ano: "2026"                            # ano de depósito
+curso: "Agronomia/Fitotecnia"          # curso ou programa de pós-graduação
+area-concentracao: "Produção Vegetal"  # opcional: apague se não houver
 orientador: "Prof. Dr. Nome do Orientador"
-coorientador: "Profa. Dra. Nome da Coorientadora"   # opcional — remova se não houver
+# orientadora: "Profa. Dra. Nome da Orientadora"  # no lugar de orientador
+# coorientador: "Prof. Dr. Nome do Coorientador"
+# coorientadora: "Profa. Dra. Nome da Coorientadora"
+# cidade: "Lavras-MG"                  # padrão: Lavras-MG
 
-# ============================================================
-# BANCA DE DEFESA (necessário para gerar folha de aprovação)
-# Remova todos os campos abaixo se ainda não defendeu
-# ============================================================
-defesa: "18 de março de 2025"
-banca-um-nome: "Prof. Dr. Membro Um"
-banca-um-inst: "UFLA"
-banca-dois-nome: "Profa. Dra. Membro Dois"
-banca-dois-inst: "UFMG"
-banca-tres-nome: "Dr. Membro Três"
-banca-tres-inst: "EPAMIG"
-# banca-quatro-nome: ""   # até quatro membros
+# --- Resumo e abstract (obrigatórios, de 150 a 500 palavras) -----------
+abstract: |
+  Este é o resumo de exemplo do modelo. O resumo apresenta, em um único
+  parágrafo, o objetivo do trabalho, o método empregado, os principais
+  resultados e as conclusões, com o verbo na voz ativa e na terceira pessoa
+  do singular. O manual da Universidade Federal de Lavras pede de 150 a 500
+  palavras para trabalhos acadêmicos, e a extensão avisa no terminal quando o
+  texto fica fora desse intervalo. Neste exemplo, avaliou-se a produtividade
+  do cafeeiro no sul de Minas Gerais entre 2019 e 2024, a partir de dados de
+  lavouras comerciais e de séries históricas públicas. Os dados foram
+  analisados por modelos de regressão e por técnicas de geoestatística,
+  considerando o espaçamento de plantio, a idade das lavouras e a fertilidade
+  do solo. A produtividade média variou de 29,5 a 36,0 sacas por hectare, com
+  queda em 2021 associada à bienalidade e ao clima. Conclui-se que o
+  espaçamento e a fertilidade explicam a maior parte da variação observada e
+  que o acompanhamento anual das lavouras permite planejar melhor o manejo.
+  Substitua este parágrafo pelo resumo do seu trabalho.
+keywords: [Café, Produtividade, Geoestatística, Regressão]
 
-# ============================================================
-# FICHA CATALOGRÁFICA
-# Obrigatória para pós-graduação stricto sensu.
-# Gerada pelo sistema da Biblioteca: https://bibliotecauniversitaria.ufla.br/
-# Defina ficha-catalografica: true e preencha os campos abaixo após obter a ficha.
-# ============================================================
-ficha-catalografica: true
-fc-autor-sobrenome: "Sobrenome, Nome do Autor"
-fc-autores: "Nome Completo do Autor"
-fc-tipo: "Dissertação (mestrado)"
-fc-catalogacao: "1. Normalização. 2. ABNT. 3. Trabalho acadêmico. I. Universidade Federal de Lavras. II. Título."
-fc-classificacao: "808.066"
-fc-ilust: "il."
+abstract-en: |
+  This is the example abstract of the template. The abstract presents, in a
+  single paragraph, the aim of the work, the method, the main results and
+  the conclusions, written in the active voice. The manual of the Federal
+  University of Lavras requires between 150 and 500 words for academic work,
+  and the extension prints a warning in the terminal when the text falls
+  outside that range. In this example, coffee yield in southern Minas Gerais
+  was evaluated from 2019 to 2024, using data from commercial farms and
+  public historical series. The data were analysed with regression models
+  and geostatistical techniques, considering plant spacing, crop age and soil
+  fertility. Mean yield ranged from 29.5 to 36.0 bags per hectare, with a
+  drop in 2021 associated with biennial bearing and weather. Spacing and
+  soil fertility explain most of the observed variation, and yearly
+  monitoring of the farms allows better planning of crop management.
+  Replace this paragraph with the abstract of your work, translated from the
+  Portuguese version above.
+keywords-en: [Coffee, Yield, Geostatistics, Regression]
 
-# ============================================================
-# ELEMENTOS PRÉ-TEXTUAIS OPCIONAIS
-# ============================================================
+# --- Versão final (dissertação e tese) --------------------------------
+# PREENCHA SÓ DEPOIS DA DEFESA, com os dados reais. Enquanto estes campos
+# estiverem comentados, o PDF sai normalmente, sem folha de aprovação, ficha
+# e indicadores, e o terminal mostra um único lembrete:
+#   "Lembrete para a versão final: dissertações e teses precisam de ..."
+# Para usar, apague o # do começo de cada linha.
+#
+# Folha de aprovação: data da defesa e membros da banca (até quatro).
+# defesa: "dia de mês de ano"
+# banca-um-nome: "Prof. Dr. Nome"
+# banca-um-inst: "UFLA"
+# banca-dois-nome: "Profa. Dra. Nome"
+# banca-dois-inst: "Instituição"
+# banca-tres-nome: "Dr. Nome"
+# banca-tres-inst: "Instituição"
+#
+# Ficha catalográfica: copie os dados da ficha gerada pelo sistema da
+# Biblioteca Universitária da UFLA (https://bibliotecauniversitaria.ufla.br/).
+# Não invente estes valores.
+# ficha-catalografica: true
+# fc-autor-sobrenome: "Sobrenome, Nome."
+# fc-tipo: "Dissertação (mestrado acadêmico)"
+# fc-catalogacao: "1. Assunto. 2. Assunto. I. Orientador. II. Título."
+# fc-classificacao: "000.00"
+#
+# Indicadores de impacto (Resolução PRPG n. 012/2024): um parágrafo em
+# português e outro em inglês sobre os impactos do trabalho.
+# indicadores-impacto-texto: |
+#   Texto dos indicadores de impacto.
+# impact-indicators-texto: |
+#   Impact indicators text.
 
-# Dedicatória (sem título, texto itálico alinhado à direita no rodapé)
-dedicatoria: |
-  À minha família, pelo apoio incondicional
-  em todos os momentos desta jornada.
+# --- Elementos opcionais -----------------------------------------------
+# dedicatoria: "À minha família."
+# agradecimentos: |
+#   Agradeço à Universidade Federal de Lavras ...
+# epigrafe: "Texto da epígrafe."
+# epigrafe-autor: "Autor (ano)"
 
-# Agradecimentos (com título "AGRADECIMENTOS" centralizado)
-agradecimentos: |
-  Agradeço à Universidade Federal de Lavras (UFLA) pelo suporte institucional.
-  Ao meu orientador, pela dedicação e sabedoria compartilhada.
-  À Coordenação de Aperfeiçoamento de Pessoal de Nível Superior (CAPES),
-  pelo financiamento desta pesquisa.
+lof: true      # lista de figuras
+lot: true      # lista de tabelas
+loq: true      # lista de quadros
+siglas:        # lista de abreviaturas e siglas (sai em ordem alfabética)
+  ABNT: Associação Brasileira de Normas Técnicas
+  Conab: Companhia Nacional de Abastecimento
+  UFLA: Universidade Federal de Lavras
+# simbolos:    # lista de símbolos (na ordem escrita)
+#   - "$\\alpha$": Nível de significância
+# glossario:   # glossário (depois das referências)
+#   Bienalidade: Alternância de safras altas e baixas no cafeeiro.
 
-# Epígrafe (sem título, itálico, alinhado à direita no rodapé)
-epigrafe: |
-  "A ciência organiza o que, de outro modo, seria
-  apenas um amontoado de fatos dispersos."
-epigrafe-autor: "Carl Sagan (1995)."
+# --- Outras opções -----------------------------------------------------
+# lang: en                             # trabalho em inglês (ou es); veja o guia
+# titulo-traduzido: "Título em português"  # obrigatório quando lang não é pt
+# formato: artigos                     # dissertação/tese em formato de artigos
+# frente-verso: true                   # impressão em frente e verso
 
-# ============================================================
-# INDICADORES DE IMPACTO (obrigatório para pós-grad stricto sensu)
-# Resolução PRPG nº 012/2024 — texto em PT e EN, parágrafo único
-# ============================================================
-indicadores-impacto-texto: |
-  Este trabalho apresenta impactos sociais, tecnológicos e ambientais
-  relacionados à produção vegetal sustentável na região de Lavras-MG.
-  Os resultados beneficiam diretamente agricultores familiares e estão
-  alinhados com os Objetivos de Desenvolvimento Sustentável (ODS) 2, 12 e 15
-  da Organização das Nações Unidas (ONU), contribuindo para a segurança
-  alimentar e a conservação dos recursos naturais.
-
-impact-indicators-texto: |
-  This work presents social, technological, and environmental impacts
-  related to sustainable plant production in the Lavras-MG region.
-  The results directly benefit family farmers and are aligned with
-  Sustainable Development Goals (SDGs) 2, 12, and 15 of the United
-  Nations (UN), contributing to food security and the conservation
-  of natural resources.
-
-# ============================================================
-# LISTAS (descomente as que desejar incluir)
-# ============================================================
-lof: true    # Lista de Figuras
-lot: true    # Lista de Tabelas
-
-# ============================================================
-# BIBLIOGRAFIA
-# Inclua sempre o .bib da extensão (norma UFLA) + seu próprio arquivo.
-# ============================================================
-bibliography:
-  - _extensions/bonijoao/ufla-normas/referencias.bib
-  - referencias.bib
-
-# ============================================================
-# FORMATO
-# ============================================================
+# --- Referências e formato (não mude) ------------------------------------
+bibliography: referencias.bib          # seu arquivo .bib, na mesma pasta
 format:
   ufla-normas-pdf: default
 ---
 
-# INTRODUÇÃO
+<!-- Cada "#" abre um capítulo numerado (1 INTRODUÇÃO). "##" é seção (1.1). -->
 
-Este documento demonstra o uso da extensão **ufla-normas** para Quarto,
-que implementa as normas técnicas da Universidade Federal de Lavras
-(UFLA) conforme o Manual de Normalização e Estrutura de Trabalhos
-Acadêmicos, 6ª edição [@Brasil2025].
+# Introdução
 
-A extensão produz automaticamente todos os elementos pré-textuais
-obrigatórios (capa, folha de rosto, ficha catalográfica, folha de
-aprovação, resumo, abstract, indicadores de impacto e sumário) a
-partir dos metadados definidos no cabeçalho YAML deste arquivo.
+Este modelo mostra os recursos da extensão. Apague o texto de exemplo e
+escreva o seu. A formatação segue o manual da UFLA [@ufla_manual_2025], e as
+referências seguem a NBR 6023 [@abnt_nbr6023_2018].
 
-## Citações — sistema autor-data (único aceito na UFLA)
+<!--
+Formas de citação (o resultado aparece no PDF):
+  [@chave]               (Silva, 2020)
+  @chave                 Silva (2020)
+  [@chave, p. 45]        (Silva, 2020, p. 45)
+  @chave [p. 45]         Silva (2020, p. 45)
+  Silva [-@chave]        Silva (2020)            (só o ano)
+  [ver @chave, p. 45]    (ver Silva, 2020, p. 45)
+  [@chave1; @chave2]     (Santos et al., 2023; Silva, 2020)
+-->
 
-A UFLA adota exclusivamente o sistema **autor-data** para citações,
-conforme a NBR 10520. Nunca use o sistema numérico.
+A análise de experimentos agrícolas exige planejamento [@silva_estatistica_2020].
+Segundo @silva_estatistica_2020, o delineamento vem antes da coleta. A escolha
+do delineamento depende da área disponível [@silva_estatistica_2020, p. 45], e
+@pereira_delineamentos_2021 [p. 50] lembra que a casualização protege contra
+vieses. Silva [-@silva_estatistica_2020] retoma o tema na segunda edição.
 
-### Citação curta (até 3 linhas)
+Estudos recentes avaliaram o espaçamento do cafeeiro
+[@santos_produtividade_2023; @souza_modelagem_2024], e @costa_redes_2022
+aplicaram redes neurais à previsão de preços [ver @costa_redes_2022, p. 5].
 
-Citações de até três linhas são inseridas no corpo do texto entre
-**aspas duplas**, em fonte 12pt:
+# Referencial teórico
 
-Como afirma @FrancaVasconcellos2021 [p. 33], "dissertações e teses
-constituem o produto de pesquisas desenvolvidas em cursos no nível de
-pós-graduação (mestrado e doutorado)."
+A variabilidade espacial da fertilidade do solo pode ser estudada por
+geoestatística [@oliveira_geoestatistica_2021]. Informações técnicas sobre a
+cultura estão disponíveis na página da Embrapa [@embrapa_cafe_2024].
 
-Ou na forma parentética: a normalização busca padronizar a produção
-científica, facilitando a comunicação e a indexação de documentos
-[@FrancaVasconcellos2021].
+<!-- Citação longa (mais de três linhas): comece cada linha com ">". -->
 
-### Citação longa (> 3 linhas)
+> A citação direta com mais de três linhas fica em parágrafo próprio, com
+> recuo de 4 cm da margem esquerda, letra menor que a do texto, espaçamento
+> simples e sem aspas. A extensão aplica esse formato a todo bloco de
+> citação escrito com o sinal de maior no começo de cada linha
+> [@ufla_manual_2025, p. 60].
 
-Citações com mais de três linhas recebem recuo de **4 cm** da margem
-esquerda, fonte **11pt**, espaçamento simples e **sem aspas**:
+O @qdr-conceitos resume os conceitos usados no trabalho.
 
-> A periodicidade é fator determinante do número de fascículos que
-> compõem um volume. Havendo um número muito grande de fascículos
-> publicados em um curto espaço de tempo, pode-se publicar mais de
-> um volume por ano. Todos os fascículos deverão ter o mesmo formato.
-> Caso haja necessidade de mudá-lo, isso deve acontecer somente no
-> início de um volume [@FrancaVasconcellos2021, p. 67].
+<!-- Quadro: texto organizado em células. Título acima, fonte abaixo. -->
 
-### Citação com quatro ou mais autores
+::: {#qdr-conceitos quadro="Conceitos usados no trabalho" fonte="Elaboração própria (2026)"}
 
-Com quatro ou mais autores, usa-se o primeiro seguido de *et al.*
-em itálico [@SilvaEtAl2023, p. 130].
+| Conceito      | Definição                                       |
+|---------------|-------------------------------------------------|
+| Produtividade | Produção por unidade de área (sacas/ha)         |
+| Bienalidade   | Alternância de safras altas e baixas            |
+| Semivariograma| Medida da dependência espacial entre amostras   |
 
-# REFERENCIAL TEÓRICO
+:::
 
-## Ilustrações
+O uso de obras protegidas segue a Lei de Direitos Autorais
+[@brasil_lei_1998].
 
-A norma determina que o **título** da ilustração vá acima dela e a
-**fonte** abaixo, ambos em tamanho 11pt, espaçamento simples
-[@Brasil2025].
+# Material e métodos
 
-![Logomarca da UFLA utilizada neste template.](imgs/logoUFLA.pdf){#fig-logo width=50%}
+Os dados de produtividade vêm das séries históricas da
+@conab_safras_2026. A @fig-produtividade mostra a evolução no período, e a
+@tbl-espacamento resume os tratamentos.
 
-Fonte: UFLA (2025).
+<!-- Figura: legenda entre colchetes, rótulo #fig-..., fonte="...". -->
 
-## Tabelas
+![Produtividade média do cafeeiro de 2019 a 2024.](imgs/grafico-exemplo.png){#fig-produtividade fonte="Elaboração própria (2026), com dados da Conab (2026)" width=80%}
 
-Tabelas contêm dados numéricos, sem bordas laterais, com linhas
-horizontais apenas no topo, no cabeçalho e no rodapé [@FrancaVasconcellos2021].
+<!-- Tabela: legenda depois da tabela, começando com ":". -->
 
-| Área do Conhecimento | Aquisição (un.) | Valor (R\$) |
-|:---------------------|----------------:|------------:|
-| Agrárias             |             800 |  450.013,01 |
-| Biológicas           |             915 |  530.802,76 |
-| Saúde                |           1.300 | 1.217.015,08 |
-| **Total**            |           **6.966** | **4.482.369,00** |
+| Espaçamento (m) | Plantas por hectare | Produtividade (sacas/ha) |
+|:---------------:|--------------------:|-------------------------:|
+| 3,5 × 0,5       |               5.714 |                     34,1 |
+| 3,5 × 0,7       |               4.082 |                     32,6 |
+| 3,5 × 1,0       |               2.857 |                     29,8 |
 
-: Aquisição de acervo bibliográfico — UFLA — 2022-2024. {#tbl-acervo}
+: Produtividade média por espaçamento de plantio. {#tbl-espacamento fonte="Elaboração própria (2026)"}
 
-Fonte: Elaboração própria.
+# Resultados e discussão
 
-# METODOLOGIA
+A produtividade caiu em 2021 (@fig-produtividade) e foi maior no espaçamento
+mais adensado (@tbl-espacamento). O roteiro de coleta está no @apx-roteiro.
 
-Esta seção apresenta os materiais e métodos utilizados na pesquisa.
-A metodologia detalha o delineamento experimental, as variáveis
-analisadas e os procedimentos estatísticos aplicados.
+# Considerações finais
 
-## Delineamento experimental
+Escreva aqui as considerações finais. As REFERÊNCIAS entram sozinhas depois
+deste capítulo, com as obras citadas no texto: não é preciso criar um título
+para elas.
 
-O experimento foi conduzido seguindo o delineamento inteiramente
-casualizado (DIC), com cinco tratamentos e quatro repetições, conforme
-@GomesUFLA2020.
+<!-- Apêndice: texto do autor. Para anexo (texto de outro autor), use {.anexo}. -->
 
-# RESULTADOS E DISCUSSÃO
+# Roteiro de coleta de dados {#apx-roteiro .apendice}
 
-Os resultados obtidos demonstram a eficácia dos tratamentos propostos.
-A análise estatística foi realizada pelo software R [@Brasil2025].
-
-# CONSIDERAÇÕES FINAIS
-
-Este trabalho demonstrou o funcionamento da extensão **ufla-normas**
-para produção de documentos acadêmicos conformes às normas da UFLA
-6ª edição [@Brasil2025].
+Conteúdo do apêndice.

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilo numérico mínimo, só para os testes do formato de artigos
+     (tests/test_artigos.py): chamadas "[1]" e lista "[1] Autor. Título, ano." -->
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" default-locale="pt-BR">
+  <info>
+    <title>Numérico mínimo (testes da ufla-normas)</title>
+    <id>http://example.org/ufla-normas/numerico-testes</id>
+    <updated>2026-10-28T00:00:00+00:00</updated>
+  </info>
+  <citation collapse="citation-number">
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout prefix="[" suffix="]" delimiter=",">
+      <text variable="citation-number"/>
+    </layout>
+  </citation>
+  <bibliography>
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout suffix=".">
+      <text variable="citation-number" prefix="[" suffix="] "/>
+      <names variable="author">
+        <name initialize-with=". " delimiter=", "/>
+      </names>
+      <text variable="title" prefix=". "/>
+      <date variable="issued" prefix=", ">
+        <date-part name="year"/>
+      </date>
+    </layout>
+  </bibliography>
+</style>

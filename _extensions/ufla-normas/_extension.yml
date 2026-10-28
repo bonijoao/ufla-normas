@@ -1,25 +1,104 @@
 title: UFLA Normas 6ª edição
-author: UFLA Template Community
-version: 1.0.0
+author: João Bonifácio
+version: 2.0.0
 quarto-required: ">=1.4.0"
 contributes:
   formats:
     pdf:
       template: template.tex
-      cite-method: natbib
-      biblio-style: abntex2-alf
-      pdf-engine: pdflatex
+      pdf-engine: lualatex
+      lang: pt-BR
+      # citeproc (Pandoc) with the bundled ABNT/UFLA style; "#" headings
+      # are chapters, so numbering starts at "1 INTRODUÇÃO"
+      csl: ufla-abnt.csl
+      top-level-division: chapter
+      # Order matters: validar.lua checks the YAML first (and stops on a
+      # missing bibliography file or unknown tipo); referencias.lua cleans
+      # the bibliography (and marks missing keys) before citacoes.lua reads
+      # it; elementos-atributos.lua turns fonte=/quadro= attributes and the
+      # siglas/simbolos/glossario YAML into document text before those two,
+      # so citations written there get the same checks and "A e B (2020)"
+      # form; elementos.lua comes last, after referencias.lua has handled
+      # the author's own "Referências" heading and #refs div, so it can move
+      # #refs before the apêndices; artigos.lua (formato: artigos) runs
+      # citeproc on each article after referencias.lua/citacoes.lua have
+      # marked missing keys and built "A e B (2020)", and before
+      # elementos.lua, which turns the .apendice/.anexo headings that end the
+      # last article into raw titles; Quarto runs citeproc after all of these
+      filters:
+        - filtros/validar.lua
+        - filtros/elementos-atributos.lua
+        - filtros/referencias.lua
+        - filtros/citacoes.lua
+        - filtros/tipo.lua
+        - filtros/artigos.lua
+        - filtros/elementos.lua
+      # Quadros: ::: {#qdr-x} ... ::: with @qdr-x references (elementos-atributos.lua
+      # adds the `quadro="Legenda"` and `fonte="..."` attributes)
+      crossref:
+        custom:
+          - kind: float
+            key: qdr
+            reference-prefix: Quadro
+            caption-location: top
+            latex-env: quadro
+            latex-list-of-file-extension: loq
+            latex-list-of-description: Quadros
+      # Reference prefixes in the text (@fig-x -> "Figura 1") follow `lang`.
+      # The top-level values are the Portuguese default, also used when the
+      # extension has no labels for `lang` (validar.lua warns, as for the
+      # captions, which babel gives in Portuguese then); en/es override them.
+      language:
+        crossref-fig-title: Figura
+        crossref-fig-prefix: Figura
+        crossref-tbl-title: Tabela
+        crossref-tbl-prefix: Tabela
+        crossref-qdr-title: Quadro
+        crossref-qdr-prefix: Quadro
+        crossref-sec-prefix: Seção
+        crossref-eq-prefix: Equação
+        en:
+          crossref-fig-title: Figure
+          crossref-fig-prefix: Figure
+          crossref-tbl-title: Table
+          crossref-tbl-prefix: Table
+          crossref-qdr-title: Chart
+          crossref-qdr-prefix: Chart
+          crossref-sec-prefix: Section
+          crossref-eq-prefix: Equation
+        es:
+          crossref-fig-title: Figura
+          crossref-fig-prefix: Figura
+          crossref-tbl-title: Tabla
+          crossref-tbl-prefix: Tabla
+          crossref-qdr-title: Cuadro
+          crossref-qdr-prefix: Cuadro
+          crossref-sec-prefix: Sección
+          crossref-eq-prefix: Ecuación
+      # Title above figures and tables, source below (manual 3.2.9/3.2.10)
+      fig-cap-location: top
+      tbl-cap-location: top
       keep-tex: false
       date-format: "YYYY"
       toc: false
       number-sections: false
-      # Default UFLA metadata (users override these at document level)
-      tipo-trabalho: "Dissertação"
-      titulo-pretendido: "Mestre"
+      # Default UFLA metadata (users override these at document level).
+      # tipo.lua fills the nota descritiva from `tipo` (empty = dissertacao);
+      # tipo-trabalho/titulo-pretendido/genero override the preset
+      tipo: ""
+      # texto-integral or artigos (parts, articles with their own references)
+      formato: "texto-integral"
+      tipo-trabalho: ""
+      genero: ""
+      titulo-pretendido: ""
       curso: ""
       area-concentracao: ""
       orientador: ""
+      orientadora: ""
+      orientador-genero: ""
       coorientador: ""
+      coorientadora: ""
+      coorientador-genero: ""
       cidade: "Lavras-MG"
       ano: ""
       instituicao: "Universidade Federal de Lavras"

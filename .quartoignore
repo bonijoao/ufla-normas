@@ -1,0 +1,16 @@
+# Arquivos que o `quarto use template bonijoao/ufla-normas` NÃO copia para a
+# pasta do aluno. Ele leva só template.qmd (renomeado com o nome da pasta),
+# referencias.bib, imgs/ e a extensão em _extensions/.
+tests/
+docs/
+.superpowers/
+.pytest_cache/
+.github/
+.git/
+.gitignore
+.quartoignore
+CHANGELOG.md
+README.md
+LICENSE
+_quarto.yml
+template.pdf
