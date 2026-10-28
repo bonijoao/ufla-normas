@@ -92,8 +92,12 @@ local function titulo_pos(header, tipo, letra, rotulo_id)
 end
 
 --- `glossario`: blocos montados por elementos-atributos.lua (ou nil).
+--- Com `suppress-bibliography` (o autor pediu, ou artigos.lua: todas as
+--- citações estão dentro dos artigos) não há lista geral: o #refs sai, para
+--- não virar um CSLReferences vazio, e o glossário fica no lugar dele.
 local function parte_pos_textual(doc, glossario)
   local blocks = doc.blocks
+  local sem_refs = doc.meta["suppress-bibliography"] == true
   doc.blocks:walk({
     Header = function(h)
       if h.level > 1 and (h.classes:includes("apendice") or h.classes:includes("anexo")) then
@@ -120,6 +124,8 @@ local function parte_pos_textual(doc, glossario)
       nomes[id] = ROTULOS[tipo].texto .. " " .. letra
       if primeiro == nil then primeiro = #saida + 1 end
       saida:insert(titulo_pos(b, tipo, letra, id))
+    elseif sem_refs and eh_refs(b) then
+      -- sem lista geral
     elseif primeiro ~= nil and eh_refs(b) then
       refs_depois = b      -- sobe para antes do primeiro apêndice/anexo
     else
@@ -138,6 +144,15 @@ local function parte_pos_textual(doc, glossario)
       if eh_refs(b) then return i end
     end
     return nil
+  end
+
+  if sem_refs then
+    if glossario ~= nil then
+      local i = primeiro or (#saida + 1)
+      for k = #glossario, 1, -1 do saida:insert(i, glossario[k]) end
+    end
+    doc.blocks = saida
+    return nomes
   end
 
   local i_refs = acha_refs()

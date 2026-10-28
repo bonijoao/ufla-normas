@@ -15,7 +15,8 @@ Avisos (a renderização continua):
   - lembrete (uma vez) dos elementos da versão final de dissertações e teses;
   - citações no texto sem `bibliography`;
   - `lang` sem rótulos na extensão (cai no português);
-  - trabalho em outro idioma sem `titulo-traduzido`.
+  - trabalho em outro idioma sem `titulo-traduzido`;
+  - `formato` diferente de texto-integral e artigos.
 
 Valores "" contam como ausentes: o _extension.yml declara vários campos com
 "" e esses padrões chegam aqui misturados aos do documento.
@@ -79,6 +80,8 @@ local CAMPOS_CONHECIDOS = {
   "siglas", "simbolos", "glossario", "loq",
   -- trabalhos em outro idioma (título em português na folha de aprovação)
   "titulo-traduzido",
+  -- artigos.lua (texto-integral ou artigos)
+  "formato",
 }
 
 -- Prefixos de famílias de opções do Quarto (fig-width, tbl-cap-location, ...).
@@ -305,6 +308,19 @@ local function confere_idioma(meta)
   end
 end
 
+local function confere_formato(meta)
+  local valor = texto(meta.formato)
+  if valor == "" then return end
+  for _, f in ipairs(util.FORMATOS) do
+    if valor:lower() == f then return end
+  end
+  local msg = 'formato: "' .. valor .. '" não é válido.'
+  local sugestao = util.sugerir(valor:lower(), util.FORMATOS)
+  if sugestao then msg = msg .. ' Você quis dizer "' .. sugestao .. '"?' end
+  util.aviso(msg .. " Use um destes: " .. table.concat(util.FORMATOS, ", ")
+    .. ". O trabalho segue como texto-integral.")
+end
+
 -- Filtro -----------------------------------------------------------------------
 
 function Pandoc(doc)
@@ -323,6 +339,7 @@ function Pandoc(doc)
   confere_versao_final(meta, chave)
   confere_citacoes(doc)
   confere_idioma(meta)
+  confere_formato(meta)
 
   util.erros(erros)
   return nil

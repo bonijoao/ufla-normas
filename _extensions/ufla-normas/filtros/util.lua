@@ -132,6 +132,9 @@ M.ROTULOS = {
     apendice = "APÊNDICE", apendice_texto = "Apêndice",
     anexo = "ANEXO", anexo_texto = "Anexo",
     glossario = "GLOSSÁRIO", trabalho_academico = "Trabalho acadêmico",
+    artigo = "ARTIGO", artigos = "ARTIGOS",
+    partes = { "PRIMEIRA PARTE", "SEGUNDA PARTE", "TERCEIRA PARTE", "QUARTA PARTE" },
+    parte = "PARTE",
   },
   en = {
     babel = "english", figura = "Figure", tabela = "Table",
@@ -139,6 +142,9 @@ M.ROTULOS = {
     apendice = "APPENDIX", apendice_texto = "Appendix",
     anexo = "ANNEX", anexo_texto = "Annex",
     glossario = "GLOSSARY", trabalho_academico = "Academic work",
+    artigo = "ARTICLE", artigos = "ARTICLES",
+    partes = { "FIRST PART", "SECOND PART", "THIRD PART", "FOURTH PART" },
+    parte = "PART",
   },
   es = {
     -- modificadores do babel: noshorthands (sem os atalhos ativos do
@@ -149,8 +155,14 @@ M.ROTULOS = {
     apendice = "APÉNDICE", apendice_texto = "Apéndice",
     anexo = "ANEXO", anexo_texto = "Anexo",
     glossario = "GLOSARIO", trabalho_academico = "Trabajo académico",
+    artigo = "ARTÍCULO", artigos = "ARTÍCULOS",
+    partes = { "PRIMERA PARTE", "SEGUNDA PARTE", "TERCERA PARTE", "CUARTA PARTE" },
+    parte = "PARTE",
   },
 }
+
+--- Valores de `formato` (validar.lua avisa os outros; artigos.lua usa).
+M.FORMATOS = { "texto-integral", "artigos" }
 
 -- Variantes regionais com nome próprio no babel.
 local BABEL_REGIAO = { ["en-gb"] = "british", ["en-uk"] = "british" }

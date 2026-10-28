@@ -20,13 +20,18 @@ contributes:
       # so citations written there get the same checks and "A e B (2020)"
       # form; elementos.lua comes last, after referencias.lua has handled
       # the author's own "Referências" heading and #refs div, so it can move
-      # #refs before the apêndices; Quarto runs citeproc after all of these
+      # #refs before the apêndices; artigos.lua (formato: artigos) runs
+      # citeproc on each article after referencias.lua/citacoes.lua have
+      # marked missing keys and built "A e B (2020)", and before
+      # elementos.lua, which turns the .apendice/.anexo headings that end the
+      # last article into raw titles; Quarto runs citeproc after all of these
       filters:
         - filtros/validar.lua
         - filtros/elementos-atributos.lua
         - filtros/referencias.lua
         - filtros/citacoes.lua
         - filtros/tipo.lua
+        - filtros/artigos.lua
         - filtros/elementos.lua
       # Quadros: ::: {#qdr-x} ... ::: with @qdr-x references (elementos-atributos.lua
       # adds the `quadro="Legenda"` and `fonte="..."` attributes)
@@ -81,6 +86,8 @@ contributes:
       # tipo.lua fills the nota descritiva from `tipo` (empty = dissertacao);
       # tipo-trabalho/titulo-pretendido/genero override the preset
       tipo: ""
+      # texto-integral or artigos (parts, articles with their own references)
+      formato: "texto-integral"
       tipo-trabalho: ""
       genero: ""
       titulo-pretendido: ""
