@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from conftest import RAIZ, fonte_de
+from conftest import RAIZ, SAIDA, fonte_de
 
 FIXTURES = RAIZ / "tests" / "fixtures"
 
@@ -424,3 +424,49 @@ def test_misc_local_editora(render):
             "Brasília: Portal Embrapa, 2021.") in refs, refs
     for colado in ("IBGERio", "solosBras", "JaneiroInstituto", ", ,"):
         assert colado not in refs, (colado, refs)
+
+
+def test_crossref_nao_e_citacao(render):
+    corpo = (
+        "# Introdução {#sec-intro}\n\n"
+        "Ver [@wickham_r_2023], @fig-um, @tbl-dois e @sec-intro.\n\n"
+        "![Uma figura](_extensions/ufla-normas/logoUFLA.pdf){#fig-um width=20%}\n\n"
+        "| a | b |\n|---|---|\n| 1 | 2 |\n\n: Uma tabela {#tbl-dois}\n"
+    )
+    r = render(
+        "crossref-nao-citacao",
+        yaml="bibliography: refs.bib",
+        corpo=corpo,
+        arquivos={"refs.bib": _bib("zotero")},
+    )
+    assert r.ok, r.log
+    assert "Citação não encontrada" not in r.log, r.log
+    assert "?]" not in r.texto, r.texto
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert "Figura 1.1, Tabela 1.1 e Seção 1." in texto, texto
+    assert "WICKHAM, Hadley" in r.depois("REFERÊNCIAS")
+
+
+def test_callout_e_id_nao_sao_citacao(render):
+    """Callouts (@tip-, @nte-, ...) e qualquer @chave igual ao id de um
+    elemento do documento não são citações. O template ainda não carrega o
+    tcolorbox dos callouts (o PDF não compila com callouts), então a saída do
+    filtro é conferida no log e no .tex."""
+    nome = "callout-nao-citacao"
+    corpo = (
+        "# Introdução\n\n"
+        "Ver [@wickham_r_2023], @tip-x, @nte-y e @meu-alvo.\n\n"
+        "::: {#tip-x .callout-tip}\n## Dica\nConteúdo da dica.\n:::\n\n"
+        "::: {#nte-y .callout-note}\nNota.\n:::\n\n"
+        "[Um alvo]{#meu-alvo}\n"
+    )
+    r = render(
+        nome,
+        yaml="bibliography: refs.bib\nkeep-tex: true",
+        corpo=corpo,
+        arquivos={"refs.bib": _bib("zotero")},
+    )
+    tex = SAIDA / nome / f"{nome}.tex"
+    assert tex.exists(), r.log
+    assert "Citação não encontrada" not in r.log, r.log
+    assert "textcolor{red}" not in tex.read_text(encoding="utf-8")
