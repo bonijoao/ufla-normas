@@ -73,6 +73,8 @@ local CAMPOS_CONHECIDOS = {
   -- chaves que o próprio Quarto injeta nos metadados
   "authors", "by-author", "affiliations", "by-affiliation", "labels",
   "revealjs-plugins",
+  -- elementos.lua (listas pré-textuais, glossário, lista de quadros)
+  "siglas", "simbolos", "glossario", "loq",
 }
 
 -- Prefixos de famílias de opções do Quarto (fig-width, tbl-cap-location, ...).

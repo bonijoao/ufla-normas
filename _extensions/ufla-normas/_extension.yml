@@ -15,12 +15,29 @@ contributes:
       # Order matters: validar.lua checks the YAML first (and stops on a
       # missing bibliography file or unknown tipo); referencias.lua cleans
       # the bibliography (and marks missing keys) before citacoes.lua reads
-      # it; Quarto runs citeproc after all of these
+      # it; elementos.lua comes last, after referencias.lua has handled the
+      # author's own "Referências" heading and #refs div, so it can move
+      # #refs before the apêndices; Quarto runs citeproc after all of these
       filters:
         - filtros/validar.lua
         - filtros/referencias.lua
         - filtros/citacoes.lua
         - filtros/tipo.lua
+        - filtros/elementos.lua
+      # Quadros: ::: {#qdr-x} ... ::: with @qdr-x references (elementos.lua
+      # adds the `quadro="Legenda"` and `fonte="..."` attributes)
+      crossref:
+        custom:
+          - kind: float
+            key: qdr
+            reference-prefix: Quadro
+            caption-location: top
+            latex-env: quadro
+            latex-list-of-file-extension: loq
+            latex-list-of-description: Quadros
+      # Title above figures and tables, source below (manual 3.2.9/3.2.10)
+      fig-cap-location: top
+      tbl-cap-location: top
       keep-tex: false
       date-format: "YYYY"
       toc: false

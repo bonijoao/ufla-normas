@@ -41,7 +41,9 @@
 \usepackage{multirow}
 \usepackage{colortbl}
 \usepackage{multicol}
-\usepackage{subfigure}
+% subcaption (not the obsolete subfigure, which it refuses to load with):
+% Quarto's subfigures (layout-ncol, fig-subcap) use it
+\usepackage{subcaption}
 
 %----------------------------------------------------------------------
 % Code highlighting (Pandoc Shaded/Highlighting environments)
@@ -189,9 +191,14 @@ $endif$
 \DeclareCaptionListFormat{ufla}{#1#2~\textendash~}
 \captionsetup{listformat=ufla, format=hang}
 
-% Source command (obrigatório em ilustrações e tabelas)
+% Source line below figures, tables and quadros (manual 3.2.9/3.2.10):
+% "Fonte: …", size 11, single spacing, centred. elementos.lua writes it
+% from the `fonte=` attribute; v1 documents call \fonte{} directly.
 \newcommand{\fontename}{Fonte}
-\newcommand{\fonte}[1]{\par\small\fontename: #1\par}
+% (\setstretch before \small: it reselects \@currsize, which the 11pt
+% \small defined above does not set, and would go back to 12pt)
+\newcommand{\fonte}[1]{\par
+  {\centering\setstretch{1}\small\fontename: #1\par}}
 
 %----------------------------------------------------------------------
 % Long quotation environment (sec 4.1b: >3 lines → 4cm indent, size 11, single space, no quotes)
@@ -243,12 +250,10 @@ $endif$
 \renewcommand{\listoftables}{%
   {\renewcommand{\numberline}{Tabela~}\listof{table}{Lista de Tabelas}}}
 
-% Quadro (table with all borders)
+% Quadro: the float is defined after the Quarto includes (see "UFLA
+% settings re-asserted" below), because Quarto defines it too when the
+% document uses @qdr- references
 \newcommand{\quadroname}{Quadro}
-\newfloat{quadro}{htb!}{loq}[chapter]
-\floatname{quadro}{\quadroname}
-\newcommand{\listofquadros}{%
-  {\renewcommand{\numberline}{\quadroname~}\listof{quadro}{Lista de Quadros}}}
 
 %----------------------------------------------------------------------
 % Table of contents (sec 3.2.5: title UPPERCASE + bold + centered)
@@ -257,7 +262,9 @@ $endif$
 \makeatletter
 \renewcommand{\tableofcontents}{
   \newpage
-  \begin{center}\textbf{\MakeUppercase{\contentsname}}\end{center}
+  % fixed title: pre-textual pages are always in Portuguese, and Quarto's
+  % includes rename \contentsname to "Índice"
+  \begin{center}\textbf{SUMÁRIO}\end{center}
   \normalfont\normalsize\@starttoc{toc}
   \clearpage
 }
@@ -279,6 +286,30 @@ $endif$
   \refstepcounter{anexo}%
   {\noindent\bfseries ANEXO~\theanexo\ -- \MakeUppercase{#1}\vspace{\baselineskip}}%
 }
+
+% Post-textual titles written in Markdown (elementos.lua): apêndices,
+% anexos and glossário. Unnumbered, uppercase (done by the filter), bold,
+% centred, new page, in the sumário (manual 3.1.2.4 and 3.2.5).
+% #1 = label, #2 = title
+\newcommand\uflaTituloPos[2]{%
+  \clearpage
+  \phantomsection\label{#1}%
+  \addcontentsline{toc}{chapter}{\numberline{}#2}%
+  \begin{center}\bfseries #2\end{center}%
+}
+
+% Lists of abreviaturas/siglas and símbolos (manual 3.1.2.1.13): item on
+% the left, meaning on the right
+\newenvironment{uflaLista}
+ {\begin{list}{}{%
+   \setlength{\labelwidth}{3cm}%
+   \setlength{\labelsep}{0.5cm}%
+   \setlength{\leftmargin}{3.5cm}%
+   \setlength{\itemsep}{0pt}%
+   \setlength{\parsep}{0pt}%
+   \setlength{\topsep}{0pt}%
+   \renewcommand{\makelabel}[1]{##1\hfil}}}
+ {\end{list}}
 
 %----------------------------------------------------------------------
 % Auxiliary column helper for tables
@@ -352,6 +383,37 @@ $endif$
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+%----------------------------------------------------------------------
+% Quarto/Pandoc includes: Quarto's own (callouts, crossref floats, …) and
+% the author's include-in-header / header-includes
+%----------------------------------------------------------------------
+$for(header-includes)$
+$header-includes$
+$endfor$
+
+%----------------------------------------------------------------------
+% UFLA settings re-asserted after the includes. Quarto's includes rename
+% \contentsname to "Índice" (the SUMÁRIO title above is fixed text),
+% define the quadro float numbered by chapter and leave
+% \floatstyle{ruled} active.
+%----------------------------------------------------------------------
+\makeatletter
+\@ifundefined{c@quadro}{\newfloat{quadro}{htb!}{loq}}{}
+\makeatother
+\floatstyle{plaintop}      % caption above (manual 3.2.9)
+\restylefloat{quadro}
+\floatplacement{quadro}{htb!}
+\floatname{quadro}{\quadroname}
+\providecommand{\listofquadros}{}
+\renewcommand{\listofquadros}{%
+  {\renewcommand{\numberline}{\quadroname~}\listof{quadro}{Lista de Quadros}}}
+% sequential numbering (Figura 1, Tabela 1, Quadro 1), one of the two
+% options in manual 3.2.9
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{quadro}{chapter}
+\AtBeginDocument{\renewcommand*{\contentsname}{Sumário}}
 
 %----------------------------------------------------------------------
 % Hyperref (always last before document)
@@ -547,6 +609,11 @@ $endif$
 %%======================================================================
 \begin{document}
 
+$for(include-before)$
+$include-before$
+
+$endfor$
+
 %----------------------------------------------------------------------
 % TOC spacing setup (reads saved width from previous run)
 %----------------------------------------------------------------------
@@ -693,6 +760,25 @@ $endif$
 %----------------------------------------------------------------------
 $if(lof)$\listoffigures$endif$
 $if(lot)$\listoftables$endif$
+$if(loq)$\listofquadros$endif$
+
+$if(ufla-lista-siglas)$
+\newpage
+\begin{center}\textbf{LISTA DE ABREVIATURAS E SIGLAS}\end{center}
+\begin{uflaLista}
+$ufla-lista-siglas$
+\end{uflaLista}
+\clearpage
+$endif$
+
+$if(ufla-lista-simbolos)$
+\newpage
+\begin{center}\textbf{LISTA DE SÍMBOLOS}\end{center}
+\begin{uflaLista}
+$ufla-lista-simbolos$
+\end{uflaLista}
+\clearpage
+$endif$
 
 %----------------------------------------------------------------------
 % SUMÁRIO (mandatory, sec 3.1.2.1.14) — counted, not numbered
@@ -717,7 +803,13 @@ $body$
 %----------------------------------------------------------------------
 % REFERÊNCIAS (mandatory) — generated by citeproc inside the body, where
 % the author puts ::: {#refs} or at the end; the CSLReferences environment
-% (preamble) prints the unnumbered "REFERÊNCIAS" title.
+% (preamble) prints the unnumbered "REFERÊNCIAS" title. elementos.lua
+% moves them before the glossário, apêndices and anexos.
 %----------------------------------------------------------------------
+
+$for(include-after)$
+$include-after$
+
+$endfor$
 
 \end{document}

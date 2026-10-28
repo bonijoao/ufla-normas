@@ -443,15 +443,15 @@ def test_crossref_nao_e_citacao(render):
     assert "Citação não encontrada" not in r.log, r.log
     assert "?]" not in r.texto, r.texto
     texto = normaliza(r.depois("INTRODUÇÃO"))
-    assert "Figura 1.1, Tabela 1.1 e Seção 1." in texto, texto
+    # numeração sequencial de figuras e tabelas (manual 3.2.9)
+    assert "Figura 1, Tabela 1 e Seção 1." in texto, texto
     assert "WICKHAM, Hadley" in r.depois("REFERÊNCIAS")
 
 
 def test_callout_e_id_nao_sao_citacao(render):
     """Callouts (@tip-, @nte-, ...) e qualquer @chave igual ao id de um
-    elemento do documento não são citações. O template ainda não carrega o
-    tcolorbox dos callouts (o PDF não compila com callouts), então a saída do
-    filtro é conferida no log e no .tex."""
+    elemento do documento não são citações: nada de "[chave?]" no .tex nem
+    no PDF, e o callout aparece no PDF."""
     nome = "callout-nao-citacao"
     corpo = (
         "# Introdução\n\n"
@@ -470,3 +470,8 @@ def test_callout_e_id_nao_sao_citacao(render):
     assert tex.exists(), r.log
     assert "Citação não encontrada" not in r.log, r.log
     assert "textcolor{red}" not in tex.read_text(encoding="utf-8")
+    assert r.ok, r.log
+    assert "?]" not in r.texto, r.texto
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert "Conteúdo da dica." in texto and "Nota." in texto, texto
+    assert "WICKHAM, Hadley" in r.depois("REFERÊNCIAS")
