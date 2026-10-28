@@ -6,7 +6,10 @@ associacao-brasileira-de-normas-tecnicas.csl do repositorio citation-style-langu
 Mudancas: URL sem < >; ponto final apos "Acesso em"; trabalho academico no formato
 "ano. Tipo - Instituicao, Local, ano."; trabalho em evento sem nome do evento com o titulo
 dos anais em negrito; intervalo de paginas com hifen; [S. l.], [s. n.] e [s.d.] como no manual;
-"In:" sem italico; chamada narrativa "Autor, Autor e Autor (ano)".-->
+"In:" sem italico; trabalho academico com "Disponivel em/Acesso em"; demais tipos (misc)
+com "Site. Local: Editora, ano.". A chamada narrativa com 2 ou 3 autores ("Autor e Autor
+(ano)") nao e feita aqui: o CSL 1.0 nao a permite, e o filtro filtros/citacoes.lua da
+extensao a monta antes do citeproc.-->
   <!--Em caso de sobrenome composto, este nao sera desmontado para a montagem da citacao ou bibliografia como no caso de L. Van Der Pijl-->
   <info>
     <title>Universidade Federal de Lavras - ABNT (UFLA, 6. ed. 2025)</title>
@@ -406,26 +409,6 @@ em caixa alta. Utiliza-se antes do nome da conferencia a expressao "In". Segundo
       <text variable="archive" prefix=" "/>
     </group>
   </macro>
-  <!--Chamada narrativa (autor incluido na sentenca): "Maia, Porte e Souza (2023)"-->
-  <macro name="author-intext">
-    <names variable="author">
-      <name form="short" and="text" delimiter=", " delimiter-precedes-last="never" initialize="false">
-        <name-part name="family" text-case="capitalize-first"/>
-      </name>
-      <substitute>
-        <names variable="editor"/>
-        <names variable="translator"/>
-        <choose>
-          <if type="book">
-            <text variable="title" form="short"/>
-          </if>
-          <else>
-            <text variable="title" form="short" quotes="true"/>
-          </else>
-        </choose>
-      </substitute>
-    </names>
-  </macro>
   <!--Citacao-->
   <!--et al. aparece a partir de 04 autores-->
   <citation et-al-min="4" et-al-use-first="1" collapse="year" disambiguate-add-year-suffix="true">
@@ -445,17 +428,6 @@ em caixa alta. Utiliza-se antes do nome da conferencia a expressao "In". Segundo
       </group>
     </layout>
   </citation>
-  <intext et-al-min="4" et-al-use-first="1">
-    <layout delimiter=", ">
-      <group delimiter=" ">
-        <text macro="author-intext"/>
-        <group prefix="(" suffix=")" delimiter=", ">
-          <text macro="issued-year"/>
-          <text macro="citation-locator"/>
-        </group>
-      </group>
-    </layout>
-  </intext>
   <!--Bibliografia-->
   <!--et al. aparece a partir de 04 autores-->
   <bibliography hanging-indent="false" et-al-min="4" et-al-use-first="1" entry-spacing="1">
@@ -583,6 +555,8 @@ em caixa alta. Utiliza-se antes do nome da conferencia a expressao "In". Segundo
               </group>
             </group>
             <!--Tipo (grau e curso) - Instituicao, Local, ano-->
+            <text macro="access" prefix=" " suffix="."/>
+            <!--URL, data do acesso (trabalho disponivel em repositorio)-->
           </group>
         </else-if>
         <!-- Nao ha norma ABNT para manuscritos -->
@@ -721,30 +695,39 @@ em caixa alta. Utiliza-se antes do nome da conferencia a expressao "In". Segundo
           </group>
         </else-if>
         <else>
-          <text macro="author" suffix=". "/>
-          <!--Autor-->
-          <text macro="title" suffix=". "/>
-          <!--Titulo-->
-          <text macro="container-contributors"/>
-          <!--Nomes de editore-->
-          <text macro="secondary-contributors"/>
-          <text variable="container-title"/>
-          <!--Titulo da publicacao (sem negrito: o titulo ja e o destaque)-->
-          <text variable="collection-title" prefix=": " suffix="."/>
-          <text macro="locators"/>
-          <!--Dados complementares "pagina, volume"-->
-          <group delimiter=". " prefix=". " suffix=". ">
-            <text macro="event"/>
+          <!--AUTOR. Titulo. Site. Local: Editora, ano. Disponivel em: URL. Acesso em: data.
+              Sem local e sem editora: AUTOR. Titulo. Site, ano. [acesso].-->
+          <group delimiter=". " suffix=".">
+            <text macro="author"/>
+            <!--Autor-->
+            <group>
+              <text macro="title"/>
+              <text macro="secondary-contributors"/>
+            </group>
+            <!--Titulo (Organizadores)-->
+            <text variable="collection-title"/>
+            <text variable="event" text-case="uppercase"/>
             <!--Nome do evento, conferencia-->
+            <choose>
+              <if variable="publisher-place publisher" match="any">
+                <group delimiter=". ">
+                  <text variable="container-title"/>
+                  <!--Site / publicacao (sem negrito: o titulo ja e o destaque)-->
+                  <text macro="publisher"/>
+                  <!--Local: Editora, ano-->
+                </group>
+              </if>
+              <else>
+                <group delimiter=", ">
+                  <text variable="container-title"/>
+                  <text macro="issued"/>
+                </group>
+                <!--Site, ano-->
+              </else>
+            </choose>
+            <text macro="access"/>
+            <!--URL, data do acesso-->
           </group>
-          <text variable="publisher-place"/>
-          <!--Local-->
-          <text variable="publisher" suffix=", "/>
-          <!--Editor-->
-          <text macro="issued" prefix=", " suffix=". "/>
-          <!--Data-->
-          <text macro="access" suffix="."/>
-          <!--URL, data do acesso-->
         </else>
       </choose>
     </layout>

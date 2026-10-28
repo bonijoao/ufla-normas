@@ -50,15 +50,13 @@ def _render_fixture(render, nome):
 SILVA = ("SILVA, João da et al. Métodos de análise estatística em ciências "
          "agrárias. Ciência e Agrotecnologia, v. 47, n. 2, p. 123-145, mar. 2023.")
 
+SOUZA = ("SOUZA, Ana Paula. Modelagem da produtividade do café. 2024. "
+         "Dissertação (Mestrado em Estatística e Experimentação Agropecuária) "
+         "– Universidade Federal de Lavras, Lavras, 2024.")
+
 CASOS = [
     ("zotero", "silva_metodos_2023", SILVA),
-    pytest.param(
-        "zotero", "souza_modelagem_2024",
-        "SOUZA, Ana Paula. Modelagem da produtividade do café. 2024. "
-        "Dissertação (Mestrado em Estatística e Experimentação Agropecuária) "
-        "– Universidade Federal de Lavras, Lavras, 2024.",
-        marks=pytest.mark.xfail(strict=True, reason="Task 2"),
-    ),
+    ("zotero", "souza_modelagem_2024", SOUZA),
     ("zotero", "instituto_brasileiro_de_geografia_e_estatistica_censo_2023",
      "INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA. Censo Demográfico 2022. "
      "IBGE, 2023. Disponível em: https://www.ibge.gov.br/estatisticas/sociais/"
@@ -213,3 +211,216 @@ def test_negrito_titulos(render):
     assert "Bold" in fonte("R for data")  # o título quebra a linha
     redes = fonte("Redes neurais")
     assert redes and "Bold" not in redes
+
+
+# --- Normalização das referências e chaves inexistentes ---------------------
+
+RESTOS_BIB = r"""
+@book{restos_livro,
+  author = {Pereira, Jos{\'e}},
+  title = {{M{\'e}todos} \& {T}{\'e}cnicas},
+  publisher = {" O'Reilly Media, Inc."},
+  address = {Lavras},
+  year = {2020},
+}
+
+@book{restos_negrito,
+  author = {Almeida, Rita},
+  title = {\textbf{Livro}},
+  publisher = {Editora UFLA},
+  address = {Lavras},
+  year = {2021},
+}
+
+@phdthesis{restos_tese,
+  author = {Barbosa, Caio},
+  title = {Ensaios},
+  type = {Disserta{\c{c}}{\~a}o ({Mestrado})},
+  school = {Universidade Federal de Lavras},
+  address = {Lavras},
+  year = {2022},
+}
+"""
+
+
+def test_restos_latex_no_bib(render):
+    r = render(
+        "restos-latex",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\n[@restos_livro; @restos_negrito; @restos_tese].",
+        arquivos={"refs.bib": RESTOS_BIB},
+    )
+    assert r.ok, r.log
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert "Métodos & Técnicas" in refs, refs
+    assert "Lavras: O’Reilly Media, Inc., 2020." in refs, refs
+    assert "Livro. Lavras: Editora UFLA, 2021." in refs, refs
+    assert "2022. Dissertação (Mestrado) – Universidade Federal" in refs, refs
+    for c in "{}\\\"":
+        assert c not in refs, (c, refs)
+
+
+def test_zotero_dissertacao_sem_chaves(render):
+    r = _render_fixture(render, "zotero")
+    assert r.ok, r.log
+    assert normaliza(SOUZA) in normaliza(r.depois("REFERÊNCIAS"))
+
+
+def test_chave_inexistente(render):
+    r = render(
+        "chave-inexistente",
+        yaml="bibliography: refs.bib",
+        corpo=("# Introdução {#sec-intro}\n\n"
+               "Ver [@silva_metodo_2023] e [@silva_metodos_2023; @zzz_nada]. "
+               "De novo [@silva_metodo_2023]. Volte à @sec-intro.\n"),
+        arquivos={"refs.bib": _bib("zotero")},
+    )
+    assert r.ok, r.log
+    assert ("[ufla-normas] AVISO: Citação não encontrada: @silva_metodo_2023"
+            in r.log), r.log
+    assert "@silva_metodos_2023" in r.log  # sugestão
+    assert r.log.count("Citação não encontrada: @silva_metodo_2023") == 1, r.log
+    assert "Citação não encontrada: @zzz_nada" in r.log
+    assert "sec-intro" not in r.log
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert "Ver [silva_metodo_2023?] e (Silva et al., 2023) [zzz_nada?]." in texto, texto
+    assert "[silva_metodo_2023?]" in r.texto
+    # o marcador sai em vermelho e negrito
+    pymupdf = pytest.importorskip("pymupdf")
+    with pymupdf.open(str(r.pdf)) as doc:
+        spans = [s for p in doc for b in p.get_text("dict")["blocks"]
+                 for ln in b.get("lines", []) for s in ln["spans"]
+                 if "silva_metodo_2023?" in s["text"]]
+    assert spans
+    assert all(s["color"] == 0xFF0000 and "Bold" in s["font"] for s in spans), spans
+
+
+def _conta_depois_do_sumario(r, palavra):
+    paginas = r.texto.split("\f")
+    inicio = next(i + 1 for i, p in enumerate(paginas) if "SUMÁRIO" in p)
+    return "".join(paginas[inicio:]).casefold().count(palavra.casefold())
+
+
+@pytest.mark.parametrize("titulo, refs_div", [
+    ("# Referências {.unnumbered}", True),
+    ("# REFERÊNCIAS", False),
+])
+def test_titulo_referencias_duplicado(render, titulo, refs_div):
+    corpo = "# Introdução\n\nVer [@wickham_r_2023].\n\n" + titulo + "\n\n"
+    if refs_div:
+        corpo += "::: {#refs}\n:::\n"
+    r = render(
+        "titulo-refs-" + ("div" if refs_div else "fim"),
+        yaml="bibliography: refs.bib",
+        corpo=corpo,
+        arquivos={"refs.bib": _bib("zotero")},
+    )
+    assert r.ok, r.log
+    assert _conta_depois_do_sumario(r, "REFERÊNCIAS") == 1, r.texto
+    assert "WICKHAM, Hadley" in r.depois("REFERÊNCIAS")
+
+
+TESES_BIB = """
+@mastersthesis{tese_mestrado,
+  author = {Moura, Lia},
+  title = {Mestrado sem tipo},
+  school = {Universidade Federal de Lavras},
+  address = {Lavras},
+  year = {2023},
+}
+
+@phdthesis{tese_doutorado,
+  author = {Nunes, Davi},
+  title = {Doutorado sem tipo},
+  school = {Universidade Federal de Lavras},
+  address = {Lavras},
+  year = {2024},
+}
+"""
+
+
+@pytest.mark.parametrize("lang, mestrado, doutorado", [
+    ("pt-BR", "Dissertação (Mestrado)", "Tese (Doutorado)"),
+    ("en", "Master’s thesis", "Doctoral thesis"),
+])
+def test_genero_tese_sem_tipo(render, lang, mestrado, doutorado):
+    r = render(
+        f"teses-{lang}",
+        yaml=f"bibliography: refs.bib\nlang: {lang}",
+        corpo="# Introdução\n\n[@tese_mestrado; @tese_doutorado].",
+        arquivos={"refs.bib": TESES_BIB},
+    )
+    assert r.ok, r.log
+    texto = normaliza(r.texto).replace("'", "’")
+    assert (f"Mestrado sem tipo. 2023. {mestrado} – Universidade Federal de "
+            "Lavras, Lavras, 2023.") in texto, texto
+    assert (f"Doutorado sem tipo. 2024. {doutorado} – Universidade Federal de "
+            "Lavras, Lavras, 2024.") in texto, texto
+    assert "Mathesis" not in texto and "Trabalho acadêmico" not in texto
+
+
+TESE_ONLINE_BIB = """
+@mastersthesis{tese_online,
+  author = {Souza, Ana Paula},
+  title = {Modelagem online},
+  type = {Dissertação (Mestrado em Estatística)},
+  school = {Universidade Federal de Lavras},
+  address = {Lavras},
+  year = {2024},
+  url = {https://repositorio.ufla.br/handle/1/123},
+  urldate = {2025-05-05},
+}
+"""
+
+
+def test_tese_online_acesso(render):
+    r = render(
+        "tese-online",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\n[@tese_online].",
+        arquivos={"refs.bib": TESE_ONLINE_BIB},
+    )
+    assert r.ok, r.log
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert ("SOUZA, Ana Paula. Modelagem online. 2024. Dissertação (Mestrado em "
+            "Estatística) – Universidade Federal de Lavras, Lavras, 2024. "
+            "Disponível em: https://repositorio.ufla.br/handle/1/123. "
+            "Acesso em: 5 maio 2025.") in refs, refs
+
+
+MISC_BIB = """
+@misc{ibge_pnad_2024,
+  author = {{Instituto Brasileiro de Geografia e Estatística}},
+  title = {Pesquisa nacional por amostra de domicílios},
+  journal = {IBGE},
+  address = {Rio de Janeiro},
+  publisher = {Instituto Brasileiro de Geografia e Estatística},
+  year = {2024},
+}
+
+@misc{embrapa_solos_2021,
+  author = {{Empresa Brasileira de Pesquisa Agropecuária}},
+  title = {Mapa de solos},
+  howpublished = {Portal Embrapa},
+  address = {Brasília},
+  year = {2021},
+}
+"""
+
+
+def test_misc_local_editora(render):
+    r = render(
+        "misc-local",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\n[@ibge_pnad_2024; @embrapa_solos_2021].",
+        arquivos={"refs.bib": MISC_BIB},
+    )
+    assert r.ok, r.log
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert ("INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA. Pesquisa nacional "
+            "por amostra de domicílios. IBGE. Rio de Janeiro: Instituto "
+            "Brasileiro de Geografia e Estatística, 2024.") in refs, refs
+    assert ("EMPRESA BRASILEIRA DE PESQUISA AGROPECUÁRIA. Mapa de solos. "
+            "Brasília: Portal Embrapa, 2021.") in refs, refs
+    for colado in ("IBGERio", "solosBras", "JaneiroInstituto", ", ,"):
+        assert colado not in refs, (colado, refs)
