@@ -71,31 +71,36 @@ abstract-en: |
 keywords-en: [Coffee, Yield, Geostatistics, Regression]
 
 # --- Versão final (dissertação e tese) --------------------------------
-# Os valores abaixo são EXEMPLOS: troque pelos reais depois da defesa.
-# Enquanto o trabalho for rascunho, pode comentar estes campos: o PDF sai
-# do mesmo jeito e o terminal mostra só um lembrete.
-defesa: "20 de março de 2026"          # gera a folha de aprovação
-banca-um-nome: "Prof. Dr. Nome do Primeiro Membro"
-banca-um-inst: "UFLA"
-banca-dois-nome: "Profa. Dra. Nome da Segunda Membro"
-banca-dois-inst: "UFV"
-# banca-tres-nome: ""                  # até quatro membros
-# banca-tres-inst: ""
-
-# Ficha catalográfica: os dados vêm da Biblioteca Universitária da UFLA.
-ficha-catalografica: true
-fc-autor-sobrenome: "Sobrenome, Nome Completo do Autor."
-fc-tipo: "Dissertação (mestrado acadêmico)"
-fc-catalogacao: "1. Café. 2. Produtividade. 3. Geoestatística. I. Sobrenome, Nome do Orientador. II. Título."
-fc-classificacao: "633.73"
-
-# Indicadores de impacto (Resolução PRPG n. 012/2024), em português e inglês.
-indicadores-impacto-texto: |
-  Exemplo: descreva em um parágrafo os impactos sociais, econômicos,
-  tecnológicos ou ambientais do trabalho e a quem os resultados interessam.
-impact-indicators-texto: |
-  Example: describe in one paragraph the social, economic, technological or
-  environmental impacts of the work and who benefits from the results.
+# PREENCHA SÓ DEPOIS DA DEFESA, com os dados reais. Enquanto estes campos
+# estiverem comentados, o PDF sai normalmente, sem folha de aprovação, ficha
+# e indicadores, e o terminal mostra um único lembrete:
+#   "Lembrete para a versão final: dissertações e teses precisam de ..."
+# Para usar, apague o # do começo de cada linha.
+#
+# Folha de aprovação: data da defesa e membros da banca (até quatro).
+# defesa: "dia de mês de ano"
+# banca-um-nome: "Prof. Dr. Nome"
+# banca-um-inst: "UFLA"
+# banca-dois-nome: "Profa. Dra. Nome"
+# banca-dois-inst: "Instituição"
+# banca-tres-nome: "Dr. Nome"
+# banca-tres-inst: "Instituição"
+#
+# Ficha catalográfica: copie os dados da ficha gerada pelo sistema da
+# Biblioteca Universitária da UFLA (https://bibliotecauniversitaria.ufla.br/).
+# Não invente estes valores.
+# ficha-catalografica: true
+# fc-autor-sobrenome: "Sobrenome, Nome."
+# fc-tipo: "Dissertação (mestrado acadêmico)"
+# fc-catalogacao: "1. Assunto. 2. Assunto. I. Orientador. II. Título."
+# fc-classificacao: "000.00"
+#
+# Indicadores de impacto (Resolução PRPG n. 012/2024): um parágrafo em
+# português e outro em inglês sobre os impactos do trabalho.
+# indicadores-impacto-texto: |
+#   Texto dos indicadores de impacto.
+# impact-indicators-texto: |
+#   Impact indicators text.
 
 # --- Elementos opcionais -----------------------------------------------
 # dedicatoria: "À minha família."

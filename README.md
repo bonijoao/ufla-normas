@@ -58,8 +58,17 @@ O comando cria:
 
 Abra o `.qmd`, troque os textos entre aspas no cabeçalho e renderize (botão
 **Render** no RStudio/Positron, ou `quarto render <nome-da-pasta>.qmd`). O
-exemplo renderiza sem nenhum aviso. Depois apague o texto de exemplo e
-escreva o seu.
+exemplo mostra um único aviso no terminal, o lembrete da versão final:
+
+```
+[ufla-normas] AVISO: Lembrete para a versão final: dissertações e teses precisam de folha de aprovação (defesa:), ficha catalográfica e indicadores de impacto.
+```
+
+É de propósito: o modelo não traz data de defesa, banca, ficha nem
+indicadores de exemplo, para que nenhum dado inventado vá parar no PDF
+entregue. Esses campos estão comentados no cabeçalho; preencha-os depois da
+defesa (veja [Versão final](#versão-final)). Depois apague o texto de
+exemplo e escreva o seu.
 
 ### Já tenho um .qmd
 
@@ -140,6 +149,19 @@ nome errado gera aviso com sugestão (veja [mensagens](#mensagens-da-extensão-e
 
 Nada disto bloqueia o rascunho. Em dissertação e tese, enquanto faltar algum,
 o terminal mostra um lembrete; o PDF sai normalmente.
+
+No modelo do `quarto use template`, estes campos vêm **comentados** (com `#`
+no começo da linha), sem valores de exemplo. Depois da defesa, apague o `#`
+de cada linha e preencha com os dados reais:
+
+- `defesa` e `banca-*`: a data e os membros da banca;
+- `ficha-catalografica: true` e `fc-*`: copie da ficha que o sistema da
+  [Biblioteca Universitária](https://bibliotecauniversitaria.ufla.br/) gera;
+  não invente esses valores;
+- `indicadores-impacto-texto` e `impact-indicators-texto`: o texto pedido
+  pela Resolução PRPG n. 012/2024.
+
+Com tudo preenchido, o lembrete some.
 
 | Campo | Para que serve |
 |---|---|
@@ -235,8 +257,9 @@ recuo de 4 cm, letra menor, espaçamento simples e sem aspas.
 
 A lista REFERÊNCIAS entra sozinha depois do último capítulo (e antes de
 glossário, apêndices e anexos), só com as obras citadas, em ordem
-alfabética. Não escreva o título "Referências": se escrever, a extensão usa
-o lugar dele e não repete o título. Para pôr a lista num ponto exato, use:
+alfabética. Você não precisa escrever um título "Referências"; se
+escrever, ele não sai repetido (a extensão põe a lista no lugar dele). Para
+pôr a lista num ponto exato, use:
 
 ```markdown
 ::: {#refs}
