@@ -13,9 +13,16 @@ Formato de artigos (`formato: artigos`; manual, Figura 3.23 e seções 4 e 5).
    só com o texto do artigo, e a lista "REFERÊNCIAS" (só com as obras citadas
    nele) fica no fim do artigo, ou onde o autor pôs `::: {#refs}` dentro
    dele. `csl="periodico.csl"` no título usa o estilo do periódico naquele
-   artigo (manual 4 e 5). As citações já resolvidas saem do documento, então
-   a lista geral (citeproc do Quarto, depois de todos os filtros) só tem as
-   citações de fora dos artigos; elementos.lua a põe antes dos apêndices.
+   artigo (manual 4 e 5). O sumário mostra só "ARTIGO 1 – TÍTULO" (sem as
+   seções nem as REFERÊNCIAS do artigo), como na Figura 3.23.
+4. Primeira parte (a que vem antes da parte com artigos): as citações dela
+   ganham a lista "REFERÊNCIAS" que fecha a parte, em página nova e no
+   sumário, do mesmo jeito.
+5. As citações já resolvidas saem do documento, então a lista geral
+   (citeproc do Quarto, depois de todos os filtros) só tem as citações da
+   terceira parte; elementos.lua a põe antes do glossário e dos apêndices.
+   Uma obra citada na primeira e na terceira parte entra nas duas listas.
+`nota="..."` vale em {.parte} e em {.artigo} (nota de rodapé no título).
 
 Roda depois de referencias.lua (chaves sem entrada já viraram "[chave?]") e
 de citacoes.lua ("Costa e Ferreira (2022)"), e antes de elementos.lua, que
@@ -146,11 +153,13 @@ local function caminho_csl(rel, titulo)
   return caminho
 end
 
--- Referências de um artigo -----------------------------------------------
+-- Referências de um artigo ou da primeira parte -------------------------------
 
---- Resolve as citações de `blocks` (um artigo) com o citeproc e devolve os
---- blocos com a lista "REFERÊNCIAS" do artigo. `n` numera os ids.
-local function referencias_artigo(blocks, n, meta, ids_bib, csl)
+--- Resolve as citações de `blocks` (um artigo ou a primeira parte) com o
+--- citeproc e devolve os blocos com a lista "REFERÊNCIAS" própria. `n`
+--- ("artigo2", "parte1") deixa os ids únicos; `artigo` escolhe o título
+--- da lista (no artigo: sem página nova e fora do sumário).
+local function referencias_bloco(blocks, n, meta, ids_bib, csl, artigo)
   -- referências cruzadas (@fig-x, @sec-x) ficam guardadas: o citeproc as
   -- trataria como citações sem entrada
   local guardadas = {}
@@ -189,9 +198,9 @@ local function referencias_artigo(blocks, n, meta, ids_bib, csl)
 
   -- ids únicos (a lista geral também tem #refs e #ref-chave) e citações já
   -- resolvidas viram texto, para o citeproc do Quarto não as ver de novo
-  local prefixo = "ref-artigo" .. n .. "-"
+  local prefixo = "ref-" .. n .. "-"
   local function novo_id(id)
-    if id == "refs" then return "refs-artigo" .. n end
+    if id == "refs" then return "refs-" .. n end
     local chave = id:match("^ref%-(.+)$")
     if chave then return prefixo .. chave end
     return id
@@ -220,10 +229,14 @@ local function referencias_artigo(blocks, n, meta, ids_bib, csl)
         end,
       })
       b.identifier = novo_id("refs")
-      -- título "REFERÊNCIAS" sem página nova, no sumário dentro do artigo
-      saida:insert(pandoc.RawBlock("latex", "\\begingroup\\uflaRefsArtigo"))
-      saida:insert(b)
-      saida:insert(pandoc.RawBlock("latex", "\\endgroup"))
+      if artigo then
+        -- título "REFERÊNCIAS" sem página nova e fora do sumário (Figura 3.23)
+        saida:insert(pandoc.RawBlock("latex", "\\begingroup\\uflaRefsArtigo"))
+        saida:insert(b)
+        saida:insert(pandoc.RawBlock("latex", "\\endgroup"))
+      else
+        saida:insert(b)   -- como a lista geral: página nova e no sumário
+      end
     else
       saida:insert(b)
     end
@@ -232,6 +245,13 @@ local function referencias_artigo(blocks, n, meta, ids_bib, csl)
 end
 
 -- Títulos --------------------------------------------------------------------
+
+--- Nota de rodapé do atributo `nota` (Markdown), ou nada.
+local function nota_de(h)
+  local nota = texto(h.attributes["nota"])
+  if nota == "" then return nil end
+  return pandoc.Note(pandoc.read(nota, "markdown").blocks)
+end
 
 local function titulo_parte(h, n, tem_artigos, rot)
   local inl
@@ -244,6 +264,9 @@ local function titulo_parte(h, n, tem_artigos, rot)
   end
   local r = pandoc.Inlines({ latex("\\uflaParte{" .. rotulo(h, "parte-" .. n) .. "}{") })
   r:extend(inl)
+  r:insert(latex("}{"))
+  local nota = nota_de(h)
+  if nota then r:insert(nota) end
   r:insert(latex("}"))
   return pandoc.Plain(r)
 end
@@ -256,10 +279,8 @@ local function titulo_artigo(h, n, rot)
   })
   r:extend(maiusculas(h.content))
   r:insert(latex("}{"))
-  local nota = texto(h.attributes["nota"])
-  if nota ~= "" then
-    r:insert(pandoc.Note(pandoc.read(nota, "markdown").blocks))
-  end
+  local nota = nota_de(h)
+  if nota then r:insert(nota) end
   r:insert(latex("}"))
   return pandoc.Plain(r)
 end
@@ -294,26 +315,30 @@ function Pandoc(doc)
 
   local saida = pandoc.Blocks({})
   local n_parte, n_artigo = 0, 0
-  local artigo = nil          -- { blocos, csl } do artigo aberto
+  -- trecho com lista própria aberto: o artigo, até o próximo título de
+  -- nível 1; a primeira parte (sem artigos), até o próximo {.parte}
+  local aberto = nil          -- { blocos, csl, id, artigo }
   local numeracao_artigo = false
 
-  local function fecha_artigo()
-    if artigo == nil then return end
-    local blocos = artigo.blocos
-    -- Divs ocultos do Quarto no fim do documento ficam fora do artigo
+  local function fecha()
+    if aberto == nil then return end
+    local blocos = aberto.blocos
+    -- Divs ocultos do Quarto no fim do documento ficam fora do trecho
     local resto = pandoc.Blocks({})
     while #blocos > 0 and eh_oculto(blocos[#blocos]) do
       resto:insert(1, blocos:remove(#blocos))
     end
-    saida:extend(referencias_artigo(blocos, n_artigo, doc.meta, ids_bib, artigo.csl))
+    saida:extend(referencias_bloco(blocos, aberto.id, doc.meta, ids_bib, aberto.csl,
+      aberto.artigo))
     saida:extend(resto)
-    artigo = nil
+    aberto = nil
   end
 
   for _, b in ipairs(doc.blocks) do
-    if b.t == "Header" and b.level == 1 then
-      fecha_artigo()
-      local c = classe(b)
+    local c = b.t == "Header" and b.level == 1 and classe(b)
+    if b.t == "Header" and b.level == 1
+        and not (aberto ~= nil and not aberto.artigo and c ~= "parte") then
+      fecha()
       if c ~= "artigo" and numeracao_artigo then
         saida:insert(pandoc.RawBlock("latex", "\\uflaFimArtigos"))
         numeracao_artigo = false
@@ -321,29 +346,35 @@ function Pandoc(doc)
       if c == "parte" then
         n_parte = n_parte + 1
         saida:insert(titulo_parte(b, n_parte, partes_com_artigos[n_parte], rot))
+        -- primeira parte (manual, Figura 3.23): REFERÊNCIAS próprias no fim
+        if n_parte == 1 and not partes_com_artigos[1] then
+          aberto = { blocos = pandoc.Blocks({}), id = "parte1", artigo = false }
+        end
       elseif c == "artigo" then
         n_artigo = n_artigo + 1
         local csl = texto(b.attributes["csl"])
-        artigo = {
+        aberto = {
           blocos = pandoc.Blocks({}),
           csl = csl ~= "" and caminho_csl(csl, stringify(b.content)) or nil,
+          id = "artigo" .. n_artigo, artigo = true,
         }
         saida:insert(titulo_artigo(b, n_artigo, rot))
         numeracao_artigo = true
       else
         saida:insert(b)
       end
-    elseif artigo ~= nil then
-      artigo.blocos:insert(b)
+    elseif aberto ~= nil then
+      aberto.blocos:insert(b)
     else
       saida:insert(b)
     end
   end
-  fecha_artigo()
+  fecha()
   doc.blocks = saida
 
-  -- sem citações fora dos artigos, não há lista geral (um ::: {#refs}
-  -- vazio daria um CSLReferences sem itens)
+  -- a lista geral (citeproc do Quarto) fica só com as citações de fora da
+  -- primeira parte e dos artigos; sem nenhuma, não há lista geral (um
+  -- ::: {#refs} vazio daria um CSLReferences sem itens)
   local cita_fora = doc.meta.nocite ~= nil
   doc.blocks:walk({
     Cite = function(c)

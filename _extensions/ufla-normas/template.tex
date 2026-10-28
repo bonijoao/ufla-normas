@@ -273,6 +273,8 @@ $endif$
   % includes rename \contentsname to "Índice"
   \begin{center}\textbf{SUMÁRIO}\end{center}
   \normalfont\normalsize\@starttoc{toc}
+  % the article format lowers tocdepth inside the .toc (\uflaArtigo)
+  \setcounter{tocdepth}{6}
   \clearpage
 }
 \makeatother
@@ -306,50 +308,46 @@ $endif$
 }
 
 % Article format (`formato: artigos`, artigos.lua; manual Figura 3.23).
-% \uflaParte{label}{PRIMEIRA PARTE}: unnumbered, bold, centred, in the
-% sumário, at the top of a new page; the chapter or article that follows
-% starts on the same page (its own page break is skipped once).
+% \uflaParte{label}{PRIMEIRA PARTE}{footnote}: unnumbered, bold, centred, in
+% the sumário, alone on its own page (the chapter or article that follows
+% opens a new page itself).
 % \uflaArtigo{label}{ARTIGO 1 – TÍTULO}{footnote}: same style, new page; the
 % article's sections (##) are numbered 1, 1.1, ... again, primary ones in
-% uppercase, until \uflaFimArtigos. \uflaRefsArtigo (inside a group) makes
-% the article's REFERÊNCIAS follow its text, listed under the article.
-\makeatletter
-\newcommand\ufla@semquebra{%
-  \global\let\ufla@clearpage@orig\clearpage
-  \global\let\ufla@cleardoublepage@orig\cleardoublepage
-  \gdef\clearpage{\ufla@volta@quebra}%
-  \gdef\cleardoublepage{\ufla@volta@quebra}}
-\newcommand\ufla@volta@quebra{%
-  \global\let\clearpage\ufla@clearpage@orig
-  \global\let\cleardoublepage\ufla@cleardoublepage@orig}
-\newcommand\uflaParte[2]{%
-  \clearpage
-  \phantomsection\label{#1}%
-  \addcontentsline{toc}{chapter}{\numberline{}#2}%
-  \begin{center}\bfseries #2\end{center}%
-  \vspace{2\baselineskip}%
-  \ufla@semquebra}
-\newcommand\uflaArtigo[3]{%
+% uppercase, until \uflaFimArtigos. Inside the articles the sumário shows
+% only the "ARTIGO n – TÍTULO" lines (tocdepth 0, written into the .toc) and
+% hyperref gets a per-article prefix, so article 2's "1 INTRODUÇÃO" is not a
+% duplicate of article 1's. \uflaRefsArtigo (inside a group) makes the
+% article's REFERÊNCIAS follow its text, outside the sumário.
+\newcounter{uflaartigo}
+\newcommand\uflaParte[3]{%
   \clearpage
   \phantomsection\label{#1}%
   \addcontentsline{toc}{chapter}{\numberline{}#2}%
   \begin{center}\bfseries #2#3\end{center}%
-  \vspace{\baselineskip}%
+  \vspace{\baselineskip}}
+\newcommand\uflaArtigo[3]{%
+  \clearpage
+  \stepcounter{uflaartigo}%
+  \phantomsection\label{#1}%
+  \addcontentsline{toc}{chapter}{\numberline{}#2}%
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{0}}%
+  \begin{center}\bfseries #2#3\end{center}%
   \setcounter{section}{0}%
   \renewcommand\thesection{\arabic{section}}%
+  \renewcommand\theHsection{artigo\arabic{uflaartigo}.\arabic{section}}%
   \titleformat{\section}{\normalfont\normalsize\bfseries}{\thesection}{1ex}%
     {\MakeUppercase}[\testasecao]}
 \newcommand\uflaFimArtigos{%
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{6}}%
   \renewcommand\thesection{\thechapter.\arabic{section}}%
+  \renewcommand\theHsection{\theHchapter.\arabic{section}}%
   \titleformat{\section}{\normalfont\normalsize\bfseries}{\thesection}{1ex}%
     {}[\testasecao]}
 \newcommand\uflaRefsArtigo{%
   \renewcommand\referencias{%
     \par\vspace{\baselineskip}%
     \phantomsection
-    \addcontentsline{toc}{section}{\numberline{}\MakeUppercase{\refname}}%
     \begin{center}\bfseries\MakeUppercase{\refname}\end{center}}}
-\makeatother
 
 % Lists of abreviaturas/siglas and símbolos (manual 3.1.2.1.13): item on
 % the left, meaning on the right

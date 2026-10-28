@@ -82,6 +82,8 @@ local CAMPOS_CONHECIDOS = {
   "titulo-traduzido",
   -- artigos.lua (texto-integral ou artigos)
   "formato",
+  -- sem lista geral de referências (elementos.lua e artigos.lua respeitam)
+  "suppress-bibliography",
 }
 
 -- Prefixos de famílias de opções do Quarto (fig-width, tbl-cap-location, ...).

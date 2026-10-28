@@ -4,10 +4,11 @@ cada artigo (com estilo do periódico opcional) e lista geral na terceira
 parte, antes dos apêndices (manual, Figura 3.23 e seções 4 e 5)."""
 import re
 
-from conftest import RAIZ
+from conftest import RAIZ, SAIDA
 
 FIXTURES = RAIZ / "tests" / "fixtures"
 NOTA = "Artigo redigido conforme a NBR 6022 (ABNT, 2018)."
+NOTA_PARTE = "Artigos sem identificação de periódico."
 
 
 def junta(s: str) -> str:
@@ -51,8 +52,8 @@ def trecho(texto: str, de: str, ate: str | None) -> str:
 CORPO = (
     "# Primeira parte {.parte}\n\n"
     "# Introdução\n\n"
-    "Introdução geral do trabalho.\n\n"
-    "# Segunda parte – Artigos {.parte}\n\n"
+    "Introdução geral do trabalho [@silva_metodos_2023; @wickham_r_2023].\n\n"
+    f'# Segunda parte – Artigos {{.parte nota="{NOTA_PARTE}"}}\n\n'
     f'# Modelagem do café {{.artigo nota="{NOTA}"}}\n\n'
     "## Introdução\n\n"
     "O café foi modelado [@souza_modelagem_2024]. "
@@ -74,25 +75,64 @@ CORPO = (
 YAML = "bibliography: refs.bib\nformato: artigos\n"
 
 
+def pagina_com(r, trecho_: str, depois_do_sumario=True) -> str:
+    """Primeira página (depois do SUMÁRIO) que contém `trecho_`."""
+    paginas = r.texto.split("\f")
+    inicio = 0
+    if depois_do_sumario:
+        inicio = next(i for i, p in enumerate(paginas) if "SUMÁRIO" in p) + 1
+    for pag in paginas[inicio:]:
+        if trecho_ in junta(pag):
+            return junta(pag)
+    raise AssertionError(f"{trecho_!r} não está no PDF")
+
+
 def test_formato_artigos(render):
-    r = render("artigos", yaml=YAML, corpo=CORPO % "", arquivos=arquivos())
+    r = render("artigos", yaml=YAML + "latex-clean: false\n", corpo=CORPO % "",
+               arquivos=arquivos())
     assert r.ok, r.log
 
+    # sumário como a Figura 3.23 do manual: dentro da segunda parte só os
+    # títulos dos artigos; REFERÊNCIAS fechando a primeira e a terceira parte
     toc = sumario(r)
-    ordem = ["PRIMEIRA PARTE", "SEGUNDA PARTE – ARTIGOS", "ARTIGO 1 – MODELAGEM DO CAFÉ",
-             "ARTIGO 2 – REDES NEURAIS E PREÇOS", "TERCEIRA PARTE", "REFERÊNCIAS",
+    ordem = ["PRIMEIRA PARTE", "1 Introdução", "REFERÊNCIAS", "SEGUNDA PARTE – ARTIGOS",
+             "ARTIGO 1 – MODELAGEM DO CAFÉ", "ARTIGO 2 – REDES NEURAIS E PREÇOS",
+             "TERCEIRA PARTE", "2 Considerações finais", "2.1 Limitações", "REFERÊNCIAS",
              "APÊNDICE A – QUESTIONÁRIO APLICADO"]
     pos = 0
-    for t in ordem:     # nesta ordem (a REFERÊNCIAS geral vem depois da 3ª parte)
+    for t in ordem:
         pos = toc.find(t, pos)
         assert pos >= 0, (t, toc)
+    assert toc.count("REFERÊNCIAS") == 2, toc
+    assert "Resultados" not in toc and "Produtividade" not in toc, toc
+    assert toc.count("Introdução") == 1, toc
+    assert NOTA_PARTE not in toc, toc
     assert "ÍNDICE" not in toc.upper()
-    # seções do artigo numeradas a partir de 1, no sumário também
-    assert "2 Resultados" in toc and "2.1 Produtividade" in toc, toc
+
+    # cada parte sozinha na sua página; o apêndice abre página nova
+    assert "INTRODUÇÃO" not in pagina_com(r, "PRIMEIRA PARTE")
+    assert "ARTIGO 1" not in pagina_com(r, "SEGUNDA PARTE – ARTIGOS")
+    assert "CONSIDERAÇÕES" not in pagina_com(r, "TERCEIRA PARTE")
+    apendice = pagina_com(r, "APÊNDICE A – QUESTIONÁRIO APLICADO")
+    assert "Limitações" not in apendice and "WICKHAM" not in apendice, apendice
+    # nota no título da segunda parte
+    assert NOTA_PARTE in pagina_com(r, "SEGUNDA PARTE – ARTIGOS")
+
+    # sem destinos duplicados do hyperref (seção 1 de cada artigo)
+    log = (SAIDA / "artigos" / "artigos.log").read_text(encoding="utf-8", errors="replace")
+    assert "duplicate destination" not in log, [l for l in log.splitlines()
+                                                if "duplicate" in l]
 
     texto = corpo_pdf(r)
-    # uma lista por artigo e a geral
-    assert texto.count("REFERÊNCIAS") == 3, texto
+    # primeira parte, um por artigo e a geral
+    assert texto.count("REFERÊNCIAS") == 4, texto
+
+    primeira = trecho(texto, "PRIMEIRA PARTE", "SEGUNDA PARTE")
+    assert "(Silva et al., 2023; Wickham;" in primeira, primeira
+    refs_p1 = trecho(primeira, "REFERÊNCIAS", None)
+    assert "SILVA, João da" in refs_p1 and "WICKHAM, Hadley" in refs_p1, refs_p1
+    for chave in ("SOUZA", "COSTA", "GARCÍA"):
+        assert chave not in refs_p1, refs_p1
 
     art1 = trecho(texto, "ARTIGO 1 – MODELAGEM DO CAFÉ", "ARTIGO 2 –")
     assert NOTA in art1, art1
@@ -117,8 +157,8 @@ def test_formato_artigos(render):
     # depois dos artigos a numeração volta a ser a do capítulo
     assert "2 CONSIDERAÇÕES FINAIS" in terceira and "2.1 Limitações" in terceira, terceira
     geral = trecho(terceira, "REFERÊNCIAS", None)
-    assert "WICKHAM, Hadley" in geral, geral
-    for chave in ("SOUZA", "COSTA", "GARCÍA"):
+    assert "WICKHAM, Hadley" in geral, geral   # citada também na primeira parte
+    for chave in ("SILVA", "SOUZA", "COSTA", "GARCÍA"):
         assert chave not in geral, geral
 
     assert "Citação não encontrada: @chave_inexistente_2020" in r.log, r.log
@@ -204,7 +244,10 @@ def test_formato_artigos_em_ingles(render):
     for t in ("FIRST PART", "SECOND PART – ARTICLES", "ARTICLE 1 – COFFEE MODELLING",
               "THIRD PART", "REFERENCES"):
         assert t in toc, toc
+    assert toc.count("REFERENCES") == 1, toc        # só a geral
     texto = corpo_pdf(r)
+    # primeira parte sem citações: sem lista própria
+    assert texto.count("REFERENCES") == 2, texto
     art = trecho(texto, "ARTICLE 1 – COFFEE MODELLING", "THIRD PART")
     assert "REFERENCES" in art and "SOUZA" in art and "WICKHAM" not in art, art
     geral = trecho(texto, "THIRD PART", None)
@@ -248,7 +291,7 @@ def test_titulo_referencias_no_artigo(render):
     r = render("artigos-titulo-refs", yaml=YAML, corpo=corpo, arquivos=arquivos())
     assert r.ok, r.log
     texto = corpo_pdf(r)
-    assert texto.count("REFERÊNCIAS") == 3, texto
+    assert texto.count("REFERÊNCIAS") == 4, texto
     art1 = trecho(texto, "ARTIGO 1 –", "ARTIGO 2 –")
     assert "SOUZA, Ana Paula" in trecho(art1, "REFERÊNCIAS", None), art1
     art2 = trecho(texto, "ARTIGO 2 –", "TERCEIRA PARTE")
