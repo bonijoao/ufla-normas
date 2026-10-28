@@ -96,6 +96,34 @@ def test_campo_desconhecido_sem_sugestao(render):
     assert sum("Campo " in a for a in avisos(r)) == 1
 
 
+def test_campos_de_editores_e_chaves_curtas(render):
+    """Chaves que o RStudio/Quarto escrevem (editor_options, zotero, ...) não
+    geram aviso; chaves curtas desconhecidas avisam sem sugestão forçada."""
+    yaml = ("editor_options:\n  chunk_output_type: console\nzotero: true\n"
+            "validate-yaml: false\nfoo: 1\nnome: x\n")
+    r = render("val_editores", yaml=yaml)
+    assert r.ok, r.log
+    for campo in ("editor_options", "zotero", "validate-yaml"):
+        assert f'"{campo}"' not in r.log, r.log
+    assert 'Campo "foo" não é usado pela extensão.' in r.log, r.log
+    assert 'Campo "nome" não é usado pela extensão.' in r.log, r.log
+    assert "você quis dizer" not in r.log, r.log
+
+
+def test_bib_com_travessao_ou_apostrofo(render):
+    """O Pandoc troca -- por – e ' por ’ no YAML: o erro explica e dá a saída."""
+    r = render("val_bib_travessao", yaml="bibliography: minhas--refs.bib\n",
+               corpo="Texto [@silva2020].", arquivos={"minhas--refs.bib": BIB})
+    assert not r.ok
+    assert 'Não encontrei o arquivo de referências "minhas–refs.bib"' in r.log, r.log
+    assert "minhas\\-\\-refs.bib" in r.log, r.log
+    # a saída sugerida funciona
+    r = render("val_bib_travessao_ok", yaml="bibliography: minhas\\-\\-refs.bib\n",
+               corpo="Texto [@silva2020].", arquivos={"minhas--refs.bib": BIB})
+    assert r.ok, r.log
+    assert "SILVA, Jo" in r.texto
+
+
 def test_errata_e_campo_conhecido(render):
     """`errata` é usado pelo template (página ERRATA) e não gera aviso."""
     r = render("val_errata", yaml='errata: "Folha 12, linha 3: onde se lê x, leia-se y."\n')

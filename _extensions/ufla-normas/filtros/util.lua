@@ -61,9 +61,10 @@ function M.levenshtein(a, b)
 end
 
 --- Opção mais parecida com `nome`, ou nil se nenhuma estiver perto o
---- bastante (distância até 3 ou até um terço do tamanho de `nome`).
+--- bastante: distância até um terço do tamanho de `nome` (mínimo 1), para
+--- que nomes curtos ("foo", "nome") não recebam sugestões sem sentido.
 function M.sugerir(nome, opcoes)
-  local limite = math.max(3, (utf8.len(nome) or #nome) // 3)
+  local limite = math.max(1, (utf8.len(nome) or #nome) // 3)
   local melhor, menor = nil, math.huge
   for _, opcao in ipairs(opcoes) do
     local d = M.levenshtein(nome, opcao)
@@ -213,7 +214,7 @@ local function identificadores(blocks)
   local function rotulo_celula(el)
     guarda(el)
     for linha in el.text:gmatch("[^\n]+") do
-      local rotulo = linha:match("^[ \t]*#|[ \t]*label:[ \t]*[\"']?([%w_:%.%-]+)")
+      local rotulo = linha:match("^[ \t]*#|[ \t]*label:[ \t]*[\"']?([A-Za-z0-9_:%.%-]+)")
       if rotulo then ids[rotulo] = true end
     end
   end
@@ -242,7 +243,7 @@ function M.crossref(doc)
   local ids_doc = identificadores(doc.blocks)
   return function(chave)
     if ids_doc[chave] then return true end
-    local prefixo = chave:match("^(%a+)%-")
+    local prefixo = chave:match("^([A-Za-z]+)%-")
     return prefixo ~= nil and prefixos[prefixo] == true
   end
 end

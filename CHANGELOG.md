@@ -29,6 +29,23 @@ escrever. Documentos da 1.x continuam renderizando; veja "Como migrar da 1.x".
 - Uma tabela dentro de quadro contava como tabela (a primeira tabela depois
   de um quadro saía "Tabela 2").
 - O campo `errata` gerava aviso de campo desconhecido.
+- "à" em nomes de autores e instituições (`{{Fundação de Amparo à Pesquisa
+  ...}}`) saía como um caractere inválido no Windows, sem aviso; letras como
+  "À" e "Ü" no fim da editora eram cortadas.
+- Obra sem autor saía com o título inteiro na citação, entre aspas em
+  páginas da internet; agora segue o manual (5.3.1.4 e Quadro 4.1):
+  "(Os grandes [...], 1981)" e "OS GRANDES clássicos das poesias líricas.".
+- `~~tachado~~`, `[sublinhado]{.underline}`, `csquotes: true` e código em nota
+  de rodapé quebravam o PDF com "Undefined control sequence".
+- `editor_options`, `zotero`, `validate-yaml`, `brand`, `resources` e
+  `csquotes` geravam aviso de campo desconhecido; nomes curtos (`foo`)
+  recebiam sugestões sem sentido.
+- `simbolos:` em forma de mapa saía em ordem diferente a cada renderização;
+  agora sai em ordem alfabética (a forma de lista mantém a ordem escrita).
+- `.bib` com `--` ou apóstrofo no nome: o erro agora explica que o Pandoc
+  troca esses caracteres e como escrever o nome.
+- O `referencias.bib` da 1.x citava o manual pelo título; agora
+  "(Universidade Federal de Lavras, 2025)".
 
 ### Adicionado
 - `tipo:` com os oito tipos do Quadro 3.1 do manual (`tcc`, `monografia`,
@@ -53,6 +70,10 @@ escrever. Documentos da 1.x continuam renderizando; veja "Como migrar da 1.x".
 - Apêndices e anexos em Markdown: `# Título {.apendice}` / `{.anexo}`, com
   `@apx-x` no texto.
 - `siglas`, `simbolos` e `glossario` no YAML.
+- Entidade com órgão subordinado (`{{Brasil. Ministério da Saúde}}`): órgão
+  superior em maiúsculas na lista e só ele na citação.
+- Trabalho em evento: número, ano e local escritos no `eventtitle` saem como
+  na NBR 6023, com só o nome do evento em maiúsculas.
 - Trabalho em outro idioma (`lang: en`, `lang: es`) com `titulo-traduzido`:
   pré-textuais em português e rótulos e referências no idioma do texto.
 - `formato: artigos` (manual, Figura 3.23): partes (`.parte`), artigos

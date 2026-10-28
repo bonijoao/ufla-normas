@@ -475,3 +475,165 @@ def test_callout_e_id_nao_sao_citacao(render):
     texto = normaliza(r.depois("INTRODUÇÃO"))
     assert "Conteúdo da dica." in texto and "Nota." in texto, texto
     assert "WICKHAM, Hadley" in r.depois("REFERÊNCIAS")
+
+
+# "à" em nomes (no Windows, o %s do Lua casa o byte 0xA0 do "à") ------------
+
+CRASE_BIB = """
+@book{fapemig_2020,
+  author = {{Fundação de Amparo à Pesquisa do Estado de Minas Gerais}},
+  title = {Relatório anual},
+  publisher = {Fapemig},
+  address = {Belo Horizonte},
+  year = {2020},
+}
+
+@book{avila_2021,
+  author = {Àvila, Maria and {Ribeiro à Silva}, José},
+  title = {Introdução à estatística},
+  publisher = {"Editora Ü"},
+  address = {Lavras},
+  year = {2021},
+}
+"""
+
+
+def test_crase_em_nomes(render):
+    r = render(
+        "crase-nomes",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\nVer [@fapemig_2020] e [@avila_2021].",
+        arquivos={"refs.bib": CRASE_BIB},
+    )
+    assert r.ok, r.log
+    assert "\ufffd" not in r.texto, r.texto
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert ("Ver (Fundação de Amparo à Pesquisa do Estado de Minas Gerais, 2020) "
+            "e (Àvila; Ribeiro à Silva, 2021).") in texto, texto
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert ("FUNDAÇÃO DE AMPARO À PESQUISA DO ESTADO DE MINAS GERAIS. Relatório "
+            "anual. Belo Horizonte: Fapemig, 2020.") in refs, refs
+    assert ("ÀVILA, Maria; RIBEIRO À SILVA, José. Introdução à estatística. "
+            "Lavras: Editora Ü, 2021.") in refs, refs
+
+
+# Documentos sem autoria (manual 5.3.1.4 e Quadro 4.1) ----------------------
+
+SEM_AUTOR_BIB = """
+@book{grandes,
+  title = {Os grandes clássicos das poesias líricas},
+  publisher = {Ex Libris},
+  year = {1981},
+}
+
+@book{estudos,
+  title = {Estudos filosóficos: homenagem a Serafim da Silva Neto},
+  publisher = {Tempo Brasileiro},
+  address = {Rio de Janeiro},
+  year = {1967},
+}
+
+@book{ingles,
+  title = {Inglês},
+  publisher = {Editora UFLA},
+  address = {Lavras},
+  year = {2012},
+}
+
+@online{canaviais,
+  title = {Nos canaviais do Brasil},
+  url = {https://exemplo.org/canaviais},
+  urldate = {2025-05-05},
+  year = {1995},
+}
+"""
+
+
+def test_sem_autoria(render):
+    r = render(
+        "sem-autoria",
+        yaml="bibliography: refs.bib",
+        corpo=("# Introdução\n\nA [@grandes]. B [@estudos, p. 4]. "
+               "C [@ingles]. D [@canaviais]."),
+        arquivos={"refs.bib": SEM_AUTOR_BIB},
+    )
+    assert r.ok, r.log
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert ("A (Os grandes [...], 1981). B (Estudos [...], 1967, p. 4). "
+            "C (Inglês, 2012). D (Nos canaviais [...], 1995).") in texto, texto
+    assert "“" not in texto
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    for esperado in (
+        "OS GRANDES clássicos das poesias líricas. [S. l.]: Ex Libris, 1981.",
+        "ESTUDOS filosóficos: homenagem a Serafim da Silva Neto. Rio de Janeiro: "
+        "Tempo Brasileiro, 1967.",
+        "INGLÊS. Lavras: Editora UFLA, 2012.",
+        "NOS CANAVIAIS do Brasil. 1995. Disponível em: "
+        "https://exemplo.org/canaviais. Acesso em: 5 maio 2025.",
+    ):
+        assert esperado in refs, (esperado, refs)
+    # a entrada pelo título não leva negrito (o destaque são as maiúsculas)
+    fonte = fonte_de(r.pdf, "clássicos", depois="REFERÊNCIAS")
+    assert fonte and "Bold" not in fonte, fonte
+
+
+# Entidade com subordinação e o referencias.bib da v1 -----------------------
+
+def test_entidade_subordinada_v1(render):
+    bib_v1 = (RAIZ / "_extensions" / "ufla-normas" / "referencias.bib").read_text(
+        encoding="utf-8")
+    r = render(
+        "entidade-subordinada",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\nConforme o manual [@UFLA2025normas].",
+        arquivos={"refs.bib": bib_v1},
+    )
+    assert r.ok, r.log
+    texto = normaliza(r.depois("INTRODUÇÃO"))
+    assert "Conforme o manual (Universidade Federal de Lavras, 2025)." in texto, texto
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert ("UNIVERSIDADE FEDERAL DE LAVRAS. Biblioteca Universitária. Manual de "
+            "normalização e estrutura de trabalhos acadêmicos. 6. ed. Lavras: UFLA, "
+            "2025.") in refs, refs
+
+
+# Trabalho em evento: número, ano e local no eventtitle ----------------------
+
+EVENTO_BIB = """
+@inproceedings{evento_completo,
+  author = {Costa, Bruno},
+  title = {Redes neurais},
+  booktitle = {Anais [...]},
+  eventtitle = {Simpósio Brasileiro de Pesquisa Operacional, 54., 2022, Campinas},
+  address = {Campinas},
+  publisher = {Sobrapo},
+  year = {2022},
+  pages = {1--12},
+}
+
+@inproceedings{evento_so_nome,
+  author = {Dias, Ana},
+  title = {Outro trabalho},
+  booktitle = {Anais [...]},
+  eventtitle = {Congresso de Estatística},
+  address = {Lavras},
+  publisher = {UFLA},
+  year = {2021},
+}
+"""
+
+
+def test_evento_numero_ano_local(render):
+    r = render(
+        "evento",
+        yaml="bibliography: refs.bib",
+        corpo="# Introdução\n\n[@evento_completo; @evento_so_nome].",
+        arquivos={"refs.bib": EVENTO_BIB},
+    )
+    assert r.ok, r.log
+    refs = normaliza(r.depois("REFERÊNCIAS"))
+    assert ("COSTA, Bruno. Redes neurais. In: SIMPÓSIO BRASILEIRO DE PESQUISA "
+            "OPERACIONAL, 54., 2022, Campinas. Anais [...]. Campinas: Sobrapo, "
+            "2022. p. 1-12.") in refs, refs
+    assert ("DIAS, Ana. Outro trabalho. In: CONGRESSO DE ESTATÍSTICA. Anais [...]. "
+            "Lavras: UFLA, 2021.") in refs, refs

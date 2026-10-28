@@ -245,6 +245,9 @@ extensão:
 | `[@souza_modelagem_2024; @costa_redes_2022]` | (Costa; Ferreira, 2022; Souza, 2024) |
 | `[@silva_a_2020; @silva_b_2020]` (mesmo autor e ano) | (Silva, 2020a, 2020b) |
 | `[@silva_sd]` (sem ano) | (Silva, [s.d.]) |
+| `[@grandes]` (sem autor; título "Os grandes clássicos...") | (Os grandes [...], 1981) |
+| `[@ingles]` (sem autor; título de uma palavra, "Inglês") | (Inglês, 2012) |
+| `[@UFLA2025normas]` (entidade com subordinação) | (Universidade Federal de Lavras, 2025) |
 | `[@chave_que_nao_existe]` | **[chave_que_nao_existe?]** em vermelho, com aviso no terminal |
 
 Citação direta com mais de três linhas: comece cada linha com `>`. Sai com
@@ -295,6 +298,30 @@ Não é preciso pôr `\textbf{}` nem `{\'e}` nos títulos: a extensão limpa
 esses comandos e põe o negrito onde a ABNT manda. Instituição como autor vai
 entre chaves duplas, para não virar "sobrenome, nome":
 `author = {{Empresa Brasileira de Pesquisa Agropecuária}}`.
+
+Órgão subordinado vai depois do órgão superior, separado por ponto:
+`author = {{Universidade Federal de Lavras. Biblioteca Universitária}}` sai
+"UNIVERSIDADE FEDERAL DE LAVRAS. Biblioteca Universitária." na lista e
+"(Universidade Federal de Lavras, 2025)" na citação (o mesmo vale para
+`{{Brasil. Ministério da Saúde}}`).
+
+Obra sem autor (manual 5.3.1.4): não preencha `author`. A entrada é pelo
+título, com a primeira palavra em maiúsculas (ou o artigo/monossílabo inicial
+e a palavra seguinte), sem negrito: "OS GRANDES clássicos das poesias
+líricas. [S. l.]: Ex Libris, 1981.". A citação traz essas palavras e
+"[...]": (Os grandes [...], 1981). Não use "Anônimo".
+
+Trabalho em evento (`@inproceedings`): a extensão não monta sozinha número,
+ano e local do evento. Escreva-os no `eventtitle`, como na NBR 6023, e use
+`booktitle = {Anais [...]}`:
+`eventtitle = {Simpósio Brasileiro de Pesquisa Operacional, 54., 2022, Campinas}`
+sai "In: SIMPÓSIO BRASILEIRO DE PESQUISA OPERACIONAL, 54., 2022, Campinas.
+Anais [...]." (só o nome do evento vai em maiúsculas). Sem `eventtitle`, sai só
+o título dos anais.
+
+Evite `--` e apóstrofo (`'`) no nome do arquivo `.bib`: o Pandoc lê o YAML
+como texto e os troca por "–" e "’" (aspas no YAML não resolvem). Renomeie o
+arquivo ou escreva com barra invertida: `bibliography: minhas\-\-refs.bib`.
 
 O `referencias.bib` do modelo tem um exemplo de cada tipo: livro, capítulo,
 artigo, dissertação, tese, trabalho em evento, página da internet, lei,
@@ -399,7 +426,8 @@ referências sempre vêm antes deles.
 siglas:                 # sai em ordem alfabética
   UFLA: Universidade Federal de Lavras
   ABNT: Associação Brasileira de Normas Técnicas
-simbolos:               # sai na ordem escrita
+simbolos:               # em lista (- "x": ...), sai na ordem escrita;
+                        # em mapa (x: ...), em ordem alfabética
   - "$\\alpha$": Nível de significância
   - "$\\beta$": Coeficiente angular
 glossario:              # sai em ordem alfabética, depois das referências
@@ -512,6 +540,7 @@ PDF sair.
 | Mensagem | O que fazer |
 |---|---|
 | `Não encontrei o arquivo de referências "refs.bib". Procurei em: C:\...\minha-pasta. Confira o nome e se ele está na mesma pasta do .qmd.` | Confira o nome do arquivo em `bibliography:` (maiúsculas, extensão `.bib`) e a pasta. O caminho é relativo à pasta do `.qmd`. |
+| `Não encontrei o arquivo de referências "minhas–refs.bib". ... O nome do arquivo tem -- ou apóstrofo (') ...` | O Pandoc trocou `--` por "–" (ou `'` por "’"). Renomeie o arquivo ou escreva `bibliography: minhas\-\-refs.bib`. |
 | `tipo: "dissertação" não existe. Você quis dizer "dissertacao"? Use um destes: tcc, monografia, monografia-licenciatura, especializacao, dissertacao, dissertacao-profissional, tese, relatorio-estagio.` | Escreva o `tipo` sem acento, como na lista. |
 | `Não encontrei o arquivo de estilo "periodico.csl" do artigo "...". Procurei em: .... Confira o nome e se ele está na mesma pasta do .qmd.` | Ponha o `.csl` na pasta do `.qmd` ou corrija o `csl=` do artigo. |
 
@@ -520,7 +549,7 @@ PDF sair.
 | Mensagem | O que fazer |
 |---|---|
 | `Campo "orientdor" desconhecido — você quis dizer "orientador"?` | Corrija o nome do campo. |
-| `Campo "x" não é usado pela extensão.` | O campo não existe; veja a [lista de campos](#escreva-aqui-o-cabeçalho-yaml). |
+| `Campo "x" não é usado pela extensão.` | O campo não existe; veja a [lista de campos](#escreva-aqui-o-cabeçalho-yaml). Nomes curtos sem parecido próximo não recebem sugestão. |
 | `Falta preencher "curso" (aparece como [preencha: curso] no PDF).` | Preencha o campo. Vale para `title`, `author`, `ano`, `curso` e `orientador`. |
 | `genero: "x" não é válido; use f (feminino) ou m (masculino).` | Use `f` ou `m` (também em `orientador-genero` e `coorientador-genero`). |
 | `tipo-trabalho "Projeto final" sem tipo: — a nota descritiva usará "Programa de Pós-Graduação em" e o título "Mestre". Defina tipo: para escolher o nível (ex.: tipo: tcc).` | Acrescente `tipo:` com o nível do seu curso. |

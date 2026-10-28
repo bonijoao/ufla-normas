@@ -120,7 +120,7 @@ local function parte_pos_textual(doc, glossario)
       -- rótulo LaTeX: o id do autor se for ASCII (é o que o link do
       -- Pandoc usa), senão "apendice-b"
       local id = b.identifier
-      if not id:match("^[%w_:%.%-]+$") then id = tipo .. "-" .. letra:lower() end
+      if not id:match("^[A-Za-z0-9_:%.%-]+$") then id = tipo .. "-" .. letra:lower() end
       nomes[id] = ROTULOS[tipo].texto .. " " .. letra
       if primeiro == nil then primeiro = #saida + 1 end
       saida:insert(titulo_pos(b, tipo, letra, id))

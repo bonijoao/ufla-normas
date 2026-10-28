@@ -85,7 +85,7 @@ end
 --- Rótulo LaTeX: o id do autor se for ASCII, senão `reserva`.
 local function rotulo(header, reserva)
   local id = header.identifier
-  if id ~= "" and id:match("^[%w_:%.%-]+$") then return id end
+  if id ~= "" and id:match("^[A-Za-z0-9_:%.%-]+$") then return id end
   return reserva
 end
 

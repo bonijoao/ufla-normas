@@ -58,6 +58,41 @@ $highlighting-macros$
 $endif$
 
 %----------------------------------------------------------------------
+% Markdown features the Pandoc LaTeX writer turns into commands from
+% optional packages (same blocks as Pandoc's default template), so that
+% ordinary Markdown never breaks the PDF:
+%   ~~x~~ and [x]{.underline} -> \st, \ul;  csquotes: true -> \enquote;
+%   verbatim code in footnotes -> \VerbatimFootnotes (after hyperref);
+%   listings: true -> \lstinline; SVG images -> \includesvg.
+% Task lists (- [ ] / - [x]) use \square/\boxtimes from amssymb (below).
+%----------------------------------------------------------------------
+\usepackage{iftex}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+$if(strikeout)$
+\ifLuaTeX
+  \usepackage{luacolor}
+  \usepackage[soul]{lua-ul}
+\else
+  \usepackage{soul}
+\fi
+$endif$
+$if(csquotes)$
+\usepackage{csquotes}
+$endif$
+$if(verbatim-in-note)$
+\usepackage{fancyvrb}
+$endif$
+$if(listings)$
+\usepackage{listings}
+\newcommand{\passthrough}[1]{#1}
+\lstset{defaultdialect=[5.3]Lua}
+\lstset{defaultdialect=[x86masm]Assembler}
+$endif$
+$if(svg)$
+\usepackage{svg}
+$endif$
+
+%----------------------------------------------------------------------
 % Math
 %----------------------------------------------------------------------
 \usepackage{amsmath}
@@ -484,6 +519,9 @@ $endfor$
   pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$}
 }
 \urlstyle{same}  % URLs in the text font, as in the manual's references
+$if(verbatim-in-note)$
+\VerbatimFootnotes % allow verbatim text in footnotes
+$endif$
 
 %----------------------------------------------------------------------
 % Babel adaptations

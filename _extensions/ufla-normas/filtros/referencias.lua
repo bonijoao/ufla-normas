@@ -49,23 +49,25 @@ local function acentua(cmd, letra, original)
 end
 
 --- Tira restos de LaTeX de um texto; `apara` também junta e corta espaços.
+--- Só classes ASCII explícitas: no Windows, o %s do Lua casa o byte 0xA0
+--- (fim do "à" em UTF-8) e o %a casa bytes de letras acentuadas.
 local function limpa_texto(s, apara)
   if s == "" then return s end
-  s = s:gsub("\\i%f[%A]", "i")
+  s = s:gsub("\\i%f[^A-Za-z]", "i")
   -- acentos de símbolo: \'{e}, \'e, {\'e}
-  s = s:gsub("\\([`'%^~\"])%s*{(%a)}", function(c, l) return acentua(c, l, l) end)
-  s = s:gsub("\\([`'%^~\"])(%a)", function(c, l) return acentua(c, l, l) end)
+  s = s:gsub("\\([`'%^~\"])[ \t\r\n]*{([A-Za-z])}", function(c, l) return acentua(c, l, l) end)
+  s = s:gsub("\\([`'%^~\"])([A-Za-z])", function(c, l) return acentua(c, l, l) end)
   -- acentos de letra: \c{c}, \c c
-  s = s:gsub("\\([cHv]){(%a)}", function(c, l) return acentua(c, l, l) end)
-  s = s:gsub("\\([cHv])%s+(%a)", function(c, l) return acentua(c, l, l) end)
+  s = s:gsub("\\([cHv]){([A-Za-z])}", function(c, l) return acentua(c, l, l) end)
+  s = s:gsub("\\([cHv])[ \t\r\n]+([A-Za-z])", function(c, l) return acentua(c, l, l) end)
   -- caracteres escapados: \& \% \_ \$ \#
   s = s:gsub("\\([&%%_%$#])", ESCAPES)
   -- comandos de formatação e outros comandos: \textbf{X} -> {X}
-  s = s:gsub("\\%a+%s*", "")
+  s = s:gsub("\\[A-Za-z]+[ \t\r\n]*", "")
   s = s:gsub("\\", "")
   s = s:gsub("[{}]", "")
   if apara then
-    s = s:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+    s = s:gsub("[ \t\r\n]+", " "):gsub("^ ", ""):gsub(" $", "")
   end
   return s
 end
@@ -137,11 +139,198 @@ local function genero_tese(genero, idioma)
   return capitaliza(genero)
 end
 
--- Limpa a editora: só texto, sem aspas ou espaços em volta.
+-- Limpa a editora: só texto, sem aspas ou espaços em volta. As aspas curvas
+-- saem como strings inteiras: numa classe [...] os bytes soltos delas
+-- cortariam o fim de letras como "À" ou "Ü".
+local VOLTA_EDITORA = { '"', "“", "”", " ", "\t", "\r", "\n" }
+
 local function limpa_editora(v)
   local s = pandoc.utils.stringify(v)
-  s = s:gsub("^[%s\"“”]+", ""):gsub("[%s\"“”]+$", "")
+  local mudou = true
+  while mudou and s ~= "" do
+    mudou = false
+    for _, q in ipairs(VOLTA_EDITORA) do
+      if s:sub(1, #q) == q then s, mudou = s:sub(#q + 1), true end
+      if #s >= #q and s:sub(-#q) == q then s, mudou = s:sub(1, -#q - 1), true end
+    end
+  end
   return s
+end
+
+-- Documentos sem autoria (manual 5.3.1.4 e Quadro 4.1) --------------------
+-- A entrada é pelo título: na referência, a primeira palavra em maiúsculas
+-- (ou o artigo/monossílabo inicial e a palavra seguinte); na citação, essas
+-- mesmas palavras seguidas de "[...]" quando o título continua:
+--   OS GRANDES clássicos das poesias líricas. [S. l.]: Ex Libris, 1981.
+--   (Os grandes [...], 1981)    (Inglês, 2012)    (Nos canaviais [...], 1995)
+
+local ARTIGOS = {
+  o = true, a = true, os = true, as = true, um = true, uma = true, uns = true, umas = true,
+  the = true, an = true,
+  el = true, la = true, lo = true, los = true, las = true, un = true, unos = true, unas = true,
+}
+
+local VOGAIS = {
+  a = true, e = true, i = true, o = true, u = true,
+  ["á"] = true, ["é"] = true, ["í"] = true, ["ó"] = true, ["ú"] = true,
+  ["à"] = true, ["â"] = true, ["ê"] = true, ["ô"] = true, ["ã"] = true,
+  ["õ"] = true, ["ü"] = true,
+}
+
+-- Encontros vocálicos de uma sílaba só (ditongos decrescentes).
+local DITONGOS = {
+  ai = true, ei = true, oi = true, ui = true, au = true, eu = true, ou = true, iu = true,
+  ["éi"] = true, ["éu"] = true, ["ói"] = true, ["ão"] = true, ["ãe"] = true,
+  ["õe"] = true, ["ãi"] = true, ["êi"] = true,
+}
+
+local function caracteres(s)
+  local t = {}
+  if utf8.len(s) == nil then return t end
+  for _, c in utf8.codes(s) do t[#t + 1] = utf8.char(c) end
+  return t
+end
+
+--- Palavra de uma sílaba: um único grupo de vogais, que é uma vogal só ou
+--- um ditongo decrescente ("Nos", "Três", "Mãe", "Pão"; não "Rio", "Rua").
+local function monossilabo(palavra)
+  local cs = caracteres(pandoc.text.lower(palavra))
+  local grupos, atual = {}, ""
+  for i, c in ipairs(cs) do
+    -- o "u" de "qu"/"gu" antes de vogal não forma sílaba
+    local vogal = VOGAIS[c] and not (c == "u" and (cs[i - 1] == "q" or cs[i - 1] == "g")
+      and cs[i + 1] ~= nil and VOGAIS[cs[i + 1]])
+    if vogal then
+      atual = atual .. c
+    elseif atual ~= "" then
+      grupos[#grupos + 1], atual = atual, ""
+    end
+  end
+  if atual ~= "" then grupos[#grupos + 1] = atual end
+  if #grupos ~= 1 then return false end
+  return utf8.len(grupos[1]) == 1 or DITONGOS[grupos[1]] == true
+end
+
+-- Pontuação ASCII e aspas em volta de uma palavra (sem classes com bytes
+-- de UTF-8: ver limpa_texto).
+local function sem_pontuacao(p)
+  p = p:gsub("^[\"'(%[]+", ""):gsub("[\"'.,:;!?)%]]+$", "")
+  for _, q in ipairs({ "“", "”", "‘", "’" }) do
+    if p:sub(1, #q) == q then p = p:sub(#q + 1) end
+    if #p >= #q and p:sub(-#q) == q then p = p:sub(1, -#q - 1) end
+  end
+  return p
+end
+
+--- Quantas palavras do título formam a entrada: 2 se a primeira for artigo
+--- ou monossílabo (e houver uma segunda), senão 1.
+local function palavras_de_entrada(palavras)
+  if #palavras >= 2 then
+    local p = sem_pontuacao(palavras[1])
+    if ARTIGOS[pandoc.text.lower(p)] or monossilabo(p) then return 2 end
+  end
+  return math.min(1, #palavras)
+end
+
+local function palavras_do_titulo(titulo)
+  local r = {}
+  for p in pandoc.utils.stringify(titulo):gmatch("[^ \t\r\n]+") do r[#r + 1] = p end
+  return r
+end
+
+--- Título curto da citação: as palavras de entrada e "[...]" se o título
+--- continua.
+local function titulo_curto(palavras, n)
+  local curto = {}
+  for i = 1, n do curto[i] = palavras[i] end
+  local s = table.concat(curto, " ")
+  s = s:gsub("[.,:;]+$", "")
+  if #palavras > n then s = s .. " [...]" end
+  return s
+end
+
+--- Título com as `n` primeiras palavras em maiúsculas.
+local function titulo_com_entrada(titulo, n)
+  local vistas = 0
+  return titulo:walk({
+    Str = function(el)
+      if vistas >= n then return nil end
+      vistas = vistas + 1
+      el.text = pandoc.text.upper(el.text)
+      return el
+    end,
+  })
+end
+
+local function sem_nomes(item)
+  return item.author == nil and item.editor == nil and item.translator == nil
+end
+
+local function entrada_pelo_titulo(item)
+  if not sem_nomes(item) or item.title == nil then return end
+  local titulo = item.title
+  if pandoc.utils.type(titulo) == "string" then titulo = pandoc.Inlines(titulo) end
+  local palavras = palavras_do_titulo(titulo)
+  local n = palavras_de_entrada(palavras)
+  if n == 0 then return end
+  item["title-short"] = titulo_curto(palavras, n)
+  item.title = titulo_com_entrada(titulo, n)
+end
+
+-- Entidade com subordinação ("Universidade Federal de Lavras. Biblioteca
+-- Universitária", "Brasil. Ministério da Saúde"): a referência traz o órgão
+-- superior em maiúsculas e o subordinado como está; a citação, só o órgão
+-- superior: (Universidade Federal de Lavras, 2025). O subordinado vai para
+-- a variável `ufla-subordinada`, que o ufla-abnt.csl imprime depois do autor.
+
+--- Posição do ". " que separa o órgão superior do subordinado: a palavra
+--- antes do ponto tem 4 letras ou mais (não é abreviação como "Prof.") e a
+--- seguinte começa com maiúscula.
+local function separa_entidade(nome)
+  local inicio = 1
+  while true do
+    local i = nome:find(". ", inicio, true)
+    if i == nil then return nil end
+    local antes = nome:sub(1, i - 1)
+    local palavra = antes:match("([^ ]+)$") or ""
+    local depois = nome:sub(i + 2)
+    local primeira = caracteres(depois)[1]
+    if (utf8.len(palavra) or 0) >= 4 and primeira ~= nil
+        and pandoc.text.lower(primeira) ~= primeira then
+      return antes, depois
+    end
+    inicio = i + 2
+  end
+end
+
+local function entidade_subordinada(item)
+  if item.author == nil or #item.author ~= 1 then return end
+  local autor = item.author[1]
+  if type(autor) ~= "table" or autor.literal == nil then return end
+  local superior, subordinada = separa_entidade(pandoc.utils.stringify(autor.literal))
+  if superior == nil then return end
+  autor.literal = superior
+  item["ufla-subordinada"] = subordinada:gsub("[ .]+$", "")
+end
+
+-- Nome do evento ----------------------------------------------------------
+-- O `eventtitle` pode trazer número, ano e local, como na NBR 6023:
+-- "Simpósio Brasileiro de Pesquisa Operacional, 54., 2022, Campinas" ->
+-- "SIMPÓSIO BRASILEIRO DE PESQUISA OPERACIONAL, 54., 2022, Campinas".
+-- Só o nome (até a primeira vírgula; depois de ";" começa outro evento) vai
+-- em maiúsculas; o ufla-abnt.csl imprime o evento como chega.
+
+local function evento_em_maiusculas(evento)
+  if pandoc.utils.type(evento) == "string" then evento = pandoc.Inlines(evento) end
+  local nome = true
+  return evento:walk({
+    Str = function(el)
+      local fim = el.text:sub(-1)
+      if nome then el.text = pandoc.text.upper(el.text) end
+      if fim == "," then nome = false elseif fim == ";" then nome = true end
+      return el
+    end,
+  })
 end
 
 -- Títulos "Referências" escritos pelo autor -----------------------------
@@ -225,6 +414,9 @@ function Pandoc(doc)
       if not NAO_LIMPAR[campo] then item[campo] = limpa_valor(valor) end
     end
     if item.publisher ~= nil then item.publisher = limpa_editora(item.publisher) end
+    entrada_pelo_titulo(item)
+    entidade_subordinada(item)
+    if item.event ~= nil then item.event = evento_em_maiusculas(item.event) end
     if item.type == "thesis" and item.genre ~= nil then
       item.genre = genero_tese(pandoc.utils.stringify(item.genre), idioma)
     elseif item.type == "thesis" and idioma ~= "pt" then

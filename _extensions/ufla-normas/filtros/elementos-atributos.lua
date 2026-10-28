@@ -16,9 +16,10 @@ para chave inexistente, "Gong e Tian (2020)" na chamada narrativa.
    último, tira essas Divs do corpo: as listas vão para os metadados que o
    template lê (`ufla-lista-siglas`, `ufla-lista-simbolos`) e o glossário vai
    para depois das referências. Siglas e glossário em ordem alfabética;
-   símbolos na ordem em que foram escritos (use a forma de lista,
-   `- "x": significado`, para manter a ordem; num mapa o Pandoc ordena as
-   chaves).
+   símbolos na ordem em que foram escritos na forma de lista
+   (`- "x": significado`). Num mapa (`x: significado`) a ordem escrita se
+   perde (o Lua percorre o mapa em ordem aleatória), então os símbolos saem
+   em ordem alfabética, sempre a mesma.
 ]]
 
 -- Carrega um módulo da pasta dos filtros. No Windows, o dofile do Lua não
@@ -228,15 +229,27 @@ local function entradas(v)
       end
     end
   elseif type(v) == "table" then
-    for k, x in pairs(v) do
-      if type(k) == "string" then junta(k, x) end
+    -- mapa: o pairs() não tem ordem; ordena para o PDF não mudar a cada render
+    local chaves = {}
+    for k in pairs(v) do
+      if type(k) == "string" then chaves[#chaves + 1] = k end
     end
+    table.sort(chaves, function(a, b)
+      local ka, kb = chave_ordem(a), chave_ordem(b)
+      if ka ~= kb then return ka < kb end
+      return a < b
+    end)
+    for _, k in ipairs(chaves) do junta(k, v[k]) end
   end
   return r
 end
 
 local function em_ordem_alfabetica(lista)
-  table.sort(lista, function(a, b) return chave_ordem(a.chave) < chave_ordem(b.chave) end)
+  table.sort(lista, function(a, b)
+    local ka, kb = chave_ordem(a.chave), chave_ordem(b.chave)
+    if ka ~= kb then return ka < kb end
+    return a.chave < b.chave
+  end)
   return lista
 end
 

@@ -73,6 +73,7 @@ local CAMPOS_CONHECIDOS = {
   "colorlinks", "linkcolor", "urlcolor", "citecolor", "filecolor", "toccolor",
   "links-as-notes", "listings", "indent", "block-headings", "mermaid",
   "biblio-config", "biblio-title", "biblatexoptions", "natbiboptions",
+  "csquotes", "editor_options", "zotero", "validate-yaml", "brand", "resources",
   -- chaves que o próprio Quarto injeta nos metadados
   "authors", "by-author", "affiliations", "by-affiliation", "labels",
   "revealjs-plugins",
@@ -164,6 +165,19 @@ end
 
 -- Regras -----------------------------------------------------------------------
 
+-- O Pandoc lê o YAML como Markdown: "--" vira "–", "---" vira "—" e "'"
+-- vira "’" (aspas no YAML não evitam). Escapar com barra invertida evita.
+local function dica_tipografia(nome)
+  if not (nome:find("–", 1, true) or nome:find("—", 1, true)
+      or nome:find("’", 1, true)) then
+    return ""
+  end
+  local escapado = nome:gsub("—", "\\-\\-\\-"):gsub("–", "\\-\\-"):gsub("’", "\\'")
+  return " O nome do arquivo tem -- ou apóstrofo ('), que o Pandoc troca por – "
+    .. "e ’ (aspas no YAML não resolvem). Renomeie o arquivo sem esses "
+    .. "caracteres ou escreva-os com barra invertida: bibliography: " .. escapado
+end
+
 local function confere_bibliography(meta, erros)
   local pasta = pandoc.system.get_working_directory()
   for _, rel in ipairs(caminhos_bib(meta.bibliography)) do
@@ -173,10 +187,11 @@ local function confere_bibliography(meta, erros)
     end
     caminho = pandoc.path.normalize(caminho)
     if not existe(caminho) then
-      erros[#erros + 1] = string.format(
+      local msg = string.format(
         'Não encontrei o arquivo de referências "%s". Procurei em: %s. '
           .. "Confira o nome e se ele está na mesma pasta do .qmd.",
         rel, pandoc.path.directory(caminho))
+      erros[#erros + 1] = msg .. dica_tipografia(rel)
     end
   end
 end

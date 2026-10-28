@@ -367,3 +367,52 @@ def test_quadro_nao_conta_como_tabela(render):
     assert "Tabela 1 – Tabela de teste" in texto
     assert "Tabela 2" not in texto
     assert "duplicate" not in r.log.lower()
+
+
+# Símbolos em forma de mapa: ordem estável (por chave) ------------------------
+
+YAML_SIMBOLOS_MAPA = """simbolos:
+  zeta: Sexta letra
+  alfa: Primeira letra
+  mu: Décima segunda letra
+  beta: Segunda letra
+  épsilon: Quinta letra
+"""
+
+
+def test_simbolos_mapa_em_ordem(render):
+    ordens = []
+    for i in (1, 2):
+        r = render(f"simbolos-mapa-{i}", yaml=YAML_SIMBOLOS_MAPA,
+                   corpo="# Introdução\n\nTexto.\n")
+        assert r.ok, r.log
+        pag = junta(paginas(r)[indice_pagina(r, "LISTA DE SÍMBOLOS")])
+        nomes = ["Primeira", "Segunda", "Quinta", "Décima", "Sexta"]
+        ordens.append(sorted(nomes, key=pag.index))
+    assert ordens[0] == ["Primeira", "Segunda", "Quinta", "Décima", "Sexta"], ordens
+    assert ordens[0] == ordens[1]
+
+
+# Markdown comum: tachado, sublinhado, lista de tarefas, aspas ---------------
+
+def test_markdown_comum(render):
+    corpo = (
+        "# Introdução\n\n"
+        "Texto ~~riscado~~ e [sublinhado]{.underline} no meio.\n\n"
+        "- [ ] tarefa aberta\n- [x] tarefa feita\n\n"
+        "Ele disse \"entre aspas\" e 'simples'.[^1]\n\n"
+        "[^1]: Nota com código `x <- 1`{.r}.\n"  # \VERB: verbatim-in-note
+    )
+    r = render("markdown-comum", corpo=corpo)
+    assert r.ok, r.log
+    texto = junta(r.depois("INTRODUÇÃO"))
+    for trecho in ("riscado", "sublinhado", "tarefa aberta", "tarefa feita",
+                   "“entre aspas”", "Nota com código x <- 1"):
+        assert trecho in texto, (trecho, texto)
+
+
+def test_csquotes(render):
+    r = render("csquotes", yaml="csquotes: true",
+               corpo="# Introdução\n\nEle disse \"entre aspas\".\n")
+    assert r.ok, r.log
+    assert "entre aspas" in junta(r.depois("INTRODUÇÃO"))
