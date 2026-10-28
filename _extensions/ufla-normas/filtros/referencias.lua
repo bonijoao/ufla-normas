@@ -189,46 +189,6 @@ end
 
 -- Citações sem entrada ---------------------------------------------------
 
-local PREFIXOS_CROSSREF = {
-  fig = true, tbl = true, sec = true, eq = true, lst = true, thm = true, lem = true,
-  cor = true, prp = true, cnj = true, def = true, exm = true, exr = true, sol = true,
-  rem = true, qdr = true, apx = true, anx = true,
-  -- callouts (Quarto >= 1.4)
-  nte = true, tip = true, wrn = true, imp = true, cau = true,
-}
-
--- Identificadores de elementos do documento: qualquer @chave igual a um deles
--- é referência cruzada, mesmo com um prefixo que a lista acima não conhece.
-local function identificadores(blocks)
-  local ids = {}
-  local function guarda(el)
-    if el.identifier ~= nil and el.identifier ~= "" then ids[el.identifier] = true end
-    -- células de código: #| label: fig-x
-    if el.attributes ~= nil then
-      local rotulo = el.attributes["label"]
-      if rotulo ~= nil and rotulo ~= "" then ids[rotulo] = true end
-    end
-  end
-  local function rotulo_celula(el)
-    guarda(el)
-    for linha in el.text:gmatch("[^\n]+") do
-      local rotulo = linha:match("^%s*#|%s*label:%s*[\"']?([%w_:%.%-]+)")
-      if rotulo then ids[rotulo] = true end
-    end
-  end
-  blocks:walk({
-    Header = guarda, Div = guarda, Span = guarda, Figure = guarda,
-    Table = guarda, Image = guarda, Link = guarda, CodeBlock = rotulo_celula,
-  })
-  return ids
-end
-
-local function eh_crossref(chave, ids_doc)
-  if ids_doc[chave] then return true end
-  local prefixo = chave:match("^(%a+)%-")
-  return prefixo ~= nil and PREFIXOS_CROSSREF[prefixo] == true
-end
-
 local function escapa_latex(s)
   return (s:gsub("[\\{}_&%%#%$~%^]", function(c)
     if c == "\\" then return "\\textbackslash{}" end
@@ -258,16 +218,6 @@ function Pandoc(doc)
 
   local idioma = pandoc.utils.stringify(doc.meta.lang or "pt"):sub(1, 2):lower()
 
-  -- custom crossref do Quarto (crossref: custom: - key: qdr)
-  local crossref = doc.meta.crossref
-  if type(crossref) == "table" and crossref.custom then
-    for _, c in ipairs(crossref.custom) do
-      if type(c) == "table" and c.key then
-        PREFIXOS_CROSSREF[pandoc.utils.stringify(c.key)] = true
-      end
-    end
-  end
-
   local ids, chaves = {}, {}
   for _, item in ipairs(refs) do
     for campo, valor in pairs(item) do
@@ -283,10 +233,10 @@ function Pandoc(doc)
   doc.meta.references = refs
   doc.meta.bibliography = nil
 
-  local ids_doc = identificadores(doc.blocks)
+  local eh_crossref = util.crossref(doc)
   local faltando, avisadas = {}, {}
   local function falta(chave)
-    if ids[chave] or eh_crossref(chave, ids_doc) then return false end
+    if ids[chave] or eh_crossref(chave) then return false end
     if not avisadas[chave] then
       avisadas[chave] = true
       faltando[#faltando + 1] = "@" .. chave

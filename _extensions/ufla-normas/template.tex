@@ -393,17 +393,17 @@ $endif$
 
     \vfill
 
-    {\Large\textbf{\MakeUppercase{$author$}}}
+    {\Large\textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}}
 
     \vfill
 
-    {\LARGE\textbf{\MakeUppercase{$title$}}%
+    {\LARGE\textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$}%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
 
     \vfill
 
     {\Large\textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par}
-    {\Large\textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}}
+    {\Large\textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}}
     \renewcommand{\baselinestretch}{1.5}\normalsize
   \end{center}%
 }
@@ -416,11 +416,11 @@ $endif$
 \newcommand{\imprimeFolhaRosto}{%
   \newpage
   \begin{center}
-    \textbf{\MakeUppercase{$author$}}
+    \textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}
 
     \vspace{\stretch{1}}
 
-    \textbf{\MakeUppercase{$title$}%
+    \textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
 
     \vspace{\stretch{.10}}
@@ -435,13 +435,13 @@ $endif$
 
     \vspace{\stretch{1}}
 
-    $if(orientador)${\textbf{$orientador$}\par $ufla-orientador-rotulo$}$endif$
+    {\textbf{$if(orientador)$$orientador$$else$\textcolor{red}{[preencha: orientador]}$endif$}\par $ufla-orientador-rotulo$}
     $if(coorientador)$\par\vspace{\stretch{.25}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
 
     \vspace{\stretch{.86}}
 
     \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
-    \textbf{\MakeUppercase{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}}
+    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}
     \renewcommand{\baselinestretch}{1.5}\normalsize
   \end{center}%
 }
@@ -472,12 +472,12 @@ $endif$
       $if(subtitle)$$title$\ : $subtitle$$else$$title$$endif$ /
       $if(fc-autores)$$fc-autores$$else$$author$$endif$.
       -- $if(cidade)$$cidade$$else$Lavras$endif$ : UFLA,
-      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$.\\
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$.\\
       \tab \pageref{LastPage} p. :
       $if(fc-ilust)$$fc-ilust$$else$il.$endif$
       \vfil
       $if(fc-tipo)$\tab $fc-tipo$--Universidade Federal de Lavras,
-      $if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$. \\$endif$
+      $if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$. \\$endif$
       $if(orientador)$\tab $ufla-orientador-rotulo$: $orientador$. \\$endif$
       $if(coorientador)$\tab $ufla-coorientador-rotulo$: $coorientador$. \\$endif$
       \tab Bibliografia.
@@ -499,11 +499,11 @@ $endif$
   \newpage
   \renewcommand{\baselinestretch}{1}\normalsize
   \begin{center}
-    \textbf{\MakeUppercase{$author$}}
+    \textbf{$if(author)$\MakeUppercase{$author$}$else$\textcolor{red}{[preencha: author]}$endif$}
 
     \vspace{\stretch{0.6}}
 
-    \textbf{\MakeUppercase{$title$}%
+    \textbf{$if(title)$\MakeUppercase{$title$}$else$\textcolor{red}{[preencha: title]}$endif$%
     $if(subtitle)$: {\MakeUppercase{$subtitle$}}$endif$}
 
     \vspace{\baselineskip}
@@ -518,21 +518,24 @@ $endif$
 
   $if(defesa)$\noindent APROVADA em $defesa$.$endif$
 
+  % no list without members: an empty itemize is a LaTeX error
+  $if(ufla-tem-banca)$
   \begin{itemize}[align=left, left=0cm, leftmargin=!, labelwidth=5cm, labelsep=2ex, noitemsep, nosep]
     $if(banca-um-nome)$\item[$banca-um-nome$] $if(banca-um-inst)$$banca-um-inst$$endif$$endif$
     $if(banca-dois-nome)$\item[$banca-dois-nome$] $if(banca-dois-inst)$$banca-dois-inst$$endif$$endif$
     $if(banca-tres-nome)$\item[$banca-tres-nome$] $if(banca-tres-inst)$$banca-tres-inst$$endif$$endif$
     $if(banca-quatro-nome)$\item[$banca-quatro-nome$] $if(banca-quatro-inst)$$banca-quatro-inst$$endif$$endif$
   \end{itemize}
+  $endif$
 
   \vspace{\stretch{.6}}
 
   \begin{center}
-    $if(orientador)${\textbf{$orientador$}\par $ufla-orientador-rotulo$}$endif$
+    {\textbf{$if(orientador)$$orientador$$else$\textcolor{red}{[preencha: orientador]}$endif$}\par $ufla-orientador-rotulo$}
     $if(coorientador)$\par\vspace{\stretch{.5}}{\textbf{$coorientador$}\par $ufla-coorientador-rotulo$}$endif$
     \vspace*{\stretch{.6}}
     \textbf{\MakeUppercase{$if(cidade)$$cidade$$else$Lavras-MG$endif$}}\par
-    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\the\year$endif$$endif$}
+    \textbf{$if(ano)$$ano$$else$$if(date)$$date$$else$\textcolor{red}{[preencha: ano]}$endif$$endif$}
   \end{center}
 
   \renewcommand{\baselinestretch}{1.5}\normalsize

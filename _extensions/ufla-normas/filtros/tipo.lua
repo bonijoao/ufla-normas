@@ -8,6 +8,7 @@ campos calculados que o template.tex lê:
   ufla-coorientador-rotulo "Coorientador" ou "Coorientadora"
   ufla-stricto             true para dissertações e teses
   ufla-tipo                chave normalizada ("dissertacao", "tese", ...)
+  ufla-tem-banca           true se algum banca-*-nome está preenchido
 
 Sobrescritas: `tipo-trabalho` troca o nome (gênero em `genero: f|m`),
 `titulo-pretendido` troca o título e `instituicao` a instituição.
@@ -155,6 +156,11 @@ function Meta(meta)
   meta["ufla-tipo-nome"] = pandoc.MetaInlines(nome)
   meta["ufla-tipo"] = chave
   meta["ufla-stricto"] = STRICTO[chave] == true
+  local banca = false
+  for _, n in ipairs({ "um", "dois", "tres", "quatro" }) do
+    banca = banca or not vazio(meta["banca-" .. n .. "-nome"])
+  end
+  meta["ufla-tem-banca"] = banca
   rotulos(meta)
   return meta
 end

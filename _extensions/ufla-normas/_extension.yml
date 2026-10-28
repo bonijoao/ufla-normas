@@ -12,10 +12,12 @@ contributes:
       # are chapters, so numbering starts at "1 INTRODUÇÃO"
       csl: ufla-abnt.csl
       top-level-division: chapter
-      # Order matters: referencias.lua cleans the bibliography (and marks
-      # missing keys) before citacoes.lua reads it; Quarto runs citeproc
-      # after all of these
+      # Order matters: validar.lua checks the YAML first (and stops on a
+      # missing bibliography file or unknown tipo); referencias.lua cleans
+      # the bibliography (and marks missing keys) before citacoes.lua reads
+      # it; Quarto runs citeproc after all of these
       filters:
+        - filtros/validar.lua
         - filtros/referencias.lua
         - filtros/citacoes.lua
         - filtros/tipo.lua
