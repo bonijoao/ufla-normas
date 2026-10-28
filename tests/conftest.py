@@ -54,9 +54,20 @@ class Render:
         return paginas[n - 1] if 1 <= n <= len(paginas) else ""
 
     def depois(self, marcador: str) -> str:
-        linhas = self.texto.splitlines(keepends=True)
+        """Texto após a primeira linha que contém `marcador` (sem diferenciar
+        maiúsculas), buscando só nas páginas posteriores à do SUMÁRIO para
+        pular o próprio sumário. Sem página SUMÁRIO, busca no texto todo."""
+        paginas = self.texto.split("")
+        inicio = 0
+        for i, pag in enumerate(paginas):
+            if "SUMÁRIO" in pag:
+                inicio = i + 1
+                break
+        alvo = "".join(paginas[inicio:])
+        chave = marcador.casefold()
+        linhas = alvo.splitlines(keepends=True)
         for i, linha in enumerate(linhas):
-            if marcador in linha:
+            if chave in linha.casefold():
                 return "".join(linhas[i + 1:])
         return ""
 
