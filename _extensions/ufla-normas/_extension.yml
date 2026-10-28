@@ -6,9 +6,14 @@ contributes:
   formats:
     pdf:
       template: template.tex
-      cite-method: natbib
-      biblio-style: abntex2-alf
-      pdf-engine: pdflatex
+      pdf-engine: lualatex
+      lang: pt-BR
+      # citeproc (Pandoc) with the bundled ABNT/UFLA style; "#" headings
+      # are chapters, so numbering starts at "1 INTRODUÇÃO"
+      csl: ufla-abnt.csl
+      top-level-division: chapter
+      filters:
+        - filtros/citacoes.lua
       keep-tex: false
       date-format: "YYYY"
       toc: false

@@ -13,11 +13,14 @@
 %----------------------------------------------------------------------
 % Encoding, fonts, language
 %----------------------------------------------------------------------
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+% Engine: LuaLaTeX (pdf-engine: lualatex in _extension.yml).
+% Text in TeX Gyre Termes (Times) through fontspec, so Unicode input
+% (μ, β, ≤, ő, ł, …) works without inputenc. Math stays in Times (mathptmx);
+% sans and mono stay at the fontspec defaults (Latin Modern), as in Pandoc.
 \usepackage[brazil]{babel}
-\usepackage{pslatex}       % Times New Roman (text), Helvetica (sans), Courier (mono)
 \usepackage{mathptmx}      % Times in math mode
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
 
 %----------------------------------------------------------------------
 % Utility packages (order matters)
@@ -261,18 +264,6 @@ $endif$
 \makeatother
 
 %----------------------------------------------------------------------
-% References section helper
-%----------------------------------------------------------------------
-\newcommand\referencias{%
-  \phantomsection%
-  \addcontentsline{toc}{chapter}{\numberline{} REFERÊNCIAS}%
-  \renewcommand{\bibname}{%
-    \centering\vspace{1.8ex}%
-    \bfseries REFERÊNCIAS\par
-    \vspace{-1.8ex}}%
-}
-
-%----------------------------------------------------------------------
 % Appendices and annexes (alphanumeric labels: A, B, …, Z, AA, AB, …)
 %----------------------------------------------------------------------
 \newcounter{apendice}[chapter]
@@ -295,25 +286,72 @@ $endif$
 \newcommand{\linhadir}[1]{\multicolumn{1}{c|}{#1}}
 
 %----------------------------------------------------------------------
-% Citations: abntex2cite (author-date, bold title, et al. in italic after 1st author with >3)
-% Must be loaded BEFORE hyperref.
-% ABNThyperref=false: store plain year text in b@key++YEAR instead of
-% \hyper@@link{...}{year}, which avoids a \@citeyear/\@ mismatch in pass 3.
+% Citations and references: Pandoc citeproc + ufla-abnt.csl
+% Macros the Pandoc 3 LaTeX writer emits (lists, images, citeproc output).
 %----------------------------------------------------------------------
-\usepackage[alf, abnt-etal-list=3, abnt-emphasize=bf]{abntex2cite}
-\setboolean{ABNThyperref}{false}
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% Natbib-compatible aliases so Pandoc-generated \citep{} and \citet{} work
 \makeatletter
-\providecommand{\citep}[2][]{%
-  \def\@citearg{#1}%
-  \ifx\@citearg\@empty\cite{#2}\else\cite[#1]{#2}\fi%
-}
-\providecommand{\citet}[2][]{%
-  \def\@citearg{#1}%
-  \ifx\@citearg\@empty\citeonline{#2}\else\citeonline[#1]{#2}\fi%
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
 }
 \makeatother
+
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+
+% REFERÊNCIAS (manual 5.2): title uppercase, bold, centred, unnumbered and in
+% the sumário; entries left-aligned, single spacing, one blank line between
+% them, no hanging indent, no hyphenation. The CSLReferences environment
+% prints the title itself, so it shows up both where the author puts
+% ::: {#refs} and at the end of the document (Pandoc's default place).
+\newcommand\referencias{%
+  \clearpage
+  \phantomsection
+  \addcontentsline{toc}{chapter}{\numberline{}\MakeUppercase{\refname}}%
+  \begin{center}\bfseries\MakeUppercase{\refname}\end{center}%
+}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.25cm}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\referencias
+  \singlespacing
+  \begin{list}{}{%
+   \setlength{\itemindent}{0pt}%
+   \setlength{\leftmargin}{0pt}%
+   \setlength{\parsep}{0pt}%
+   \setlength{\topsep}{0pt}%
+   % hanging indent only if the CSL asks for it (ufla-abnt.csl does not)
+   \ifodd #1
+    \setlength{\leftmargin}{\cslhangindent}%
+    \setlength{\itemindent}{-1\cslhangindent}%
+   \fi
+   % entry-spacing="1": one blank single-spaced line between entries
+   \setlength{\itemsep}{#2\baselineskip}}%
+  \raggedright\hyphenpenalty=10000\relax}
+ {\end{list}}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 %----------------------------------------------------------------------
 % Hyperref (always last before document)
@@ -325,24 +363,7 @@ $endif$
   pdfsubject={$if(tipo-trabalho)$$tipo-trabalho$$else$Trabalho acadêmico$endif$ — UFLA},
   pdfkeywords={$for(keywords)$$keywords$$sep$; $endfor$}
 }
-
-% Override hyperref's \bibcite to store plain text in b@labels.
-% Reason: \@input{aux} inside \document runs BEFORE \AtBeginDocument hooks, so
-% we must redefine \bibcite here in the preamble (not via \AtBeginDocument).
-% Without this, hyperref's \bibcite stores \hyper@@link in b@key++YEAR, which
-% causes abntex2cite's {\yearstyle\@citeyear\@} to fail with
-% "Use of \@ doesn't match its definition" in the third pdflatex pass.
-\makeatletter
-\def\bibcite#1#2{\@newl@bel{b}{#1}{#2}}
-\makeatother
-
-% Patch \@lbibitem so abntex2cite's \abntnextkey is set even when hyperref
-% overwrites \@lbibitem (hyperref is loaded after abntex2cite, so its
-% definition wins; we add \gdef\abntnextkey{#2} to restore the tracking).
-\makeatletter
-\let\abnt@orig@lbibitem\@lbibitem
-\def\@lbibitem[#1]#2{\gdef\abntnextkey{#2}\abnt@orig@lbibitem[{#1}]{#2}}
-\makeatother
+\urlstyle{same}  % URLs in the text font, as in the manual's references
 
 %----------------------------------------------------------------------
 % Babel adaptations
@@ -705,16 +726,9 @@ $body$
 %%======================================================================
 
 %----------------------------------------------------------------------
-% REFERÊNCIAS (mandatory) — no section number, UPPERCASE centered title
+% REFERÊNCIAS (mandatory) — generated by citeproc inside the body, where
+% the author puts ::: {#refs} or at the end; the CSLReferences environment
+% (preamble) prints the unnumbered "REFERÊNCIAS" title.
 %----------------------------------------------------------------------
-$if(bibliography)$
-\referencias
-\bibliographystyle{$if(biblio-style)$$biblio-style$$else$abntex2-alf$endif$}
-\citeoption{abnt-etal-text=it}
-\citeoption{abnt-etal-cite=3}
-\citeoption{abnt-missing-year=sd}
-\citeoption{abnt-nbr10520=1988}
-\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
-$endif$
 
 \end{document}

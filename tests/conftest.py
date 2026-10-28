@@ -112,3 +112,31 @@ def render():
                       pdf=pdf if pdf.exists() else None)
 
     return _render
+
+
+def fonte_de(pdf_path, trecho, depois=None):
+    """Nome da fonte do primeiro trecho de texto (span do PyMuPDF) que contém
+    `trecho`. Com `depois`, só procura após a última linha cujo texto é
+    exatamente `depois` (por exemplo, o título "REFERÊNCIAS", pulando o
+    sumário). Devolve "" se não achar."""
+    pymupdf = pytest.importorskip("pymupdf")
+    spans = []
+    with pymupdf.open(str(pdf_path)) as doc:
+        for pagina in doc:
+            for bloco in pagina.get_text("dict")["blocks"]:
+                for linha in bloco.get("lines", []):
+                    texto_linha = "".join(s["text"] for s in linha["spans"]).strip()
+                    spans.append(("linha", texto_linha))
+                    for s in linha["spans"]:
+                        spans.append((s["font"], s["text"]))
+    inicio = 0
+    if depois is not None:
+        marcas = [i for i, (tipo, txt) in enumerate(spans)
+                  if tipo == "linha" and txt == depois]
+        if not marcas:
+            return ""
+        inicio = marcas[-1] + 1
+    for fonte, texto in spans[inicio:]:
+        if fonte != "linha" and trecho in texto:
+            return fonte
+    return ""
