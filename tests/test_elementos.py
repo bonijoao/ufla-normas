@@ -393,6 +393,39 @@ def test_simbolos_mapa_em_ordem(render):
     assert ordens[0] == ordens[1]
 
 
+# Trabalho sem citações: nada de lista REFERÊNCIAS vazia ----------------------
+
+@pytest.mark.parametrize("nome,yaml,corpo", [
+    ("apendice", "", "# Introdução\n\nTexto.\n\n# Roteiro {#apx-r .apendice}\n\nVeja o @apx-r."),
+    ("anexo", "", "# Introdução\n\nTexto.\n\n# Lei {.anexo}\n\nX."),
+    ("glossario", "glossario:\n  Termo: Definição do termo.\n", "# Introdução\n\nTexto."),
+    ("refs-do-autor", "", "# Introdução\n\nTexto.\n\n::: {#refs}\n:::"),
+])
+def test_sem_citacoes_nao_gera_lista_vazia(render, nome, yaml, corpo):
+    """Um CSLReferences vazio derrubava o LaTeX ("missing \\item")."""
+    r = render(f"sem-citacoes-{nome}", yaml=yaml, corpo=corpo)
+    assert r.ok, r.log
+    assert "REFERÊNCIAS" not in r.texto
+    assert "Texto." in r.texto or "Veja o" in r.texto
+
+
+@pytest.mark.parametrize("nome,yaml,corpo", [
+    ("nocite", 'nocite: "@silva_livro_2020"\n', "# Introdução\n\nTexto."),
+    ("campo-yaml", 'agradecimentos: "Como diz @silva_livro_2020."\n', "# Introdução\n\nTexto."),
+    ("glossario", "glossario:\n  Termo: Definido por @silva_livro_2020.\n", "# Introdução\n\nTexto."),
+    ("apendice", "", "# Introdução\n\nTexto.\n\n# Roteiro {.apendice}\n\nSegundo @silva_livro_2020."),
+])
+def test_citacao_fora_do_corpo_mantem_a_lista(render, nome, yaml, corpo):
+    r = render(
+        f"com-citacao-{nome}",
+        yaml="bibliography: refs.bib\n" + yaml,
+        corpo=corpo + "\n\n# Último {.anexo}\n\nX.",
+        arquivos={"refs.bib": BIB},
+    )
+    assert r.ok, r.log
+    assert "SILVA, João. Livro de teste" in junta(r.depois("REFERÊNCIAS"))
+
+
 # Markdown comum: tachado, sublinhado, lista de tarefas, aspas ---------------
 
 def test_markdown_comum(render):
