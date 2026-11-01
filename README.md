@@ -1,17 +1,6 @@
 # ufla-normas
 
-Extensão do Quarto que gera em PDF o trabalho acadêmico (TCC, monografia,
-dissertação, tese, relatório de estágio) nas normas da **Universidade Federal
-de Lavras (UFLA)**: *Manual de normalização e estrutura de trabalhos
-acadêmicos*, 6. ed. (2025).
-
-Você preenche o cabeçalho YAML e escreve em Markdown. A extensão monta capa,
-folha de rosto, ficha catalográfica, folha de aprovação, resumo, abstract,
-indicadores de impacto, listas e sumário, e formata citações e referências
-pela ABNT como o manual pede. Não é preciso saber LaTeX.
-
-Versão atual: **2.1.0**. Quem vem da 1.x deve ler
-[Migrar da versão 1.x](#migrar-da-versão-1x).
+Extensão do Quarto que gera em PDF o trabalho acadêmico (TCC, monografia, dissertação, tese, relatório de estágio) nas normas da **Universidade Federal de Lavras (UFLA)**: *Manual de normalização e estrutura de trabalhos acadêmicos*, 6. ed. (2025).
 
 ## Sumário
 
@@ -33,8 +22,7 @@ Versão atual: **2.1.0**. Quem vem da 1.x deve ler
 ### Requisitos
 
 - [Quarto](https://quarto.org) 1.4 ou mais novo.
-- Uma distribuição LaTeX com **LuaLaTeX** e a fonte **TeX Gyre Termes**
-  (equivalente à Times):
+- Uma distribuição LaTeX com **LuaLaTeX** e a fonte **TeX Gyre Termes** (equivalente à Times):
   - **TinyTeX** (o LaTeX que o Quarto instala com `quarto install tinytex`):
     rode uma vez `tlmgr install tex-gyre`.
   - **MiKTeX**: instala os pacotes que faltarem na primeira renderização
@@ -56,19 +44,13 @@ O comando cria:
 - `imgs/grafico-exemplo.png`: a figura do exemplo;
 - `_extensions/`: a extensão (não mexa).
 
-Abra o `.qmd`, troque os textos entre aspas no cabeçalho e renderize (botão
-**Render** no RStudio/Positron, ou `quarto render <nome-da-pasta>.qmd`). O
-exemplo mostra um único aviso no terminal, o lembrete da versão final:
+Abra o `.qmd`, troque os textos entre aspas no cabeçalho e renderize (botão **Render** no RStudio/Positron, ou `quarto render <nome-da-pasta>.qmd`). O exemplo mostra um aviso no terminal, o lembrete da versão final:
 
 ```
 [ufla-normas] AVISO: Lembrete para a versão final: dissertações e teses precisam de folha de aprovação (defesa:), ficha catalográfica e indicadores de impacto.
 ```
 
-É de propósito: o modelo não traz data de defesa, banca, ficha nem
-indicadores de exemplo, para que nenhum dado inventado vá parar no PDF
-entregue. Esses campos estão comentados no cabeçalho; preencha-os depois da
-defesa (veja [Versão final](#versão-final)). Depois apague o texto de
-exemplo e escreva o seu.
+O modelo não traz data de defesa, banca, ficha nem indicadores de exemplo, para que nenhum dado inventado vá parar no PDF entregue. Esses campos estão comentados no cabeçalho; preencha-os depois da defesa (veja [Versão final](#versão-final)). Depois apague o texto de exemplo e escreva o seu.
 
 ### Já tenho um .qmd
 
