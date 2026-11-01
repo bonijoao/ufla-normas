@@ -88,6 +88,26 @@ format:
 Para atualizar depois, rode `quarto add bonijoao/ufla-normas` de novo. Para
 ficar na versão antiga: `quarto add bonijoao/ufla-normas@v1.0.0`.
 
+### Ajuda do editor (opcional)
+
+Com a extensão [Quarto Wizard](https://m.canouil.dev/quarto-wizard/) no VS Code
+ou no Positron, o editor oferece trechos prontos em qualquer `.qmd`: comece a
+digitar `figura`, `tabela`, `quadro`, `apendice`, `anexo`, `parte`, `artigo`,
+`referencias` ou `versao-final` e escolha na lista.
+
+O Wizard também completa e confere os campos, mas só os que estão dentro de
+`format:`. O modelo os deixa no topo do cabeçalho, onde funcionam igual, sem
+essa ajuda. Se preferir tê-la, mova os campos da extensão para lá (`title`,
+`author`, `abstract`, `keywords` e `bibliography` continuam no topo):
+
+```yaml
+format:
+  ufla-normas-pdf:
+    tipo: dissertacao
+    ano: "2026"
+    curso: "Agronomia/Fitotecnia"
+```
+
 ## Escreva aqui: o cabeçalho YAML
 
 Cabeçalho mínimo:

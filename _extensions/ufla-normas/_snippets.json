@@ -1,0 +1,108 @@
+{
+  "Figura": {
+    "prefix": "figura",
+    "body": [
+      "![${1:Legenda da figura.}](${2:imgs/grafico.png}){#fig-${3:nome} fonte=\"${4:Elaboração própria (2026)}\" width=80%}$0"
+    ],
+    "description": "Figura com título acima e fonte abaixo."
+  },
+  "Figura em célula R": {
+    "prefix": "figura-r",
+    "body": [
+      "```{r}",
+      "#| label: fig-${1:nome}",
+      "#| fig-cap: \"${2:Legenda da figura.}\"",
+      "#| fig-fonte: \"${3:Elaboração própria (2026)}\"",
+      "${4:plot(1:3)}",
+      "```$0"
+    ],
+    "description": "Figura gerada em célula de código R, com fonte."
+  },
+  "Tabela": {
+    "prefix": "tabela",
+    "body": [
+      "| ${1:Coluna 1} | ${2:Coluna 2} |",
+      "|---|---:|",
+      "| ${3:texto} | ${4:1,0} |",
+      "",
+      ": ${5:Legenda da tabela.} {#tbl-${6:nome} fonte=\"${7:Elaboração própria (2026)}\"}$0"
+    ],
+    "description": "Tabela com título acima e fonte abaixo."
+  },
+  "Quadro": {
+    "prefix": "quadro",
+    "body": [
+      "::: {#qdr-${1:nome} quadro=\"${2:Título do quadro}\" fonte=\"${3:Elaboração própria (2026)}\"}",
+      "",
+      "| ${4:Conceito} | ${5:Definição} |",
+      "|---|---|",
+      "| ${6:termo} | ${7:texto} |",
+      "",
+      ":::$0"
+    ],
+    "description": "Quadro (texto em células) com título e fonte."
+  },
+  "Apêndice": {
+    "prefix": "apendice",
+    "body": [
+      "# ${1:Título do apêndice} {#apx-${2:nome} .apendice}",
+      "",
+      "$0"
+    ],
+    "description": "Apêndice: APÊNDICE A – TÍTULO, depois das referências."
+  },
+  "Anexo": {
+    "prefix": "anexo",
+    "body": [
+      "# ${1:Título do anexo} {.anexo}",
+      "",
+      "$0"
+    ],
+    "description": "Anexo: ANEXO A – TÍTULO, depois das referências."
+  },
+  "Parte": {
+    "prefix": "parte",
+    "body": [
+      "# ${1:Primeira parte} {.parte}",
+      "",
+      "$0"
+    ],
+    "description": "Parte do trabalho no formato de artigos (formato: artigos)."
+  },
+  "Artigo": {
+    "prefix": "artigo",
+    "body": [
+      "# ${1:Título do artigo} {.artigo nota=\"${2:Artigo redigido conforme a NBR 6022 (ABNT, 2018).}\"}",
+      "",
+      "$0"
+    ],
+    "description": "Artigo com referências próprias, no formato de artigos (formato: artigos)."
+  },
+  "Lista de referências aqui": {
+    "prefix": "referencias",
+    "body": [
+      "::: {#refs}",
+      ":::$0"
+    ],
+    "description": "Põe a lista REFERÊNCIAS neste ponto exato do texto."
+  },
+  "Versão final": {
+    "prefix": "versao-final",
+    "body": [
+      "defesa: \"${1:data da defesa}\"",
+      "banca-um-nome: \"${2:nome}\"",
+      "banca-um-inst: \"${3:instituição}\"",
+      "banca-dois-nome: \"${4:nome}\"",
+      "banca-dois-inst: \"${5:instituição}\"",
+      "ficha-catalografica: true",
+      "fc-autor-sobrenome: \"${6:copie da ficha da Biblioteca Universitária}\"",
+      "fc-autores: \"${7:copie da ficha da Biblioteca Universitária}\"",
+      "fc-tipo: \"${8:copie da ficha da Biblioteca Universitária}\"",
+      "fc-catalogacao: \"${9:copie da ficha da Biblioteca Universitária}\"",
+      "fc-classificacao: \"${10:copie da ficha da Biblioteca Universitária}\"",
+      "indicadores-impacto-texto: \"${11:texto pedido pela Resolução PRPG n. 012/2024}\"",
+      "impact-indicators-texto: \"${12:text required by Resolução PRPG n. 012/2024}\"$0"
+    ],
+    "description": "Campos da versão final, para o cabeçalho YAML: banca, ficha e indicadores de impacto."
+  }
+}
