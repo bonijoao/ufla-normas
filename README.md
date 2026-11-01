@@ -10,7 +10,7 @@ folha de rosto, ficha catalográfica, folha de aprovação, resumo, abstract,
 indicadores de impacto, listas e sumário, e formata citações e referências
 pela ABNT como o manual pede. Não é preciso saber LaTeX.
 
-Versão atual: **2.0.0**. Quem vem da 1.x deve ler
+Versão atual: **2.1.0**. Quem vem da 1.x deve ler
 [Migrar da versão 1.x](#migrar-da-versão-1x).
 
 ## Sumário
@@ -87,6 +87,26 @@ format:
 
 Para atualizar depois, rode `quarto add bonijoao/ufla-normas` de novo. Para
 ficar na versão antiga: `quarto add bonijoao/ufla-normas@v1.0.0`.
+
+### Ajuda do editor (opcional)
+
+Com a extensão [Quarto Wizard](https://m.canouil.dev/quarto-wizard/) no VS Code
+ou no Positron, o editor oferece trechos prontos em qualquer `.qmd`: comece a
+digitar `figura`, `tabela`, `quadro`, `apendice`, `anexo`, `parte`, `artigo`,
+`referencias` ou `versao-final` e escolha na lista.
+
+O Wizard também completa e confere os campos, mas só os que estão dentro de
+`format:`. O modelo os deixa no topo do cabeçalho, onde funcionam igual, sem
+essa ajuda. Se preferir tê-la, mova os campos da extensão para lá (`title`,
+`author`, `abstract`, `keywords` e `bibliography` continuam no topo):
+
+```yaml
+format:
+  ufla-normas-pdf:
+    tipo: dissertacao
+    ano: "2026"
+    curso: "Agronomia/Fitotecnia"
+```
 
 ## Escreva aqui: o cabeçalho YAML
 

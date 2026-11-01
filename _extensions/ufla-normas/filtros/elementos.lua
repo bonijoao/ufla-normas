@@ -91,13 +91,43 @@ local function titulo_pos(header, tipo, letra, rotulo_id)
   return pandoc.Plain(inl)
 end
 
+--- O trabalho cita alguma obra? Procura no texto, no glossário (já retirado do
+--- texto) e nos campos do YAML, que o citeproc também processa; referências
+--- cruzadas (@fig-x, @apx-x) não contam.
+local function cita_alguma_obra(doc, glossario)
+  if doc.meta.nocite ~= nil then return true end
+  local eh_crossref = util.crossref(doc)
+  local achou = false
+  local busca = {
+    Cite = function(cite)
+      for _, c in ipairs(cite.citations) do
+        if not eh_crossref(c.id) then achou = true end
+      end
+    end,
+  }
+  local function no_valor(v)
+    local tipo = pandoc.utils.type(v)
+    if tipo == "Inlines" or tipo == "Blocks" then
+      v:walk(busca)
+    elseif tipo == "List" or tipo == "table" then
+      for _, item in pairs(v) do no_valor(item) end
+    end
+  end
+  doc.blocks:walk(busca)
+  if glossario ~= nil then pandoc.Blocks(glossario):walk(busca) end
+  for _, v in pairs(doc.meta) do no_valor(v) end
+  return achou
+end
+
 --- `glossario`: blocos montados por elementos-atributos.lua (ou nil).
 --- Com `suppress-bibliography` (o autor pediu, ou artigos.lua: todas as
---- citações estão dentro dos artigos) não há lista geral: o #refs sai, para
---- não virar um CSLReferences vazio, e o glossário fica no lugar dele.
+--- citações estão dentro dos artigos) ou sem nenhuma citação não há lista
+--- geral: o #refs sai, para não virar um CSLReferences vazio, que derruba o
+--- LaTeX, e o glossário fica no lugar dele.
 local function parte_pos_textual(doc, glossario)
   local blocks = doc.blocks
   local sem_refs = doc.meta["suppress-bibliography"] == true
+    or not cita_alguma_obra(doc, glossario)
   doc.blocks:walk({
     Header = function(h)
       if h.level > 1 and (h.classes:includes("apendice") or h.classes:includes("anexo")) then

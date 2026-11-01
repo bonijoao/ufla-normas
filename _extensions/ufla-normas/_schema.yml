@@ -1,0 +1,271 @@
+# Autocompletar, validação e documentação no editor (Quarto Wizard).
+# Especificação: https://m.canouil.dev/quarto-wizard/reference/schema-specification.html
+#
+# O Wizard só lê estas opções dentro de `format: ufla-normas-pdf:`. A extensão
+# aceita os mesmos campos também no topo do YAML, onde o modelo os coloca; lá
+# eles funcionam, mas sem ajuda do editor.
+#
+# Ao criar um campo novo, acrescente-o aqui e em CAMPOS_CONHECIDOS (validar.lua);
+# tests/test_wizard.py confere as duas listas, os tipos e os formatos.
+
+formats:
+  ufla-normas-pdf:
+    # Identificação ---------------------------------------------------------
+    tipo:
+      type: string
+      enum:
+        - tcc
+        - monografia
+        - monografia-licenciatura
+        - especializacao
+        - dissertacao
+        - dissertacao-profissional
+        - tese
+        - relatorio-estagio
+      enum-case-insensitive: true
+      default: dissertacao
+      description: "Tipo de trabalho; define a nota descritiva da folha de rosto (Quadro 3.1 do manual)."
+    ano:
+      type: [string, integer]
+      description: "Ano de depósito."
+      examples: ["2026"]
+    curso:
+      type: string
+      description: "Curso de graduação ou programa de pós-graduação."
+      examples: ["Agronomia/Fitotecnia"]
+    area-concentracao:
+      type: string
+      description: "Área de concentração (opcional)."
+    orientador:
+      type: string
+      description: "Nome do orientador."
+    orientadora:
+      type: string
+      description: "Nome da orientadora; já escreve o rótulo 'Orientadora'."
+    orientador-genero:
+      type: string
+      enum: [f, m]
+      enum-case-insensitive: true
+      description: "Escolhe o rótulo quando se usa o campo orientador."
+    coorientador:
+      type: string
+      description: "Nome do coorientador (opcional)."
+    coorientadora:
+      type: string
+      description: "Nome da coorientadora (opcional)."
+    coorientador-genero:
+      type: string
+      enum: [f, m]
+      enum-case-insensitive: true
+      description: "Escolhe o rótulo quando se usa o campo coorientador."
+    genero:
+      type: string
+      enum: [f, m]
+      enum-case-insensitive: true
+      description: "'apresentada' ou 'apresentado' na nota descritiva. O tipo já escolhe; use só para mudar."
+    tipo-trabalho:
+      type: string
+      description: "Texto livre que troca o nome do trabalho na nota descritiva (ex.: formatos alternativos)."
+      examples: ["Produto técnico"]
+    titulo-pretendido:
+      type: string
+      description: "Troca o título obtido na nota descritiva."
+      examples: ["Mestra"]
+    instituicao:
+      type: string
+      default: "Universidade Federal de Lavras"
+      description: "Instituição."
+    cidade:
+      type: string
+      default: "Lavras-MG"
+      description: "Cidade da capa e da folha de rosto."
+
+    # Resumos ---------------------------------------------------------------
+    abstract-en:
+      type: string
+      description: "Abstract em inglês, um parágrafo, de 150 a 500 palavras."
+    keywords-en:
+      type: [array, string]
+      description: "Keywords do abstract."
+      items:
+        type: string
+
+    # Versão final ----------------------------------------------------------
+    defesa:
+      type: string
+      description: "Data da defesa; com ela sai a folha de aprovação."
+      examples: ["20 de março de 2026"]
+    banca-um-nome:
+      type: string
+      description: "Nome do primeiro membro da banca."
+    banca-um-inst:
+      type: string
+      description: "Instituição do primeiro membro da banca."
+    banca-dois-nome:
+      type: string
+      description: "Nome do segundo membro da banca."
+    banca-dois-inst:
+      type: string
+      description: "Instituição do segundo membro da banca."
+    banca-tres-nome:
+      type: string
+      description: "Nome do terceiro membro da banca."
+    banca-tres-inst:
+      type: string
+      description: "Instituição do terceiro membro da banca."
+    banca-quatro-nome:
+      type: string
+      description: "Nome do quarto membro da banca."
+    banca-quatro-inst:
+      type: string
+      description: "Instituição do quarto membro da banca."
+    ficha-catalografica:
+      type: boolean
+      default: false
+      description: "true inclui a ficha catalográfica. Copie os campos fc-* da ficha gerada pela Biblioteca Universitária."
+    fc-autor-sobrenome:
+      type: string
+      description: "Ficha catalográfica: autor, como a Biblioteca Universitária fornece."
+    fc-autores:
+      type: string
+      description: "Ficha catalográfica: autores, como a Biblioteca Universitária fornece."
+    fc-tipo:
+      type: string
+      description: "Ficha catalográfica: tipo de trabalho, como a Biblioteca Universitária fornece."
+    fc-catalogacao:
+      type: string
+      description: "Ficha catalográfica: catalogação, como a Biblioteca Universitária fornece."
+    fc-classificacao:
+      type: string
+      description: "Ficha catalográfica: classificação, como a Biblioteca Universitária fornece."
+    fc-ilust:
+      type: string
+      default: "il."
+      description: "Ficha catalográfica: ilustrações."
+    indicadores-impacto-texto:
+      type: string
+      description: "Texto da página INDICADORES DE IMPACTO (Resolução PRPG n. 012/2024)."
+    impact-indicators-texto:
+      type: string
+      description: "Texto da página IMPACT INDICATORS."
+
+    # Elementos opcionais ---------------------------------------------------
+    errata:
+      type: string
+      description: "Texto da página ERRATA."
+    dedicatoria:
+      type: string
+      description: "Dedicatória (sem título)."
+    agradecimentos:
+      type: string
+      description: "Texto da página AGRADECIMENTOS."
+    epigrafe:
+      type: string
+      description: "Epígrafe."
+    epigrafe-autor:
+      type: string
+      description: "Autoria da epígrafe."
+    lof:
+      type: boolean
+      description: "true inclui a LISTA DE FIGURAS."
+    lot:
+      type: boolean
+      description: "true inclui a LISTA DE TABELAS."
+    loq:
+      type: boolean
+      description: "true inclui a LISTA DE QUADROS."
+    siglas:
+      type: object
+      description: "LISTA DE ABREVIATURAS E SIGLAS: pares SIGLA: significado. Sai em ordem alfabética."
+    simbolos:
+      type: [array, object]
+      description: "LISTA DE SÍMBOLOS. Em lista, sai na ordem escrita; em mapa, em ordem alfabética."
+    glossario:
+      type: object
+      description: "GLOSSÁRIO: pares termo: definição. Sai em ordem alfabética, depois das referências."
+    frente-verso:
+      type: boolean
+      default: false
+      description: "true prepara o PDF para impressão em frente e verso."
+
+    # Outras opções ---------------------------------------------------------
+    lang:
+      type: string
+      default: pt-BR
+      description: "Idioma do texto. pt, en e es têm rótulos próprios; outros ficam em português, com aviso."
+      completion:
+        values: [pt-BR, en, es]
+    titulo-traduzido:
+      type: string
+      description: "Título em português, exigido na folha de aprovação quando lang não é português."
+    formato:
+      type: string
+      enum: [texto-integral, artigos]
+      enum-case-insensitive: true
+      default: texto-integral
+      description: "texto-integral ou artigos (partes e artigos com referências próprias; manual, Figura 3.23)."
+    suppress-bibliography:
+      type: boolean
+      default: false
+      description: "true retira a lista geral de referências."
+
+classes:
+  apendice:
+    description: "Em título de nível 1: APÊNDICE A – TÍTULO, depois das referências."
+  anexo:
+    description: "Em título de nível 1: ANEXO A – TÍTULO, depois das referências."
+  parte:
+    description: "Com formato: artigos, em título de nível 1: abre uma parte do trabalho."
+  artigo:
+    description: "Com formato: artigos, em título de nível 1: ARTIGO n – TÍTULO, com referências próprias."
+
+attributes:
+  fig:
+    fonte:
+      type: string
+      description: "Fonte, abaixo da figura."
+  tbl:
+    fonte:
+      type: string
+      description: "Fonte, abaixo da tabela."
+  qdr:
+    quadro:
+      type: string
+      description: "Título do quadro."
+    fonte:
+      type: string
+      description: "Fonte, abaixo do quadro."
+  parte:
+    nota:
+      type: string
+      description: "Nota de rodapé no título da parte."
+  artigo:
+    nota:
+      type: string
+      description: "Nota de rodapé no título do artigo (por exemplo, a norma do periódico)."
+    csl:
+      type: string
+      description: "Estilo de citação do periódico, só neste artigo. O arquivo fica na pasta do .qmd."
+      completion:
+        type: file
+        extensions: [".csl"]
+
+cells:
+  r:
+    description: "Células de código R."
+    options:
+      fig-fonte:
+        type: string
+        description: "Fonte, abaixo da figura da célula."
+      tbl-fonte:
+        type: string
+        description: "Fonte, abaixo da tabela da célula."
+  python:
+    description: "Células de código Python."
+    options:
+      fig-fonte:
+        type: string
+        description: "Fonte, abaixo da figura da célula."
+      tbl-fonte:
+        type: string
+        description: "Fonte, abaixo da tabela da célula."
