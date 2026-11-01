@@ -10,7 +10,7 @@ folha de rosto, ficha catalográfica, folha de aprovação, resumo, abstract,
 indicadores de impacto, listas e sumário, e formata citações e referências
 pela ABNT como o manual pede. Não é preciso saber LaTeX.
 
-Versão atual: **2.0.0**. Quem vem da 1.x deve ler
+Versão atual: **2.1.0**. Quem vem da 1.x deve ler
 [Migrar da versão 1.x](#migrar-da-versão-1x).
 
 ## Sumário

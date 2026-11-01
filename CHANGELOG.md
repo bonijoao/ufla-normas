@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0] — 2026-11-01
+
+### Adicionado
+- Suporte ao [Quarto Wizard](https://m.canouil.dev/quarto-wizard/): `_schema.yml`
+  (autocompletar, validação e documentação dos campos dentro de `format:`) e
+  `_snippets.json` (figura, tabela, quadro, apêndice, anexo, parte, artigo,
+  referências e campos da versão final).
+
+### Corrigido
+- Trabalho com apêndice, anexo, glossário ou `::: {#refs}` e sem nenhuma citação
+  não compilava (`missing \item`, relatado como "missing packages"). Sem
+  citações, agora não sai lista REFERÊNCIAS.
+
 ## [2.0.0] — 2026-10-28
 
 Versão reescrita para quem usa Quarto e não sabe LaTeX: ajustar o YAML e
